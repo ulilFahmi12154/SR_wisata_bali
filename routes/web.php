@@ -7,6 +7,7 @@ Route::redirect('/', '/destinations');
 
 Route::view('/curations', 'home')->name('curations');
 Route::view('/destinations', 'pages.destinations')->name('destinations');
+Route::view('/destinations/tanah-lot', 'pages.destination-detail')->name('destination-detail');
 Route::view('/itineraries', 'pages.itineraries')->name('itineraries');
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/privacy-policy', 'pages.privacy')->name('privacy');

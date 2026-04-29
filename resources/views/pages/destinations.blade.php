@@ -73,7 +73,7 @@
                         </div>
                     </div>
 
-                    <a class="dest-feature-action" href="{{ route('curations') }}">
+                    <a class="dest-feature-action" href="{{ route('destination-detail') }}">
                         <span>View Experience Details</span>
                         <svg class="dest-action-icon" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M13.96 5.46l6.04 6.04-6.04 6.04-1.42-1.42 3.62-3.62H4v-2h12.16l-3.62-3.62 1.42-1.42z" fill="currentColor"/>
