@@ -2,18 +2,192 @@
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
-Route::redirect('/', '/destinations');
+/*
+|--------------------------------------------------------------------------
+| ROOT
+|--------------------------------------------------------------------------
+*/
 
-Route::view('/curations', 'home')->name('curations');
-Route::view('/destinations', 'pages.destinations')->name('destinations');
-Route::view('/itineraries', 'pages.itineraries')->name('itineraries');
+Route::redirect('/', '/login');
+
+
+/*
+|--------------------------------------------------------------------------
+| PUBLIC
+|--------------------------------------------------------------------------
+*/
+
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/privacy-policy', 'pages.privacy')->name('privacy');
 Route::view('/terms', 'pages.terms')->name('terms');
 Route::view('/contact', 'pages.contact')->name('contact');
 
+
+/*
+|--------------------------------------------------------------------------
+| USER AUTH (GUEST ONLY)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('guest')->name('user.')->group(function () {
+
+    Route::get('/login', fn() => view('pages.auth.user.login'))->name('login');
+
+    Route::post('/login', function () {
+
+        $credentials = request()->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+            request()->session()->regenerate();
+
+            $user = Auth::user();
+
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
+
+            return redirect()->route('user.home');
+        }
+
+        return back()->withErrors([
+            'email' => 'Email atau password salah'
+        ]);
+    })->name('login.process');
+
+
+    Route::get('/register', fn() => view('pages.auth.user.register'))->name('register');
+
+    Route::post('/register', function () {
+        return redirect()->route('user.login')
+            ->with('status', 'Registrasi berhasil');
+    })->name('register.process');
+
+    Route::get('/forgot-password', fn() => view('pages.auth.user.forgot-password'))
+        ->name('password.request');
+
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| USER AREA (WAJIB LOGIN)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->name('user.')->group(function () {
+
+    // PUBLIC-like but after login
+    Route::get('/home', fn() => view('pages.user.home'))->name('home');
+
+    Route::get('/destinations', fn() => view('pages.user.destinations.index'))->name('destinations');
+
+    Route::get('/destinations/{id}', fn($id) =>
+        view('pages.user.destinations.detail', compact('id'))
+    )->name('destinations.detail');
+
+    // 🔒 protected
+    Route::get('/recommendation', fn() => view('pages.user.recommendation'))->name('recommendation');
+
+    Route::get('/profile', fn() => view('pages.user.profile'))->name('profile');
+
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN AREA
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('admin')->name('admin.')->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN AUTH
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware('guest')->group(function () {
+
+        Route::get('/login', fn() => view('pages.auth.admin.login'))->name('login');
+
+        // 🔥 pakai auth yang sama
+        Route::post('/login', function () {
+
+            $credentials = request()->only('email', 'password');
+
+            if (Auth::attempt($credentials)) {
+                request()->session()->regenerate();
+
+                if (Auth::user()->role === 'admin') {
+                    return redirect()->route('admin.dashboard');
+                }
+
+                // kalau bukan admin → tolak
+                Auth::logout();
+                return back()->withErrors(['email' => 'Bukan akun admin']);
+            }
+
+            return back()->withErrors(['email' => 'Login gagal']);
+        })->name('login.process');
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN PROTECTED
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware(['auth'])->group(function () {
+
+        Route::get('/dashboard', fn() => view('pages.admin.dashboard'))->name('dashboard');
+
+        Route::get('/users', fn() => view('pages.admin.users.index'))->name('users');
+
+        Route::get('/users/{id}', fn($id) =>
+            view('pages.admin.users.detail', compact('id'))
+        )->name('users.detail');
+
+        Route::get('/destinations', fn() => view('pages.admin.destinations.index'))->name('destinations');
+
+        Route::get('/destinations/create', fn() => view('pages.admin.destinations.create'))->name('destinations.create');
+
+        Route::get('/destinations/{id}/edit', fn($id) =>
+            view('pages.admin.destinations.edit', compact('id'))
+        )->name('destinations.edit');
+
+        Route::get('/analytics', fn() => view('pages.admin.analytics'))->name('analytics');
+
+    });
+
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| LOGOUT
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+
+    return redirect('/login');
+})->name('logout');
+
+
+/*
+|--------------------------------------------------------------------------
+| TEST
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/test-db', function () {
     return DB::select('SHOW TABLES');
 });
-
