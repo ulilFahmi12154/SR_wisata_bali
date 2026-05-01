@@ -13,10 +13,15 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+
+            $table->string('name'); // WAJIB untuk Laravel Auth
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('role'); // user/admin
-            $table->timestamp('created_at')->useCurrent();
+
+            $table->string('role')->default('user'); // user / admin
+
+            $table->rememberToken(); // penting untuk session login
+            $table->timestamps(); // created_at & updated_at
         });
     }
 

@@ -2,7 +2,7 @@
     <div class="container footer-shell">
         <div class="footer-top">
             <div class="footer-brand">
-                <a class="footer-logo" href="{{ route('destinations') }}">Jelajah Bali</a>
+                <a class="footer-logo" href="{{ route('user.destinations') }}">Jelajah Bali</a>
                 <p class="footer-tagline">
                     Platform rekomendasi wisata yang membantu Anda merencanakan perjalanan Bali dengan pilihan destinasi yang lebih relevan.
                 </p>
