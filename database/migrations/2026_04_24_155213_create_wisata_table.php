@@ -13,9 +13,7 @@ return new class extends Migration
     {
         Schema::create('wisata', function (Blueprint $table) {
             $table->id();
-
-            $table->string('nama', 150);
-
+            $table->string('nama', 250); // Dinaikkan sedikit panjangnya
             $table->foreignId('kategori_id')->constrained('kategori')->cascadeOnDelete();
             $table->foreignId('lokasi_id')->constrained('lokasi')->cascadeOnDelete();
 
@@ -26,10 +24,16 @@ return new class extends Migration
 
             $table->decimal('rating', 3, 2)->nullable();
             $table->text('deskripsi')->nullable();
-            $table->string('link')->nullable();
+            $table->text('keterangan')->nullable(); // Tambahkan ini
+            $table->string('jam_operasional')->nullable(); // Tambahkan ini
+            $table->string('link')->nullable(); // Untuk link maps
+            $table->string('image')->nullable(); // Tambahkan ini untuk image path
 
-            $table->float('latitude')->nullable();
-            $table->float('longitude')->nullable();
+            // Gunakan decimal untuk presisi koordinat
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+
+            $table->timestamps(); // Bagus untuk tracking data baru
         });
     }
 

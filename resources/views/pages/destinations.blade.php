@@ -155,7 +155,7 @@
                     </div>
                 </div>
 
-                <a class="dest-mini-action" href="{{ route('curations') }}">Explore Destination</a>
+                <a class="dest-mini-action" href="{{ route('preferences') }}">Explore Destination</a>
             </div>
         </article>
 
@@ -183,7 +183,7 @@
                     </div>
                 </div>
 
-                <a class="dest-mini-action" href="{{ route('curations') }}">Explore Destination</a>
+                <a class="dest-mini-action" href="{{ route('preferences') }}">Explore Destination</a>
             </div>
         </article>
 
@@ -211,7 +211,7 @@
                     </div>
                 </div>
 
-                <a class="dest-mini-action" href="{{ route('curations') }}">Explore Destination</a>
+                <a class="dest-mini-action" href="{{ route('preferences') }}">Explore Destination</a>
             </div>
         </article>
     </section>
@@ -224,7 +224,7 @@
         </p>
 
         <div class="dest-final-actions">
-            <a class="dest-final-primary" href="{{ route('curations') }}">Refine Criteria</a>
+            <a class="dest-final-primary" href="{{ route('preferences') }}">Refine Criteria</a>
             <a class="dest-final-secondary" href="{{ route('contact') }}">Save Comparison</a>
         </div>
     </section>

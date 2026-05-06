@@ -228,18 +228,23 @@
     }
 
     .hero-banner {
-        height: 600px;
+        height: 760px;
         background-size: cover;
-        background-position: center;
+        background-position: center center;
         display: flex;
         align-items: flex-end;
         color: white;
-        padding-bottom: 80px;
-        margin-bottom: -60px;
+        padding-bottom: 160px;
+        margin-bottom: -140px;
+        width: 100%;
+        overflow: hidden;
     }
 
     .hero-content {
+        max-width: 1400px;
         width: 100%;
+        margin: 0 auto;
+        padding: 0 40px;
     }
 
     .hero-meta {
@@ -269,7 +274,7 @@
     }
 
     .hero-title {
-        font-size: 80px;
+        font-size: 96px;
         font-weight: 800;
         margin: 0 0 16px 0;
         letter-spacing: -3px;
@@ -685,7 +690,7 @@
         }
 
         .hero-title {
-            font-size: 60px;
+            font-size: 72px;
         }
     }
 
@@ -701,11 +706,11 @@
         }
 
         .hero-title {
-            font-size: 40px;
+            font-size: 48px;
         }
 
         .hero-banner {
-            height: 450px;
+            height: 520px;
         }
     }
 </style>
