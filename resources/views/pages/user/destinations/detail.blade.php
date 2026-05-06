@@ -1,10 +1,8 @@
-@extends('layouts.app')
-
-@section('title', 'Detail Destinasi')
+@extends('layouts.user')
 
 @section('content')
 
-<div class="max-w-5xl mx-auto py-8">
+<div class="max-w-6xl mx-auto space-y-8">
     {{-- Hero Section --}}
     <div class="relative bg-slate-300 rounded-2xl overflow-hidden h-96 mb-8 border border-slate-200">
         <div class="absolute inset-0 bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center">

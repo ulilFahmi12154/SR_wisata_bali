@@ -133,6 +133,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             return back()->withErrors(['email' => 'Login gagal']);
         })->name('login.process');
 
+        Route::get('/forgot-password', fn() => view('pages.auth.admin.forgot-password'))
+            ->name('password.request');
+
     });
 
 
@@ -146,13 +149,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/dashboard', fn() => view('pages.admin.dashboard'))->name('dashboard');
 
-        Route::get('/users', fn() => view('pages.admin.users.index'))->name('users');
+        Route::get('/users', fn() => view('pages.admin.users.index'))->name('users.index');
 
         Route::get('/users/{id}', fn($id) =>
             view('pages.admin.users.detail', compact('id'))
         )->name('users.detail');
 
-        Route::get('/destinations', fn() => view('pages.admin.destinations.index'))->name('destinations');
+        Route::get('/destinations', fn() => view('pages.admin.destinations.index'))->name('destinations.index');
 
         Route::get('/destinations/create', fn() => view('pages.admin.destinations.create'))->name('destinations.create');
 
