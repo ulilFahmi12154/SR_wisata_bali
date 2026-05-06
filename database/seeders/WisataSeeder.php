@@ -118,16 +118,24 @@ class WisataSeeder extends Seeder
                 // 1. Penilaian Rating
                 Penilaian::create([
                     'wisata_id'   => $wisata->id,
-                    'kriteria_id' => $kriteriaRating->id, // Menggunakan ID yang benar dari database
-                    'nilai'       => is_numeric($rating) ? (float)$rating : 0
+                    'kriteria_id' => $kriteriaRating->id,
+                    // Kita ubah dulu ke (float) baru di-round, untuk menghindari TypeError
+                    'nilai'       => round((float) $rating, 2)
                 ]);
 
                 // 2. Penilaian Harga (diambil dari harga minimal)
                 if ($wni_min !== null) {
+                    $skorHarga = 0.0;
+                    if ($wni_min == 0) $skorHarga = 5.0;
+                    elseif ($wni_min <= 5000) $skorHarga = 4.5;
+                    elseif ($wni_min <= 15000) $skorHarga = 4.0;
+                    elseif ($wni_min <= 50000) $skorHarga = 3.0;
+                    elseif ($wni_min <= 100000) $skorHarga = 2.0;
+                    else $skorHarga = 1.0;
                     Penilaian::create([
                         'wisata_id'   => $wisata->id,
-                        'kriteria_id' => $kriteriaHarga->id, // Menggunakan ID yang benar dari database
-                        'nilai'       => (float)$wni_min
+                        'kriteria_id' => $kriteriaHarga->id,
+                        'nilai'       => (float) $skorHarga
                     ]);
                 }
             }
