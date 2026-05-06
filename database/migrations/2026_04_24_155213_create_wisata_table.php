@@ -26,7 +26,7 @@ return new class extends Migration
             $table->text('deskripsi')->nullable();
             $table->text('keterangan')->nullable(); // Tambahkan ini
             $table->string('jam_operasional')->nullable(); // Tambahkan ini
-            $table->string('link')->nullable(); // Untuk link maps
+            $table->text('link')->nullable(); // Untuk link maps
             $table->string('image')->nullable(); // Tambahkan ini untuk image path
 
             // Gunakan decimal untuk presisi koordinat
