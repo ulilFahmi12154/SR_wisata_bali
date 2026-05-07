@@ -1,6 +1,6 @@
 <header class="site-header">
     <div class="container header-shell">
-        <a class="brand-mark" href="{{ route('destinations') }}">Jelajah Bali</a>
+        <a class="brand-mark" href="{{ route('user.destinations') }}">Jelajah Bali</a>
 
         <button
             class="menu-toggle"
@@ -16,7 +16,7 @@
         </button>
 
         <nav class="site-nav" id="siteNav" aria-label="Primary navigation">
-            <a class="nav-link {{ request()->routeIs('destinations') ? 'is-active' : '' }}" href="{{ route('destinations') }}">
+            <a class="nav-link {{ request()->routeIs('user.destinations') ? 'is-active' : '' }}" href="{{ route('user.destinations') }}">
                 Destinations
             </a>
             {{-- <a class="nav-link {{ request()->routeIs('preferences') ? 'is-active' : '' }}" href="{{ route('preferences') }}">
