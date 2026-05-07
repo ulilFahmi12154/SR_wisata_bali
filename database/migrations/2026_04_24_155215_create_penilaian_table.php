@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('wisata_id')->constrained('wisata')->cascadeOnDelete();
             $table->foreignId('kriteria_id')->constrained('kriteria')->cascadeOnDelete();
 
-            $table->float('nilai');
+            $table->decimal('nilai', 3, 2);
         });
     }
 
