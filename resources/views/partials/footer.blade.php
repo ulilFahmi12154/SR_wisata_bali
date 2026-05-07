@@ -4,7 +4,7 @@
             <div class="footer-brand">
                 <a class="footer-logo" href="{{ route('user.destinations') }}">Jelajah Bali</a>
                 <p class="footer-tagline">
-                    Platform rekomendasi wisata yang membantu Anda merencanakan perjalanan Bali dengan pilihan destinasi yang lebih relevan.
+                    Platform rekomendasi perjalanan terpercaya untuk perencanaan destinasi Bali yang lebih personal dan relevan.
                 </p>
             </div>
 
@@ -32,7 +32,7 @@
         </div>
 
         <div class="footer-bottom">
-            <p class="footer-copy">© {{ date('Y') }} Kelompok 3. All rights reserved.</p>
+            <p class="footer-copy">© {{ date('Y') }} Kelompok 2. All rights reserved.</p>
             <p class="footer-meta">Made for smarter Bali trip planning.</p>
         </div>
     </div>

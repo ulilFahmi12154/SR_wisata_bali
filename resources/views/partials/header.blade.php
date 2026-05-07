@@ -1,7 +1,3 @@
-@php
-    $isCurationsActive = request()->routeIs('curations');
-@endphp
-
 <header class="site-header">
     <div class="container header-shell">
         <a class="brand-mark" href="{{ route('user.destinations') }}">Jelajah Bali</a>
@@ -23,9 +19,9 @@
             <a class="nav-link {{ request()->routeIs('user.destinations') ? 'is-active' : '' }}" href="{{ route('user.destinations') }}">
                 Destinations
             </a>
-            <a class="nav-link {{ $isCurationsActive ? 'is-active' : '' }}" href="{{ route('user.home') }}">
-                Curations
-            </a>
+            {{-- <a class="nav-link {{ request()->routeIs('preferences') ? 'is-active' : '' }}" href="{{ route('preferences') }}">
+                Preferensi
+            </a> --}}
             <a class="nav-link {{ request()->routeIs('about') ? 'is-active' : '' }}" href="{{ route('about') }}">
                 About
             </a>
