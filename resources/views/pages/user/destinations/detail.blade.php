@@ -1,162 +1,717 @@
-@extends('layouts.user')
+@extends('layouts.app')
+
+@section('title', 'Tanah Lot - Destination Detail')
 
 @section('content')
-
-<div class="max-w-6xl mx-auto space-y-8">
-    {{-- Hero Section --}}
-    <div class="relative bg-slate-300 rounded-2xl overflow-hidden h-96 mb-8 border border-slate-200">
-        <div class="absolute inset-0 bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center">
-            <svg class="w-32 h-32 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-        </div>
-    </div>
-
-    {{-- Title & Rating --}}
-    <div class="mb-8">
-        <div class="flex items-start justify-between mb-3">
-            <div>
-                <h1 class="font-display text-4xl font-bold text-slate-900 mb-2">
-                    Destinasi Wisata Impian
-                </h1>
-                <p class="text-slate-600">📍 Badung, Bali</p>
+<div class="destination-detail">
+    <!-- Hero Section -->
+    <section class="hero-banner" style="background-image: linear-gradient(180deg, rgba(23, 28, 31, 0) 0%, rgba(23, 28, 31, 0.8) 100%), url('{{ asset('images/mok69als-svs0dv4.png') }}');">
+        <div class="container hero-content">
+            <div class="hero-meta">
+                <span class="category-badge">COASTAL HERITAGE</span>
+                <div class="rating">
+                    <img src="{{ asset('images/mok69ali-fm56qoo.svg') }}" alt="Star icon" class="icon-star">
+                    <span>4.9 (2.4k Reviews)</span>
+                </div>
             </div>
-            <div class="text-right">
-                <div class="text-3xl font-bold text-yellow-500">⭐ 4.8</div>
-                <p class="text-sm text-slate-600">(234 reviews)</p>
+            <h1 class="hero-title">Tanah Lot</h1>
+            <div class="hero-location">
+                <img src="{{ asset('images/mok69ali-wgs75rk.svg') }}" alt="Location pin" class="icon-pin">
+                <span>Beraban, Kediri, Tabanan Regency, Bali</span>
             </div>
         </div>
-        <div class="flex gap-2">
-            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">🏞️ Alam</span>
-            <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">📸 Fotografi</span>
-            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">🚶 Petualangan</span>
-        </div>
-    </div>
+    </section>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {{-- Main Content --}}
-        <div class="lg:col-span-2 space-y-8">
-            {{-- Description --}}
-            <section>
-                <h2 class="text-2xl font-bold text-slate-900 mb-4">Deskripsi</h2>
-                <p class="text-slate-600 leading-relaxed mb-4">
-                    Destinasi wisata yang menakjubkan dengan pemandangan alam yang spektakuler. Tempat ini menawarkan pengalaman yang tak terlupakan dengan kombinasi keindahan alam, budaya lokal, dan fasilitas modern.
+    <!-- Main Content -->
+    <div class="container main-layout">
+        <div class="content-left">
+            <!-- Description Card -->
+            <div class="card info-card">
+                <h2 class="section-title">Precision Description</h2>
+                <p class="description-text">
+                    Tanah Lot is perhaps the most iconic temple in Bali, situated atop a massive coastal rock formation that becomes surrounded by the sea at high tide. It is one of the seven sea temples around the Balinese coast, each within sight of the next to form a chain along the south-western shore. The site is a fusion of breathtaking natural beauty and spiritual significance, offering the most famous sunset backdrop on the island.
                 </p>
-                <p class="text-slate-600 leading-relaxed">
-                    Dengan akses mudah dari pusat kota dan berbagai pilihan akomodasi, tempat ini menjadi salah satu destinasi pilihan wisatawan dari seluruh dunia.
-                </p>
-            </section>
-
-            {{-- Highlights --}}
-            <section>
-                <h2 class="text-2xl font-bold text-slate-900 mb-4">Highlight</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                        <p class="font-semibold text-slate-900 mb-2">🌅 Pemandangan Spektakuler</p>
-                        <p class="text-sm text-slate-600">Nikmati sunset yang memukau dengan pemandangan laut yang luas.</p>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">ENTRANCE FEE</span>
+                        <span class="info-value price">IDR 75.000</span>
                     </div>
-                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                        <p class="font-semibold text-slate-900 mb-2">🥾 Trek Hiking</p>
-                        <p class="text-sm text-slate-600">Jalur hiking yang menantang dengan level kesulitan berbeda.</p>
+                    <div class="info-item">
+                        <span class="info-label">BEST VISIT</span>
+                        <span class="info-value">17:30 - Sunset</span>
                     </div>
-                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                        <p class="font-semibold text-slate-900 mb-2">🍽️ Kuliner Lokal</p>
-                        <p class="text-sm text-slate-600">Cita rasa autentik Bali dengan resep turun-temurun.</p>
+                    <div class="info-item">
+                        <span class="info-label">ACCESSIBILITY</span>
+                        <span class="info-value">Easy Access</span>
                     </div>
-                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                        <p class="font-semibold text-slate-900 mb-2">📸 Photo Spot</p>
-                        <p class="text-sm text-slate-600">Tempat-tempat instagramable untuk abadikan kenangan.</p>
+                    <div class="info-item">
+                        <span class="info-label">EST. DURATION</span>
+                        <span class="info-value">2-3 Hours</span>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            {{-- Facilities --}}
-            <section>
-                <h2 class="text-2xl font-bold text-slate-900 mb-4">Fasilitas</h2>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <div class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
-                        <span class="text-xl">🅿️</span>
-                        <span class="text-sm font-medium text-slate-700">Area Parkir</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
-                        <span class="text-xl">📶</span>
-                        <span class="text-sm font-medium text-slate-700">WiFi</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
-                        <span class="text-xl">🚻</span>
-                        <span class="text-sm font-medium text-slate-700">Toilet Bersih</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
-                        <span class="text-xl">🍽️</span>
-                        <span class="text-sm font-medium text-slate-700">Restoran</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
-                        <span class="text-xl">🏥</span>
-                        <span class="text-sm font-medium text-slate-700">First Aid</span>
-                    </div>
-                    <div class="flex items-center gap-2 p-3 bg-slate-50 rounded-lg">
-                        <span class="text-xl">👨‍💼</span>
-                        <span class="text-sm font-medium text-slate-700">Tour Guide</span>
-                    </div>
+            <!-- Facilities Section -->
+            <div class="card facilities-card">
+                <div class="facilities-header">
+                    <img src="{{ asset('images/mok69ali-ko6krcz.svg') }}" alt="Facilities icon" class="section-icon">
+                    <h2 class="section-title-sm">Site Facilities</h2>
                 </div>
-            </section>
-
-            {{-- Reviews --}}
-            <section>
-                <h2 class="text-2xl font-bold text-slate-900 mb-4">Ulasan Pengunjung</h2>
-                <div class="space-y-4">
-                    <div class="p-4 border border-slate-200 rounded-lg">
-                        <div class="flex items-center justify-between mb-2">
-                            <p class="font-semibold text-slate-900">Budi Santoso</p>
-                            <p class="text-yellow-500">⭐⭐⭐⭐⭐</p>
+                <div class="facilities-grid">
+                    <div class="facility-item">
+                        <div class="facility-icon-wrapper">
+                            <img src="{{ asset('images/mok69ali-x9v3lix.svg') }}" alt="Dining">
                         </div>
-                        <p class="text-sm text-slate-600">Tempat yang sangat indah dan cocok untuk liburan keluarga. Pelayanan pegawainya ramah dan fasilitas lengkap.</p>
+                        <span>Artisan Dining</span>
                     </div>
-                    <div class="p-4 border border-slate-200 rounded-lg">
-                        <div class="flex items-center justify-between mb-2">
-                            <p class="font-semibold text-slate-900">Siti Nurhaliza</p>
-                            <p class="text-yellow-500">⭐⭐⭐⭐</p>
+                    <div class="facility-item">
+                        <div class="facility-icon-wrapper">
+                            <img src="{{ asset('images/mok69ali-wod7egb.svg') }}" alt="Parking">
                         </div>
-                        <p class="text-sm text-slate-600">Pengalaman yang berkesan. Satu-satunya kekurangan adalah harganya sedikit mahal, tapi sebanding dengan kualitas.</p>
+                        <span>Premium Parking</span>
+                    </div>
+                    <div class="facility-item">
+                        <div class="facility-icon-wrapper">
+                            <img src="{{ asset('images/mok69ali-s3atnk2.svg') }}" alt="Restrooms">
+                        </div>
+                        <span>Clean Restrooms</span>
+                    </div>
+                    <div class="facility-item">
+                        <div class="facility-icon-wrapper">
+                            <img src="{{ asset('images/mok69ali-jnu45vc.svg') }}" alt="Market">
+                        </div>
+                        <span>Art Market</span>
                     </div>
                 </div>
-            </section>
-        </div>
-
-        {{-- Sidebar --}}
-        <div class="lg:col-span-1">
-            {{-- Booking Card --}}
-            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-md sticky top-24">
-                <h3 class="text-xl font-bold text-slate-900 mb-4">Informasi Kunjungan</h3>
-                
-                <div class="space-y-4 mb-6">
-                    <div>
-                        <p class="text-sm text-slate-600 mb-1">Jam Buka</p>
-                        <p class="font-semibold text-slate-900">08:00 - 18:00 WITA</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-slate-600 mb-1">Harga Tiket</p>
-                        <p class="font-semibold text-slate-900">Rp 50.000 - Rp 100.000</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-slate-600 mb-1">Waktu Tempuh</p>
-                        <p class="font-semibold text-slate-900">30 menit dari Denpasar</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-slate-600 mb-1">Kontak</p>
-                        <p class="font-semibold text-slate-900">+62 123 456 789</p>
-                    </div>
-                </div>
-
-                <a href="#" class="block w-full px-6 py-3 bg-brand-600 text-white font-semibold rounded-lg hover:bg-brand-700 transition text-center mb-2">
-                    Tambah ke Itinerary
-                </a>
-                <a href="#" class="block w-full px-6 py-3 border-2 border-brand-600 text-brand-600 font-semibold rounded-lg hover:bg-brand-50 transition text-center">
-                    Bagikan
-                </a>
             </div>
         </div>
+
+        <aside class="content-right">
+            <!-- Booking Sidebar -->
+            <div class="card sidebar-card">
+                <div class="sidebar-header">
+                    <span class="sidebar-eyebrow">CURATED PACKAGE</span>
+                    <h2 class="sidebar-title">Standard Access</h2>
+                    <div class="sidebar-price">
+                        <span class="price-amount">IDR 75k</span>
+                        <span class="price-unit">/person</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-features">
+                    <div class="sidebar-feature">
+                        <img src="{{ asset('images/mok69ali-rx1fx04.svg') }}" alt="Clock" class="feature-icon">
+                        <div class="feature-text">
+                            <span class="feature-label">AVAILABLE TODAY</span>
+                            <span class="feature-value">06:00 - 19:00</span>
+                        </div>
+                    </div>
+                    <div class="sidebar-feature">
+                        <img src="{{ asset('images/mok69ali-0jd28pp.svg') }}" alt="Ticket" class="feature-icon">
+                        <div class="feature-text">
+                            <span class="feature-label">INSTANT DELIVERY</span>
+                            <span class="feature-value">Digital Ticket Sent to App</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-actions">
+                    <button class="btn-book">Book Access Now</button>
+                    <button class="btn-itinerary">Save to Itinerary</button>
+                </div>
+
+                <div class="map-preview">
+                    <img src="{{ asset('images/mok69als-npe4f6u.png') }}" alt="Map Preview" class="map-img">
+                    <div class="map-overlay">
+                        <a href="#" class="btn-maps">
+                            <img src="{{ asset('images/mok69alj-1z3v3s6.svg') }}" alt="Maps icon">
+                            <span>Open in Maps</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
+
+    <!-- Recommendations Section -->
+    <section class="container recommendations">
+        <div class="recommendations-header">
+            <div class="header-left">
+                <span class="section-eyebrow">INTELLIGENT MATCHING</span>
+                <h2 class="section-title-lg">Rekomendasi Serupa</h2>
+            </div>
+            <p class="header-right">
+                Based on your interest in <strong>Coastal Heritage</strong> and <strong>Sacred Sites</strong>, our horizon engine recommends these curated experiences.
+            </p>
+        </div>
+
+        <div class="recommendations-grid">
+            <!-- Recommendation Card 1 -->
+            <div class="rec-card">
+                <div class="rec-media" style="background-image: url('{{ asset('images/mok69als-8d8ijt7.png') }}');">
+                    <span class="rec-badge">HERITAGE</span>
+                    <div class="rec-overlay">
+                        <div class="rec-match">
+                            <img src="{{ asset('images/mok69ali-w2uljcd.svg') }}" alt="Match icon">
+                            <span>98% MATCH</span>
+                        </div>
+                        <h3 class="rec-title">Uluwatu Temple</h3>
+                    </div>
+                </div>
+                <div class="rec-content">
+                    <div class="rec-info">
+                        <p class="rec-loc">Pecatu, South Kuta</p>
+                        <p class="rec-tags">Coastal • Spiritual • Performance</p>
+                    </div>
+                    <div class="rec-price">
+                        <span class="price-val">IDR 50k</span>
+                        <span class="price-label">ACCESS</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendation Card 2 -->
+            <div class="rec-card">
+                <div class="rec-media" style="background-image: url('{{ asset('images/mok69als-bvxxxn5.png') }}');">
+                    <span class="rec-badge">SPIRITUAL</span>
+                    <div class="rec-overlay">
+                        <div class="rec-match">
+                            <img src="{{ asset('images/mok69ali-w2uljcd.svg') }}" alt="Match icon">
+                            <span>92% MATCH</span>
+                        </div>
+                        <h3 class="rec-title">Tirta Empul</h3>
+                    </div>
+                </div>
+                <div class="rec-content">
+                    <div class="rec-info">
+                        <p class="rec-loc">Manukaya, Tampaksiring</p>
+                        <p class="rec-tags">Culture • Water • Healing</p>
+                    </div>
+                    <div class="rec-price">
+                        <span class="price-val">IDR 50k</span>
+                        <span class="price-label">ACCESS</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendation Card 3 -->
+            <div class="rec-card">
+                <div class="rec-media" style="background-image: url('{{ asset('images/mok69als-vzd27n1.png') }}');">
+                    <span class="rec-badge">LANDMARK</span>
+                    <div class="rec-overlay">
+                        <div class="rec-match">
+                            <img src="{{ asset('images/mok69ali-w2uljcd.svg') }}" alt="Match icon">
+                            <span>89% MATCH</span>
+                        </div>
+                        <h3 class="rec-title">Ulun Danu Bratan</h3>
+                    </div>
+                </div>
+                <div class="rec-content">
+                    <div class="rec-info">
+                        <p class="rec-loc">Candikuning, Baturiti</p>
+                        <p class="rec-tags">Lakeside • Serene • Scenic</p>
+                    </div>
+                    <div class="rec-price">
+                        <span class="price-val">IDR 75k</span>
+                        <span class="price-label">ACCESS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
 
+<style>
+    .destination-detail {
+        background: #f6fafe;
+        padding-bottom: 80px;
+    }
+
+    .hero-banner {
+        height: 760px;
+        background-size: cover;
+        background-position: center center;
+        display: flex;
+        align-items: flex-end;
+        color: white;
+        padding-bottom: 160px;
+        margin-bottom: -140px;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .hero-content {
+        max-width: 1400px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0 40px;
+    }
+
+    .hero-meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .category-badge {
+        background: #b1f0ce;
+        color: #0e5138;
+        padding: 4px 16px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.6px;
+    }
+
+    .rating {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #cde5ff;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .hero-title {
+        font-size: 96px;
+        font-weight: 800;
+        margin: 0 0 16px 0;
+        letter-spacing: -3px;
+        line-height: 1;
+    }
+
+    .hero-location {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+    }
+
+    .main-layout {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 32px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .content-left {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .section-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #171c1f;
+    }
+
+    .description-text {
+        font-size: 17px;
+        line-height: 1.6;
+        color: #404850;
+        margin-bottom: 32px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 24px;
+        padding-top: 32px;
+        border-top: 1px solid #bfc7d140;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .info-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #707881;
+        letter-spacing: 1px;
+    }
+
+    .info-value {
+        font-size: 18px;
+        font-weight: 600;
+        color: #171c1f;
+    }
+
+    .info-value.price {
+        color: #005d90;
+    }
+
+    /* Facilities */
+    .facilities-card {
+        background: #eaeef2 !important;
+        padding: 40px !important;
+    }
+
+    .facilities-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
+    }
+
+    .section-title-sm {
+        font-size: 20px;
+        font-weight: 700;
+        color: #171c1f;
+        margin: 0;
+    }
+
+    .facilities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 24px;
+    }
+
+    .facility-item {
+        background: white;
+        padding: 24px 16px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .facility-item span {
+        font-size: 14px;
+        font-weight: 600;
+        color: #171c1f;
+    }
+
+    .facility-icon-wrapper {
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Sidebar */
+    .sidebar-card {
+        padding: 32px !important;
+        position: sticky;
+        top: 100px;
+    }
+
+    .sidebar-eyebrow {
+        font-size: 12px;
+        font-weight: 600;
+        color: #707881;
+        letter-spacing: 1.2px;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .sidebar-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 12px 0;
+    }
+
+    .sidebar-price {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+        margin-bottom: 24px;
+    }
+
+    .price-amount {
+        font-size: 32px;
+        font-weight: 700;
+        color: #005d90;
+    }
+
+    .price-unit {
+        font-size: 16px;
+        color: #404850;
+    }
+
+    .sidebar-features {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 24px;
+        padding: 16px 0;
+    }
+
+    .sidebar-feature {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: #f0f4f8;
+        padding: 12px 16px;
+        border-radius: 8px;
+    }
+
+    .feature-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .feature-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #707881;
+    }
+
+    .feature-value {
+        font-size: 13px;
+        font-weight: 600;
+        color: #171c1f;
+    }
+
+    .sidebar-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .btn-book {
+        background: linear-gradient(135deg, #005d90 0%, #0077b6 100%);
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 999px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 10px 15px -3px rgba(0, 93, 144, 0.2);
+    }
+
+    .btn-itinerary {
+        background: transparent;
+        border: 2px solid #bfc7d140;
+        padding: 14px;
+        border-radius: 999px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #171c1f;
+        cursor: pointer;
+    }
+
+    .map-preview {
+        border-radius: 12px;
+        overflow: hidden;
+        position: relative;
+        height: 200px;
+    }
+
+    .map-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .map-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 93, 144, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-maps {
+        background: white;
+        padding: 8px 16px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        color: #171c1f;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Recommendations */
+    .recommendations {
+        margin-top: 80px;
+    }
+
+    .recommendations-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 48px;
+    }
+
+    .section-eyebrow {
+        font-size: 14px;
+        font-weight: 600;
+        color: #005d90;
+        letter-spacing: 2px;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .section-title-lg {
+        font-size: 48px;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -1.5px;
+    }
+
+    .header-right {
+        max-width: 440px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #404850;
+        margin: 0;
+    }
+
+    .recommendations-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+    }
+
+    .rec-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .rec-media {
+        height: 280px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .rec-badge {
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(4px);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 700;
+        align-self: flex-start;
+        letter-spacing: 1px;
+    }
+
+    .rec-overlay {
+        background: linear-gradient(0deg, rgba(23, 28, 31, 0.9) 0%, rgba(23, 28, 31, 0) 100%);
+        margin: -16px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .rec-match {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #b1f0ce;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .rec-title {
+        color: white;
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .rec-content {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .rec-loc {
+        font-size: 14px;
+        font-weight: 600;
+        color: #171c1f;
+        margin-bottom: 2px;
+    }
+
+    .rec-tags {
+        font-size: 12px;
+        color: #707881;
+        margin: 0;
+    }
+
+    .rec-price {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .price-val {
+        font-size: 18px;
+        font-weight: 700;
+        color: #005d90;
+    }
+
+    .price-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: #707881;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .main-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar-card {
+            position: static;
+        }
+
+        .recommendations-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .hero-title {
+            font-size: 72px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .recommendations-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .recommendations-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .hero-title {
+            font-size: 48px;
+        }
+
+        .hero-banner {
+            height: 520px;
+        }
+    }
+</style>
 @endsection
