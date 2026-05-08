@@ -105,6 +105,9 @@
                         placeholder="admin@jelajahbali.id"
                         autocomplete="email"
                         required
+                        data-label="Email administrator"
+                        oninvalid="const label = this.getAttribute('data-label') || 'Email administrator'; let message = ''; if (this.validity.valueMissing) { message = label + ' wajib diisi.'; } else if (this.validity.typeMismatch) { message = 'Format ' + label.toLowerCase() + ' tidak valid.'; } this.setCustomValidity(message);"
+                        oninput="this.setCustomValidity('');"
                         class="input-admin w-full rounded-xl pl-10 pr-4 py-3 text-sm transition-all duration-150"
                     >
                 </div>
@@ -135,6 +138,9 @@
                         placeholder="••••••••••"
                         autocomplete="current-password"
                         required
+                        data-label="Password"
+                        oninvalid="const label = this.getAttribute('data-label') || 'Password'; let message = ''; if (this.validity.valueMissing) { message = label + ' wajib diisi.'; } this.setCustomValidity(message);"
+                        oninput="this.setCustomValidity('');"
                         class="input-admin w-full rounded-xl pl-10 pr-11 py-3 text-sm transition-all duration-150"
                     >
                     <button type="button" @click="showPass = !showPass"

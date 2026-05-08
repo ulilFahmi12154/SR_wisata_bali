@@ -1,8 +1,10 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,8 +62,46 @@ Route::middleware('guest')->name('user.')->group(function () {
     Route::get('/register', fn() => view('pages.auth.user.register'))->name('register');
 
     Route::post('/register', function () {
-        return redirect()->route('user.login')
-            ->with('status', 'Registrasi berhasil');
+        $data = request()->validate([
+            'name' => ['required', 'string', 'max:255', "regex:/^[A-Za-z\s]+$/"],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'terms' => ['accepted'],
+        ], [
+            'required' => ':attribute wajib diisi.',
+            'email' => ':attribute tidak valid.',
+            'unique' => ':attribute sudah terdaftar.',
+            'min' => ':attribute minimal :min karakter.',
+            'confirmed' => 'Konfirmasi password tidak cocok.',
+            'regex' => ':attribute hanya boleh berisi huruf dan spasi.',
+            'accepted' => ':attribute harus disetujui.',
+            'terms.accepted' => 'Anda harus menyetujui Syarat & Ketentuan.',
+        ], [
+            'name' => 'Nama lengkap',
+            'email' => 'Alamat email',
+            'password' => 'Password',
+            'password_confirmation' => 'Konfirmasi password',
+            'terms' => 'Syarat & Ketentuan',
+        ]);
+
+        try {
+            User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'role' => 'user',
+            ]);
+
+            return redirect()
+                ->route('user.login')
+                ->with('success', 'Registrasi berhasil. Silakan login.');
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Registrasi gagal. Silakan coba lagi.');
+        }
     })->name('register.process');
 
     Route::get('/forgot-password', fn() => view('pages.auth.user.forgot-password'))

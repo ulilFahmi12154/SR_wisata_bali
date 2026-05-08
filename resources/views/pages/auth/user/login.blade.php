@@ -86,6 +86,9 @@
                     placeholder="••••••••"
                     autocomplete="current-password"
                     required
+                    data-label="Password"
+                    oninvalid="const label = this.getAttribute('data-label') || 'Password'; let message = ''; if (this.validity.valueMissing) { message = label + ' wajib diisi.'; } this.setCustomValidity(message);"
+                    oninput="this.setCustomValidity('');"
                     class="w-full rounded-xl border pl-11 pr-11 py-3 text-sm bg-slate-50/60 placeholder:text-slate-400
                            transition-all duration-150 focus:outline-none focus:ring-2 focus:bg-white
                            @error('password')

@@ -38,6 +38,8 @@
             placeholder="John Doe"
             autocomplete="name"
             required
+            pattern="^[A-Za-z\s]+$"
+            data-pattern-message="Nama lengkap hanya boleh berisi huruf dan spasi."
             icon="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
         />
 
@@ -124,6 +126,10 @@
                     placeholder="Min. 8 karakter"
                     autocomplete="new-password"
                     required
+                    minlength="8"
+                    data-label="Password"
+                    oninvalid="const label = this.getAttribute('data-label') || 'Password'; let message = ''; if (this.validity.valueMissing) { message = label + ' wajib diisi.'; } else if (this.validity.tooShort) { message = label + ' minimal ' + this.minLength + ' karakter.'; } this.setCustomValidity(message);"
+                    oninput="this.setCustomValidity('');"
                     class="w-full rounded-xl border border-slate-200
                            pl-11 pr-11 py-3 text-sm
                            bg-slate-50/60 placeholder:text-slate-400
@@ -249,6 +255,7 @@
             placeholder="Ulangi password"
             autocomplete="new-password"
             required
+            minlength="8"
             icon="M12 15v2m6-6V7a6 6 0 10-12 0v4"
         />
 
@@ -259,6 +266,8 @@
                 id="terms"
                 name="terms"
                 required
+                oninvalid="this.setCustomValidity('Anda harus menyetujui Syarat & Ketentuan.');"
+                oninput="this.setCustomValidity('');"
                 class="mt-1 w-4 h-4 rounded border-slate-300
                        text-brand-600 focus:ring-brand-500"
             >
