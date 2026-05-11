@@ -5,19 +5,21 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\LandingPageController;
 
 /*
 |--------------------------------------------------------------------------
-| ROOT
+| ROOT (LANDING PAGE PUBLIC)
 |--------------------------------------------------------------------------
 */
 
-Route::redirect('/', '/login');
+Route::get('/', [LandingPageController::class, 'index'])->name('landingpage');
 
 
 /*
 |--------------------------------------------------------------------------
-| PUBLIC
+| PUBLIC PAGES
 |--------------------------------------------------------------------------
 */
 
@@ -35,7 +37,9 @@ Route::view('/contact', 'pages.contact')->name('contact');
 
 Route::middleware('guest')->name('user.')->group(function () {
 
-    Route::get('/login', fn() => view('pages.auth.user.login'))->name('login');
+    Route::get('/login', fn () =>
+        view('pages.auth.user.login')
+    )->name('login'); // → route name jadi 'user.login' ✅
 
     Route::post('/login', function () {
 
@@ -50,18 +54,27 @@ Route::middleware('guest')->name('user.')->group(function () {
                 return redirect()->route('admin.dashboard');
             }
 
-            return redirect()->route('user.home');
+            return redirect()->intended(route('user.home'));
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password salah'
-        ]);
+            'email' => 'Email atau password salah.'
+        ])->onlyInput('email');
+
     })->name('login.process');
 
 
-    Route::get('/register', fn() => view('pages.auth.user.register'))->name('register');
+    Route::get('/register', fn () =>
+        view('pages.auth.user.register')
+    )->name('register');
 
     Route::post('/register', function () {
+
+        // TODO: implementasi registrasi
+
+        return redirect()->route('user.login')
+            ->with('status', 'Registrasi berhasil, silakan login.');
+
         $data = request()->validate([
             'name' => ['required', 'string', 'max:255', "regex:/^[A-Za-z\s]+$/"],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
@@ -104,33 +117,57 @@ Route::middleware('guest')->name('user.')->group(function () {
         }
     })->name('register.process');
 
-    Route::get('/forgot-password', fn() => view('pages.auth.user.forgot-password'))
-        ->name('password.request');
+
+    Route::get('/forgot-password', fn () =>
+        view('pages.auth.user.forgot-password')
+    )->name('password.request');
+
+    Route::post('/forgot-password', function () {
+
+        // TODO: kirim link reset password
+
+        return back()->with('status', 'Link reset password telah dikirim.');
+
+    })->name('password.email');
 
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| USER AREA (WAJIB LOGIN)
+| USER AREA (PROTECTED)
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth')->name('user.')->group(function () {
 
-    // PUBLIC-like but after login
-    Route::get('/home', fn() => view('pages.user.home'))->name('home');
+    Route::get('/home', fn () =>
+        view('pages.user.home')
+    )->name('home');
 
-    Route::get('/destinations', fn() => view('pages.user.destinations.index'))->name('destinations');
+    Route::get('/destinations', fn () =>
+        view('pages.user.destinations.index')
+    )->name('destinations');
 
-    Route::get('/destinations/{id}', fn($id) =>
+    Route::get('/destinations/{id}', fn ($id) =>
         view('pages.user.destinations.detail', compact('id'))
     )->name('destinations.detail');
 
-    // 🔒 protected
-    Route::get('/recommendation', fn() => view('pages.user.recommendation'))->name('recommendation');
+    Route::get('/recommendation', fn () =>
+        view('pages.user.recommendation')
+    )->name('recommendation');
 
-    Route::get('/profile', fn() => view('pages.user.profile'))->name('profile');
+    Route::get('/profile', fn () =>
+        view('pages.user.profile')
+    )->name('profile');
+
+    Route::post('/profile', function () {
+
+        // TODO: update profile
+
+        return back()->with('status', 'Profile berhasil diupdate.');
+
+    })->name('profile.update');
 
 });
 
@@ -144,16 +181,17 @@ Route::middleware('auth')->name('user.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
 
     /*
-    |--------------------------------------------------------------------------
-    | ADMIN AUTH
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------------
+    | ADMIN AUTH (GUEST ONLY)
+    |----------------------------------------------------------------------
     */
 
     Route::middleware('guest')->group(function () {
 
-        Route::get('/login', fn() => view('pages.auth.admin.login'))->name('login');
+        Route::get('/login', fn () =>
+            view('pages.auth.admin.login')
+        )->name('login');
 
-        // 🔥 pakai auth yang sama
         Route::post('/login', function () {
 
             $credentials = request()->only('email', 'password');
@@ -165,45 +203,99 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     return redirect()->route('admin.dashboard');
                 }
 
-                // kalau bukan admin → tolak
                 Auth::logout();
-                return back()->withErrors(['email' => 'Bukan akun admin']);
+                request()->session()->invalidate();
+                request()->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Akun ini tidak memiliki akses admin.'
+                ])->onlyInput('email');
             }
 
-            return back()->withErrors(['email' => 'Login gagal']);
-        })->name('login.process');
+            return back()->withErrors([
+                'email' => 'Email atau password salah.'
+            ])->onlyInput('email');
 
-        Route::get('/forgot-password', fn() => view('pages.auth.admin.forgot-password'))
-            ->name('password.request');
+        })->name('login.process');
 
     });
 
 
     /*
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------------
     | ADMIN PROTECTED
-    |--------------------------------------------------------------------------
+    |----------------------------------------------------------------------
     */
 
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware('auth')->group(function () {
 
-        Route::get('/dashboard', fn() => view('pages.admin.dashboard'))->name('dashboard');
+        Route::get('/dashboard', fn () =>
+            view('pages.admin.dashboard')
+        )->name('dashboard');
 
-        Route::get('/users', fn() => view('pages.admin.users.index'))->name('users.index');
+        // Users
+        Route::get('/users', fn () =>
+            view('pages.admin.users.index')
+        )->name('users.index');
 
-        Route::get('/users/{id}', fn($id) =>
+        Route::get('/users/{id}', fn ($id) =>
             view('pages.admin.users.detail', compact('id'))
         )->name('users.detail');
 
-        Route::get('/destinations', fn() => view('pages.admin.destinations.index'))->name('destinations.index');
+        // Destinations — /create WAJIB sebelum /{id}
+        Route::get('/destinations', fn () =>
+            view('pages.admin.destinations.index')
+        )->name('destinations.index');
 
-        Route::get('/destinations/create', fn() => view('pages.admin.destinations.create'))->name('destinations.create');
+        Route::get('/destinations/create', fn () =>
+            view('pages.admin.destinations.create')
+        )->name('destinations.create');
 
-        Route::get('/destinations/{id}/edit', fn($id) =>
+        Route::post('/destinations', function () {
+
+            // TODO: simpan destination
+
+            return redirect()->route('admin.destinations.index')
+                ->with('status', 'Destination berhasil ditambahkan.');
+
+        })->name('destinations.store');
+
+        Route::get('/destinations/{id}/edit', fn ($id) =>
             view('pages.admin.destinations.edit', compact('id'))
         )->name('destinations.edit');
 
-        Route::get('/analytics', fn() => view('pages.admin.analytics'))->name('analytics');
+        Route::put('/destinations/{id}', function ($id) {
+
+            // TODO: update destination
+
+            return redirect()->route('admin.destinations.index')
+                ->with('status', 'Destination berhasil diupdate.');
+
+        })->name('destinations.update');
+
+        Route::delete('/destinations/{id}', function ($id) {
+
+            // TODO: hapus destination
+
+            return redirect()->route('admin.destinations.index')
+                ->with('status', 'Destination berhasil dihapus.');
+
+        })->name('destinations.destroy');
+
+        // Analytics
+        Route::get('/analytics', fn () =>
+            view('pages.admin.analytics')
+        )->name('analytics');
+
+        // Admin Logout
+        Route::post('/logout', function () {
+            Auth::logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+
+            return redirect()->route('admin.login');
+
+        })->name('logout');
 
     });
 
@@ -212,7 +304,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| LOGOUT
+| USER LOGOUT
 |--------------------------------------------------------------------------
 */
 
@@ -221,16 +313,17 @@ Route::post('/logout', function () {
     request()->session()->invalidate();
     request()->session()->regenerateToken();
 
-    return redirect('/login');
-})->name('logout');
+    return redirect()->route('user.login');
+})->name('logout')->middleware('auth');
 
 
 /*
 |--------------------------------------------------------------------------
-| TEST
+| TEST DB (hapus di production!)
 |--------------------------------------------------------------------------
 */
 
 Route::get('/test-db', function () {
     return DB::select('SHOW TABLES');
 });
+
