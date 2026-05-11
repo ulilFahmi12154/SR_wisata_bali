@@ -32,8 +32,24 @@
             {{-- Contact --}}
             <div>
                 <h3 class="font-semibold text-white mb-4">Kontak</h3>
-                <p class="text-sm mb-2">📧 info@jelajahbali.com</p>
-                <p class="text-sm mb-4">📱 +62 (123) 456-789</p>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+                            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <span class="text-sm">info@jelajahbali.com</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+                            <svg class="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 011.94.82l-1.15 4.62a1 1 0 01-1.01.79H5.22a10.97 10.97 0 004.95 4.95l1.25-1.25a1 1 0 011.04-.26l4.62 1.15a1 1 0 01.82 1.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                            </svg>
+                        </div>
+                        <span class="text-sm">+62 (123) 456-789</span>
+                    </div>
+                </div>
             </div>
         </div>
 

@@ -318,12 +318,12 @@
 <div class="pref-page">
     <div class="pref-grid">
         <section aria-label="Intro halaman preferensi">
-            <p class="pref-kicker">Recommendation Engine</p>
+            <p class="pref-kicker">PERSONALISASI PERJALANAN</p>
             <h1 class="pref-title">
-                Craft Your <span>Perfect Bali</span> Escape.
+                Temukan <span>Liburan Bali</span> Terbaik.
             </h1>
             <p class="pref-description">
-                Mesin kurasi kami mengubah preferensi perjalanan Anda menjadi rekomendasi destinasi yang terarah. Pilih wilayah, minat utama, dan fasilitas penting sesuai gaya liburan Anda.
+                Temukan destinasi impian Anda di Bali dengan algoritma perankingan yang akurat. Masukkan kriteria perjalanan Anda di bawah ini.
             </p>
 
             <article class="pref-highlight" aria-label="Highlight destinasi">
@@ -331,22 +331,24 @@
                 <div class="pref-highlight-info">
                     <p class="pref-highlight-location">
                         <img src="{{ asset('images/mos268mb-gnjc7oh.svg') }}" alt="" aria-hidden="true">
-                        <span>Ubud Highlands</span>
+                        <span>Kawasan Ubud</span>
                     </p>
-                    <p class="pref-highlight-title">Curated Nature Retreats</p>
+                    <p class="pref-highlight-title">Destinasi Alam Pilihan</p>
                 </div>
             </article>
         </section>
 
         <section class="pref-form-card" aria-label="Form input preferensi">
+            <h2 style="font-size: 1.5rem; font-weight: 800; color: #182435; margin: 0 0 20px;">Filter Utama</h2>
             <form method="GET" action="{{ route('user.destinations') }}" x-data="{ budget: {{ $selectedBudget }} }">
                 <div class="pref-group">
                     <p class="pref-label">
                         <img class="pref-icon" src="{{ asset('images/mos268mb-l3nqqp7.svg') }}" alt="" aria-hidden="true">
-                        <span>Where do you want to explore?</span>
+                        <span>Wilayah mana yang ingin Anda jelajahi?</span>
                     </p>
+                    <div style="margin-bottom: 8px; font-size: 0.85rem; font-weight: 600; color: #4d5b6f;">Kabupaten/Kota</div>
                     <select class="pref-select" name="regency" aria-label="Pilih kabupaten">
-                        <option value="all" @selected(request('regency', 'all') === 'all')>All Districts</option>
+                        <option value="all" @selected(request('regency', 'all') === 'all')>Pilih Kabupaten</option>
                         <option value="badung" @selected(request('regency') === 'badung')>Badung</option>
                         <option value="gianyar" @selected(request('regency') === 'gianyar')>Gianyar</option>
                         <option value="bangli" @selected(request('regency') === 'bangli')>Bangli</option>
@@ -357,28 +359,29 @@
                 <div class="pref-group">
                     <p class="pref-label">
                         <img class="pref-icon" src="{{ asset('images/mos268mb-dab7w9w.svg') }}" alt="" aria-hidden="true">
-                        <span>Primary Interest</span>
+                        <span>Ingin liburan seperti apa kali ini?</span>
                     </p>
+                    <div style="margin-bottom: 8px; font-size: 0.85rem; font-weight: 600; color: #4d5b6f;">Kategori Wisata</div>
                     <div class="pref-chip-list" role="radiogroup" aria-label="Minat utama">
                         <label class="pref-chip-option">
                             <input type="radio" name="interest" value="all" @checked($selectedInterest === 'all')>
-                            <span>All</span>
+                            <span>Semua</span>
                         </label>
                         <label class="pref-chip-option">
                             <input type="radio" name="interest" value="nature" @checked($selectedInterest === 'nature')>
-                            <span>Nature</span>
+                            <span>Alam</span>
                         </label>
                         <label class="pref-chip-option">
                             <input type="radio" name="interest" value="culture" @checked($selectedInterest === 'culture')>
-                            <span>Culture</span>
+                            <span>Budaya</span>
                         </label>
                         <label class="pref-chip-option">
                             <input type="radio" name="interest" value="beach" @checked($selectedInterest === 'beach')>
-                            <span>Beach</span>
+                            <span>Pantai</span>
                         </label>
                         <label class="pref-chip-option">
                             <input type="radio" name="interest" value="culinary" @checked($selectedInterest === 'culinary')>
-                            <span>Culinary</span>
+                            <span>Kuliner</span>
                         </label>
                     </div>
                 </div>
@@ -387,7 +390,7 @@
                     <div style="display:flex; align-items:center; gap:10px; justify-content: space-between;">
                         <p class="pref-label" style="margin-bottom:0;">
                             <img class="pref-icon" src="{{ asset('images/mos268mb-zgiezb6.svg') }}" alt="" aria-hidden="true">
-                            <span>Your Max Budget (IDR)</span>
+                            <span>Estimasi Biaya Harian</span>
                         </p>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-weight: 700; color: #0b70c8;">Rp</span>
@@ -405,6 +408,7 @@
                             >
                         </div>
                     </div>
+                    <div style="margin-top: 4px; font-size: 0.85rem; color: #4d5b6f;">Atur pengeluaran maksimum per orang</div>
                     <div class="pref-slider-shell">
                         <input class="pref-slider" type="range" min="0" max="2000000" step="50000" x-model.number="budget" aria-label="Budget harian">
                         <div class="pref-scale">
@@ -418,24 +422,25 @@
                 <div class="pref-group">
                     <p class="pref-label">
                         <img class="pref-icon" src="{{ asset('images/mos268mb-g9rqp6i.svg') }}" alt="" aria-hidden="true">
-                        <span>Essential Amenities</span>
+                        <span>Fasilitas Pendukung</span>
                     </p>
+                    <div style="margin-bottom: 12px; font-size: 0.85rem; color: #4d5b6f;">Pilih fasilitas yang wajib ada</div>
                     <div class="pref-amenities">
                         <label class="pref-check">
                             <input type="checkbox" name="amenities[]" value="parking" @checked(in_array('parking', $selectedAmenities, true))>
-                            <span>Parking Area</span>
+                            <span>Area Parkir</span>
                         </label>
                         <label class="pref-check">
                             <input type="checkbox" name="amenities[]" value="wifi" @checked(in_array('wifi', $selectedAmenities, true))>
-                            <span>High-speed Wifi</span>
+                            <span>Wifi Cepat</span>
                         </label>
                         <label class="pref-check">
                             <input type="checkbox" name="amenities[]" value="restroom" @checked(in_array('restroom', $selectedAmenities, true))>
-                            <span>Clean Restrooms</span>
+                            <span>Toilet Bersih</span>
                         </label>
                         <label class="pref-check">
                             <input type="checkbox" name="amenities[]" value="restaurant" @checked(in_array('restaurant', $selectedAmenities, true))>
-                            <span>On-site Restaurant</span>
+                            <span>Restoran/Rumah Makan</span>
                         </label>
                     </div>
                 </div>
@@ -444,7 +449,7 @@
                     <span>Cari Rekomendasi</span>
                     <img class="pref-submit-icon" src="{{ asset('images/mos268mb-dpv3btu.svg') }}" alt="" aria-hidden="true">
                 </button>
-                <p class="pref-meta">Powered by Curated Horizon AI • Personalizing 2,400+ Bali Destinations</p>
+                <p class="pref-meta">Sistem Rekomendasi Wisata Bali • Personalisasi Rekomendasi dari Koleksi Destinasi Terpilih
             </form>
         </section>
     </div>
