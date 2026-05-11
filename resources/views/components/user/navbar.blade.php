@@ -44,7 +44,7 @@
                     </form>
                 </div>
             @else
-                <a href="{{ route('login') }}" class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition">
+                <a href="{{ route('user.login') }}" class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium hover:bg-brand-700 transition">
                     Masuk
                 </a>
             @endauth

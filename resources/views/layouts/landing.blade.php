@@ -6,6 +6,19 @@
     <title>@yield('title')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    {{-- Fonts --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=DM+Sans&display=swap" rel="stylesheet">
+
+    {{-- Tailwind CDN --}}
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    {{-- App assets --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- Alpine --}}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <style>
         /* ============================================
            CSS TEMANMU — diambil dari layouts/app.blade.php
@@ -19,6 +32,22 @@
         .container {
             width: 90%;
             margin: auto;
+        }
+
+        /* Landing-specific navbar alignment override */
+        .landing-page .max-w-7xl > .flex.items-center.justify-between {
+            align-items: flex-start;
+        }
+
+        .landing-page .max-w-7xl nav.hidden.md\:flex.items-center.gap-8 {
+            margin-left: auto;
+        }
+
+        .landing-page .max-w-7xl nav.hidden.md\:flex.items-center.gap-8 a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
         }
 
         .site-header {
@@ -789,13 +818,13 @@
     </style>
 </head>
 
-<body>
+<body class="landing-page">
 
-    @include('partials.header')
+    <x-user.navbar />
 
     @yield('content')
 
-    @include('partials.footer')
+    <x-user.footer />
 
 </body>
 

@@ -3,6 +3,9 @@
 @section('title', 'Jelajah Bali')
 
 @section('content')
+@php
+    $startRoute = auth()->check() ? route('user.home') : route('user.login');
+@endphp
 
 {{-- Hero Section --}}
 <section class="landing-hero">
@@ -11,7 +14,7 @@
         <h1>Sistem Rekomendasi Wisata <span class="landing-highlight">Pulau Bali</span></h1>
 
         <div class="landing-hero-buttons">
-            <a href="{{ route('user.home') }}" class="landing-btn-primary">
+            <a href="{{ $startRoute }}" class="landing-btn-primary">
                 Mulai Cari Wisata →
             </a>
 
@@ -74,7 +77,7 @@
                 serupa melalui analisis data atribut yang mendalam.
             </p>
 
-            <a href="{{ route('user.home') }}" class="landing-explore-link">
+            <a href="{{ $startRoute }}" class="landing-explore-link">
                 MULAI JELAJAH ↗
             </a>
 
@@ -202,7 +205,7 @@
 
         <div class="landing-cta-buttons">
 
-            <a href="{{ route('user.home') }}"
+            <a href="{{ $startRoute }}"
                class="landing-cta-btn primary">
                 Mulai Cari Wisata Sekarang
             </a>
