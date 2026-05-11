@@ -4,8 +4,9 @@
 
 @section('content')
 @php
-    $selectedInterest = request('interest', 'nature');
-    $selectedAmenities = collect(request('amenities', ['wifi']))->map(fn ($value) => (string) $value)->all();
+    $selectedInterest = request('interest', 'all');
+    $selectedAmenities = collect(request('amenities', []))->map(fn ($value) => (string) $value)->all();
+    $selectedBudget = (int) request('budget', 500000);
 @endphp
 
 <style>
@@ -203,6 +204,17 @@
         accent-color: #0b70c8;
     }
 
+    .pref-budget-input {
+        width: 90px;
+        border: 1px solid #d6e1ef;
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+        color: #1a283a;
+        background: #f7fafd;
+        text-align: center;
+    }
+
     .pref-scale {
         margin-top: 8px;
         display: flex;
@@ -327,14 +339,14 @@
         </section>
 
         <section class="pref-form-card" aria-label="Form input preferensi">
-            <form method="GET" action="{{ route('user.destinations') }}">
+            <form method="GET" action="{{ route('user.destinations') }}" x-data="{ budget: {{ $selectedBudget }} }">
                 <div class="pref-group">
                     <p class="pref-label">
                         <img class="pref-icon" src="{{ asset('images/mos268mb-l3nqqp7.svg') }}" alt="" aria-hidden="true">
                         <span>Where do you want to explore?</span>
                     </p>
                     <select class="pref-select" name="regency" aria-label="Pilih kabupaten">
-                        <option value="">Select a Regency</option>
+                        <option value="all" @selected(request('regency', 'all') === 'all')>All Districts</option>
                         <option value="badung" @selected(request('regency') === 'badung')>Badung</option>
                         <option value="gianyar" @selected(request('regency') === 'gianyar')>Gianyar</option>
                         <option value="bangli" @selected(request('regency') === 'bangli')>Bangli</option>
@@ -348,6 +360,10 @@
                         <span>Primary Interest</span>
                     </p>
                     <div class="pref-chip-list" role="radiogroup" aria-label="Minat utama">
+                        <label class="pref-chip-option">
+                            <input type="radio" name="interest" value="all" @checked($selectedInterest === 'all')>
+                            <span>All</span>
+                        </label>
                         <label class="pref-chip-option">
                             <input type="radio" name="interest" value="nature" @checked($selectedInterest === 'nature')>
                             <span>Nature</span>
@@ -368,19 +384,33 @@
                 </div>
 
                 <div class="pref-group">
-                    <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:10px; justify-content: space-between;">
                         <p class="pref-label" style="margin-bottom:0;">
                             <img class="pref-icon" src="{{ asset('images/mos268mb-zgiezb6.svg') }}" alt="" aria-hidden="true">
-                            <span>Daily Budget</span>
+                            <span>Your Max Budget (IDR)</span>
                         </p>
-                        <span class="pref-budget-chip">IDR 500k - 2M+</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: 700; color: #0b70c8;">Rp</span>
+                            <input
+                                class="pref-budget-input"
+                                type="number"
+                                name="budget"
+                                min="0"
+                                max="10000000"
+                                step="10000"
+                                inputmode="numeric"
+                                x-model.number="budget"
+                                style="width: 140px; text-align: left;"
+                                aria-label="Nilai budget"
+                            >
+                        </div>
                     </div>
                     <div class="pref-slider-shell">
-                        <input class="pref-slider" type="range" min="1" max="3" step="1" name="budget" value="{{ request('budget', 2) }}" aria-label="Budget harian">
+                        <input class="pref-slider" type="range" min="0" max="2000000" step="50000" x-model.number="budget" aria-label="Budget harian">
                         <div class="pref-scale">
-                            <span>BUDGET</span>
-                            <span>MID-RANGE</span>
-                            <span>LUXURY</span>
+                            <span>Rp 0</span>
+                            <span>Rp 1.000.000</span>
+                            <span>Rp 2.000.000+</span>
                         </div>
                     </div>
                 </div>

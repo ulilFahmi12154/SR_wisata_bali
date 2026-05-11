@@ -1,23 +1,38 @@
 @extends('layouts.app')
 
-@section('title', 'Tanah Lot - Destination Detail')
+@section('title', ($destination->nama ?? 'Destination') . ' - Detail')
 
 @section('content')
+@php
+    $imagePath = $destination->image ?? '';
+    $imageUrl = $imagePath 
+        ? (preg_match('/^https?:\/\//', $imagePath) ? $imagePath : asset('images/destination/' . ltrim($imagePath, '/')))
+        : 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?auto=format&fit=crop&w=1200&q=80';
+    
+    $location = $destination->nama_kabupaten ?? 'Bali';
+    $description = $destination->deskripsi ?? $destination->keterangan ?? 'No description available.';
+    $entryFee = $destination->harga_wni_min ?? $destination->harga_wna_min;
+    $rating = $destination->rating ? number_format($destination->rating, 1) : 'New';
+    $category = $destination->nama_kategori ?? 'Destination';
+    $operatingHours = $destination->jam_operasional ?? '08:00 - 18:00';
+    $mapsLink = $destination->link ?? '#';
+@endphp
+
 <div class="destination-detail">
     <!-- Hero Section -->
-    <section class="hero-banner" style="background-image: linear-gradient(180deg, rgba(23, 28, 31, 0) 0%, rgba(23, 28, 31, 0.8) 100%), url('{{ asset('images/mok69als-svs0dv4.png') }}');">
+    <section class="hero-banner" style="background-color: #171c1f; background-image: linear-gradient(180deg, rgba(23, 28, 31, 0) 0%, rgba(23, 28, 31, 0.8) 100%), url('{{ $imageUrl }}');">
         <div class="container hero-content">
             <div class="hero-meta">
-                <span class="category-badge">COASTAL HERITAGE</span>
+                <span class="category-badge">{{ strtoupper($category) }}</span>
                 <div class="rating">
                     <img src="{{ asset('images/mok69ali-fm56qoo.svg') }}" alt="Star icon" class="icon-star">
-                    <span>4.9 (2.4k Reviews)</span>
+                    <span>{{ $rating }} (Traveler Rating)</span>
                 </div>
             </div>
-            <h1 class="hero-title">Tanah Lot</h1>
+            <h1 class="hero-title">{{ $destination->nama }}</h1>
             <div class="hero-location">
                 <img src="{{ asset('images/mok69ali-wgs75rk.svg') }}" alt="Location pin" class="icon-pin">
-                <span>Beraban, Kediri, Tabanan Regency, Bali</span>
+                <span>{{ $location }}, Bali</span>
             </div>
         </div>
     </section>
@@ -29,16 +44,16 @@
             <div class="card info-card">
                 <h2 class="section-title">Precision Description</h2>
                 <p class="description-text">
-                    Tanah Lot is perhaps the most iconic temple in Bali, situated atop a massive coastal rock formation that becomes surrounded by the sea at high tide. It is one of the seven sea temples around the Balinese coast, each within sight of the next to form a chain along the south-western shore. The site is a fusion of breathtaking natural beauty and spiritual significance, offering the most famous sunset backdrop on the island.
+                    {{ $description }}
                 </p>
                 <div class="info-grid">
                     <div class="info-item">
                         <span class="info-label">ENTRANCE FEE</span>
-                        <span class="info-value price">IDR 75.000</span>
+                        <span class="info-value price">{{ $entryFee ? 'IDR ' . number_format($entryFee, 0, ',', '.') : 'Free Entry' }}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">BEST VISIT</span>
-                        <span class="info-value">17:30 - Sunset</span>
+                        <span class="info-value">{{ $operatingHours }}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">ACCESSIBILITY</span>
@@ -46,7 +61,7 @@
                     </div>
                     <div class="info-item">
                         <span class="info-label">EST. DURATION</span>
-                        <span class="info-value">2-3 Hours</span>
+                        <span class="info-value">2-4 Hours</span>
                     </div>
                 </div>
             </div>
@@ -58,30 +73,23 @@
                     <h2 class="section-title-sm">Site Facilities</h2>
                 </div>
                 <div class="facilities-grid">
-                    <div class="facility-item">
-                        <div class="facility-icon-wrapper">
-                            <img src="{{ asset('images/mok69ali-x9v3lix.svg') }}" alt="Dining">
+                    @forelse($facilities as $facility)
+                        <div class="facility-item">
+                            <div class="facility-icon-wrapper">
+                                @php
+                                    $facilityIcon = 'mok69ali-x9v3lix.svg'; // Default icon
+                                    $fLower = strtolower($facility);
+                                    if (str_contains($fLower, 'parkir')) $facilityIcon = 'mok69ali-wod7egb.svg';
+                                    elseif (str_contains($fLower, 'toilet')) $facilityIcon = 'mok69ali-s3atnk2.svg';
+                                    elseif (str_contains($fLower, 'toko') || str_contains($fLower, 'market')) $facilityIcon = 'mok69ali-jnu45vc.svg';
+                                @endphp
+                                <img src="{{ asset('images/' . $facilityIcon) }}" alt="{{ $facility }}">
+                            </div>
+                            <span>{{ $facility }}</span>
                         </div>
-                        <span>Artisan Dining</span>
-                    </div>
-                    <div class="facility-item">
-                        <div class="facility-icon-wrapper">
-                            <img src="{{ asset('images/mok69ali-wod7egb.svg') }}" alt="Parking">
-                        </div>
-                        <span>Premium Parking</span>
-                    </div>
-                    <div class="facility-item">
-                        <div class="facility-icon-wrapper">
-                            <img src="{{ asset('images/mok69ali-s3atnk2.svg') }}" alt="Restrooms">
-                        </div>
-                        <span>Clean Restrooms</span>
-                    </div>
-                    <div class="facility-item">
-                        <div class="facility-icon-wrapper">
-                            <img src="{{ asset('images/mok69ali-jnu45vc.svg') }}" alt="Market">
-                        </div>
-                        <span>Art Market</span>
-                    </div>
+                    @empty
+                        <p>No facilities listed.</p>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -93,7 +101,7 @@
                     <span class="sidebar-eyebrow">CURATED PACKAGE</span>
                     <h2 class="sidebar-title">Standard Access</h2>
                     <div class="sidebar-price">
-                        <span class="price-amount">IDR 75k</span>
+                        <span class="price-amount">{{ $entryFee ? 'IDR ' . number_format($entryFee / 1000, 0) . 'k' : 'Free' }}</span>
                         <span class="price-unit">/person</span>
                     </div>
                 </div>
@@ -102,15 +110,15 @@
                     <div class="sidebar-feature">
                         <img src="{{ asset('images/mok69ali-rx1fx04.svg') }}" alt="Clock" class="feature-icon">
                         <div class="feature-text">
-                            <span class="feature-label">AVAILABLE TODAY</span>
-                            <span class="feature-value">06:00 - 19:00</span>
+                            <span class="feature-label">OPERATING HOURS</span>
+                            <span class="feature-value">{{ $operatingHours }}</span>
                         </div>
                     </div>
                     <div class="sidebar-feature">
                         <img src="{{ asset('images/mok69ali-0jd28pp.svg') }}" alt="Ticket" class="feature-icon">
                         <div class="feature-text">
-                            <span class="feature-label">INSTANT DELIVERY</span>
-                            <span class="feature-value">Digital Ticket Sent to App</span>
+                            <span class="feature-label">INSTANT ACCESS</span>
+                            <span class="feature-value">Digital Entry Available</span>
                         </div>
                     </div>
                 </div>
@@ -121,9 +129,9 @@
                 </div>
 
                 <div class="map-preview">
-                    <img src="{{ asset('images/mok69als-npe4f6u.png') }}" alt="Map Preview" class="map-img">
+                    <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=500&q=60" alt="Map Preview" class="map-img">
                     <div class="map-overlay">
-                        <a href="#" class="btn-maps">
+                        <a href="{{ $mapsLink }}" target="_blank" class="btn-maps">
                             <img src="{{ asset('images/mok69alj-1z3v3s6.svg') }}" alt="Maps icon">
                             <span>Open in Maps</span>
                         </a>
@@ -141,82 +149,42 @@
                 <h2 class="section-title-lg">Rekomendasi Serupa</h2>
             </div>
             <p class="header-right">
-                Based on your interest in <strong>Coastal Heritage</strong> and <strong>Sacred Sites</strong>, our horizon engine recommends these curated experiences.
+                Based on your interest in <strong>{{ $category }}</strong>, our horizon engine recommends these curated experiences.
             </p>
         </div>
 
         <div class="recommendations-grid">
-            <!-- Recommendation Card 1 -->
-            <div class="rec-card">
-                <div class="rec-media" style="background-image: url('{{ asset('images/mok69als-8d8ijt7.png') }}');">
-                    <span class="rec-badge">HERITAGE</span>
-                    <div class="rec-overlay">
-                        <div class="rec-match">
-                            <img src="{{ asset('images/mok69ali-w2uljcd.svg') }}" alt="Match icon">
-                            <span>98% MATCH</span>
+            @foreach($recommendations as $rec)
+                @php
+                    $recImage = $rec->image ?? '';
+                    $recImageUrl = $recImage 
+                        ? (preg_match('/^https?:\/\//', $recImage) ? $recImage : asset('images/destination/' . ltrim($recImage, '/')))
+                        : 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?auto=format&fit=crop&w=500&q=80';
+                    $recFee = $rec->harga_wni_min ?? $rec->harga_wna_min;
+                @endphp
+                <div class="rec-card" onclick="window.location='{{ route('user.destinations.detail', $rec->id) }}'" style="cursor: pointer;">
+                    <div class="rec-media" style="background-image: url('{{ $recImageUrl }}');">
+                        <span class="rec-badge">{{ strtoupper($rec->nama_kategori ?? 'BALI') }}</span>
+                        <div class="rec-overlay">
+                            <div class="rec-match">
+                                <img src="{{ asset('images/mok69ali-w2uljcd.svg') }}" alt="Match icon">
+                                <span>SIMILAR MATCH</span>
+                            </div>
+                            <h3 class="rec-title">{{ $rec->nama }}</h3>
                         </div>
-                        <h3 class="rec-title">Uluwatu Temple</h3>
                     </div>
-                </div>
-                <div class="rec-content">
-                    <div class="rec-info">
-                        <p class="rec-loc">Pecatu, South Kuta</p>
-                        <p class="rec-tags">Coastal • Spiritual • Performance</p>
-                    </div>
-                    <div class="rec-price">
-                        <span class="price-val">IDR 50k</span>
-                        <span class="price-label">ACCESS</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recommendation Card 2 -->
-            <div class="rec-card">
-                <div class="rec-media" style="background-image: url('{{ asset('images/mok69als-bvxxxn5.png') }}');">
-                    <span class="rec-badge">SPIRITUAL</span>
-                    <div class="rec-overlay">
-                        <div class="rec-match">
-                            <img src="{{ asset('images/mok69ali-w2uljcd.svg') }}" alt="Match icon">
-                            <span>92% MATCH</span>
+                    <div class="rec-content">
+                        <div class="rec-info">
+                            <p class="rec-loc">{{ $rec->nama_kabupaten ?? 'Bali' }}</p>
+                            <p class="rec-tags">{{ $rec->nama_kategori }} • Scenic • Explore</p>
                         </div>
-                        <h3 class="rec-title">Tirta Empul</h3>
-                    </div>
-                </div>
-                <div class="rec-content">
-                    <div class="rec-info">
-                        <p class="rec-loc">Manukaya, Tampaksiring</p>
-                        <p class="rec-tags">Culture • Water • Healing</p>
-                    </div>
-                    <div class="rec-price">
-                        <span class="price-val">IDR 50k</span>
-                        <span class="price-label">ACCESS</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recommendation Card 3 -->
-            <div class="rec-card">
-                <div class="rec-media" style="background-image: url('{{ asset('images/mok69als-vzd27n1.png') }}');">
-                    <span class="rec-badge">LANDMARK</span>
-                    <div class="rec-overlay">
-                        <div class="rec-match">
-                            <img src="{{ asset('images/mok69ali-w2uljcd.svg') }}" alt="Match icon">
-                            <span>89% MATCH</span>
+                        <div class="rec-price">
+                            <span class="price-val">{{ $recFee ? 'IDR ' . number_format($recFee / 1000, 0) . 'k' : 'Free' }}</span>
+                            <span class="price-label">ACCESS</span>
                         </div>
-                        <h3 class="rec-title">Ulun Danu Bratan</h3>
                     </div>
                 </div>
-                <div class="rec-content">
-                    <div class="rec-info">
-                        <p class="rec-loc">Candikuning, Baturiti</p>
-                        <p class="rec-tags">Lakeside • Serene • Scenic</p>
-                    </div>
-                    <div class="rec-price">
-                        <span class="price-val">IDR 75k</span>
-                        <span class="price-label">ACCESS</span>
-                    </div>
-                </div>
-            </div>
+            @endforeach
         </div>
     </section>
 </div>
@@ -231,6 +199,7 @@
         height: 760px;
         background-size: cover;
         background-position: center center;
+        background-color: #171c1f; /* Fallback color */
         display: flex;
         align-items: flex-end;
         color: white;
@@ -592,6 +561,7 @@
         height: 280px;
         background-size: cover;
         background-position: center;
+        background-color: #2a343d; /* Fallback color */
         position: relative;
         padding: 16px;
         display: flex;
@@ -600,6 +570,8 @@
     }
 
     .rec-badge {
+        position: relative;
+        z-index: 5;
         background: rgba(0, 0, 0, 0.4);
         backdrop-filter: blur(4px);
         color: white;
@@ -612,8 +584,11 @@
     }
 
     .rec-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
         background: linear-gradient(0deg, rgba(23, 28, 31, 0.9) 0%, rgba(23, 28, 31, 0) 100%);
-        margin: -16px;
         padding: 24px;
         display: flex;
         flex-direction: column;

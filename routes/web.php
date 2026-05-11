@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RekomendasiController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -121,11 +122,9 @@ Route::middleware('auth')->name('user.')->group(function () {
     // PUBLIC-like but after login
     Route::get('/home', fn() => view('pages.user.home'))->name('home');
 
-    Route::get('/destinations', fn() => view('pages.user.destinations.index'))->name('destinations');
+    Route::get('/destinations', [RekomendasiController::class, 'index'])->name('destinations');
 
-    Route::get('/destinations/{id}', fn($id) =>
-        view('pages.user.destinations.detail', compact('id'))
-    )->name('destinations.detail');
+    Route::get('/destinations/{id}', [RekomendasiController::class, 'show'])->name('destinations.detail');
 
     // 🔒 protected
     Route::get('/recommendation', fn() => view('pages.user.recommendation'))->name('recommendation');

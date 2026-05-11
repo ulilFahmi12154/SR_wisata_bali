@@ -38,7 +38,7 @@
         </div>
 
         <div class="border-t border-slate-800 pt-8">
-            <p class="text-center text-sm">© {{ date('Y') }} Kelompok 3. Semua hak dilindungi.</p>
+            <p class="text-center text-sm">© {{ date('Y') }} Kelompok 2. Semua hak dilindungi.</p>
             <p class="text-center text-xs text-slate-400 mt-2">Dibuat untuk perencanaan perjalanan Bali yang lebih cerdas.</p>
         </div>
 

@@ -13,19 +13,22 @@ use Illuminate\Support\Facades\DB;
 
 class WisataSeeder extends Seeder
 {
+    // Helper function agar kode lebih rapi
+    private function hitungSkorHarga($harga) {
+        if ($harga == 0) return 5.0;
+        if ($harga <= 5000) return 4.5;
+        if ($harga <= 15000) return 4.0;
+        if ($harga <= 50000) return 3.0;
+        if ($harga <= 100000) return 2.0;
+        return 1.0;
+    }
     public function run(): void
     {
-        // 0. CARI ATAU BUAT KRITERIA (Tanpa memaksa ID)
-        // Kita gunakan firstOrCreate berdasarkan nama_kriteria
-        $kriteriaRating = Kriteria::firstOrCreate(
-            ['nama_kriteria' => 'Rating'],
-            ['tipe' => 'benefit']
-        );
-
-        $kriteriaHarga = Kriteria::firstOrCreate(
-            ['nama_kriteria' => 'Harga WNI'],
-            ['tipe' => 'cost']
-        );
+        // 0. DEFINISIKAN SEMUA 4 KRITERIA
+        $kriteriaRating = Kriteria::firstOrCreate(['nama_kriteria' => 'Rating'], ['tipe' => 'benefit']);
+        $kriteriaHargaWNI = Kriteria::firstOrCreate(['nama_kriteria' => 'Harga WNI'], ['tipe' => 'cost']);
+        $kriteriaFasilitas = Kriteria::firstOrCreate(['nama_kriteria' => 'Fasilitas'], ['tipe' => 'benefit']);
+        $kriteriaHargaUmum = Kriteria::firstOrCreate(['nama_kriteria' => 'Harga'], ['tipe' => 'cost']);
 
         // 1. Path ke file CSV kamu
         $file = database_path('data/Dataset_Lokasi_Wisata_Pulau_Bali.done.csv');
@@ -103,8 +106,10 @@ class WisataSeeder extends Seeder
                 ]);
 
                 // --- TRANSFORM & LOAD: Fasilitas ---
+               $countFasilitas = 0;
                 if (!empty($raw_fasilitas)) {
                     $list_fasilitas = explode(',', $raw_fasilitas);
+                    $countFasilitas = count($list_fasilitas); // Hitung jumlah fasilitas untuk skor SAW
                     foreach ($list_fasilitas as $item) {
                         $nama_fasilitas = trim($item);
                         if (!empty($nama_fasilitas)) {
@@ -123,21 +128,30 @@ class WisataSeeder extends Seeder
                     'nilai'       => round((float) $rating, 2)
                 ]);
 
-                // 2. Penilaian Harga (diambil dari harga minimal)
-                if ($wni_min !== null) {
-                    $skorHarga = 0.0;
-                    if ($wni_min == 0) $skorHarga = 5.0;
-                    elseif ($wni_min <= 5000) $skorHarga = 4.5;
-                    elseif ($wni_min <= 15000) $skorHarga = 4.0;
-                    elseif ($wni_min <= 50000) $skorHarga = 3.0;
-                    elseif ($wni_min <= 100000) $skorHarga = 2.0;
-                    else $skorHarga = 1.0;
-                    Penilaian::create([
-                        'wisata_id'   => $wisata->id,
-                        'kriteria_id' => $kriteriaHarga->id,
-                        'nilai'       => (float) $skorHarga
-                    ]);
-                }
+                // 2. Penilaian Harga WNI (Cost - Skor 1-5)
+                $skorHargaWNI = $this->hitungSkorHarga($wni_min);
+                Penilaian::create([
+                    'wisata_id'   => $wisata->id,
+                    'kriteria_id' => $kriteriaHargaWNI->id,
+                    'nilai'       => $skorHargaWNI
+                ]);
+
+                // 3. Penilaian Fasilitas (Benefit - Berdasarkan Jumlah)
+                Penilaian::create([
+                    'wisata_id'   => $wisata->id,
+                    'kriteria_id' => $kriteriaFasilitas->id,
+                    'nilai'       => (float) $countFasilitas // Semakin banyak fasilitas, nilai makin tinggi
+                ]);
+
+                // 4. Penilaian Harga Umum/WNA (Cost - Skor 1-5)
+                $skorHargaUmum = $this->hitungSkorHarga($wna_min);
+                Penilaian::create([
+                    'wisata_id'   => $wisata->id,
+                    'kriteria_id' => $kriteriaHargaUmum->id,
+                    'nilai'       => $skorHargaUmum
+                ]);
+
+                
             }
 
             DB::commit();
