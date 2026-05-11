@@ -7,16 +7,16 @@
 {{-- Hero Section --}}
 <section class="landing-hero">
     <div class="landing-hero-content">
-        <span class="landing-tag">INTELLIGENT RECOMMENDATION ENGINE</span>
+        <span class="landing-tag">SISTEM PENDUKUNG KEPUTUSAN WISATA</span>
         <h1>Sistem Rekomendasi Wisata <span class="landing-highlight">Pulau Bali</span></h1>
 
         <div class="landing-hero-buttons">
-            <a href="{{ route('user.destinations') }}" class="landing-btn-primary">
+            <a href="{{ route('user.home') }}" class="landing-btn-primary">
                 Mulai Cari Wisata →
             </a>
 
             <button class="landing-btn-secondary">
-                Pelajari Metode
+                Pelajari Metode SAW
             </button>
         </div>
     </div>
@@ -29,13 +29,13 @@
     <div class="landing-features-header">
 
         <div class="landing-features-left">
-            <span class="landing-section-tag">CORE CAPABILITIES</span>
-            <h2>Fitur Cerdas Unggulan</h2>
+            <span class="landing-section-tag">FITUR UTAMA</span>
+            <h2>Keputusan Perjalanan Cerdas</h2>
         </div>
 
         <p class="landing-features-desc">
-            Menyeimbangkan preferensi subjektif Anda dengan perhitungan sistematis
-            untuk hasil yang tidak hanya akurat, namun juga personal.
+            Menggabungkan kriteria preferensi Anda dengan perhitungan algoritma SAW
+            untuk memberikan hasil rekomendasi yang objektif dan personal.
         </p>
 
     </div>
@@ -47,18 +47,17 @@
 
             <div class="landing-feature-icon">☰</div>
 
-            <h3>Rekomendasi Preferensi</h3>
+            <h3>Analisis Multi-Kriteria</h3>
 
             <p>
-                Sesuaikan kriteria pencarian mulai dari budget,
-                jenis aktivitas, hingga tingkat keramaian
-                untuk mendapatkan hasil yang dipersonalisasi.
+                Perhitungan matang berdasarkan berbagai kriteria mulai dari budget,
+                fasilitas, hingga rating untuk mendapatkan hasil terbaik.
             </p>
 
             <div class="landing-feature-tags">
-                <span>Budget-friendly</span>
-                <span>Solo-suitable</span>
-                <span>Cultural</span>
+                <span>Hemat Biaya</span>
+                <span>Fasilitas Lengkap</span>
+                <span>Rating Tinggi</span>
             </div>
 
         </div>
@@ -68,16 +67,15 @@
 
             <div class="landing-feature-icon">⇄</div>
 
-            <h3>Similar Destinations</h3>
+            <h3>Destinasi Serupa</h3>
 
             <p>
-                Temukan permata tersembunyi yang memiliki karakteristik
-                serupa dengan destinasi favorit Anda melalui analisis
-                kesamaan atribut.
+                Temukan tempat wisata lain yang memiliki karakteristik
+                serupa melalui analisis data atribut yang mendalam.
             </p>
 
-            <a href="#" class="landing-explore-link">
-                EXPLORE NEARBY ↗
+            <a href="{{ route('user.home') }}" class="landing-explore-link">
+                MULAI JELAJAH ↗
             </a>
 
         </div>
@@ -88,13 +86,13 @@
             <div class="landing-feature-card-overlay">
 
                 <span class="landing-card-badge">
-                    BALI EXPLORATION
+                    EKSPLORASI BALI
                 </span>
 
-                <h3>Discover Tegalalang</h3>
+                <h3>Keindahan Tegalalang</h3>
 
                 <span class="landing-card-rating">
-                    ★ 9.6 Rating
+                    ★ 4.8 Rating
                 </span>
 
             </div>
@@ -111,7 +109,7 @@
 
     <div class="landing-popular-header">
         <h2>Wisata Terpopuler Saat Ini</h2>
-        <p>horizon engine recommends these curated experiences.</p>
+        <p>Rekomendasi destinasi pilihan berdasarkan skor popularitas tertinggi.</p>
     </div>
 
     <div class="landing-popular-grid">
@@ -204,7 +202,7 @@
 
         <div class="landing-cta-buttons">
 
-            <a href="{{ route('user.destinations') }}"
+            <a href="{{ route('user.home') }}"
                class="landing-cta-btn primary">
                 Mulai Cari Wisata Sekarang
             </a>
