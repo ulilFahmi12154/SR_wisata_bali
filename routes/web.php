@@ -6,7 +6,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+<<<<<<< Updated upstream
 use App\Http\Controllers\LandingPageController;
+=======
+use App\Http\Controllers\WisataController;
+>>>>>>> Stashed changes
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +33,7 @@ Route::view('/terms', 'pages.terms')->name('terms');
 Route::view('/contact', 'pages.contact')->name('contact');
 
 
+<<<<<<< Updated upstream
 /*
 |--------------------------------------------------------------------------
 | USER AUTH (GUEST ONLY)
@@ -318,6 +323,8 @@ Route::post('/logout', function () {
 | TEST DB (hapus di production!)
 |--------------------------------------------------------------------------
 */
+=======
+>>>>>>> Stashed changes
 
 Route::get('/test-db', function () {
     return DB::select('SHOW TABLES');
