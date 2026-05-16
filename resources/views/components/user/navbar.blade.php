@@ -38,13 +38,20 @@
 
                 {{-- Auth Section --}}
                 @auth
+                    @php
+                        $userName = trim(auth()->user()->name ?? '');
+                        $userName = $userName !== '' ? $userName : 'User';
+                        $userInitial = mb_strtoupper(mb_substr($userName, 0, 1));
+                    @endphp
+
                     <div class="flex items-center gap-2 sm:gap-3">
                         <a
                             href="{{ route('user.profile') }}"
                             class="flex h-10 w-10 items-center justify-center rounded-full border border-sky-100 bg-sky-50 text-sm font-bold text-sky-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-sky-100"
-                            aria-label="Profil pengguna"
+                            title="Profil {{ $userName }}"
+                            aria-label="Buka profil {{ $userName }}"
                         >
-                            {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                            {{ $userInitial }}
                         </a>
 
                         <form method="POST" action="{{ route('logout') }}">
