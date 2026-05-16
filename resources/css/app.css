@@ -21,6 +21,10 @@
         font-family: var(--font-body);
     }
 
+    [x-cloak] {
+        display: none !important;
+    }
+
     .font-display {
         @apply font-['Playfair_Display'];
     }
