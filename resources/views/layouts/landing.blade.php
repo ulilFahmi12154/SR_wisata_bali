@@ -57,80 +57,6 @@
             font-family: 'Playfair Display', serif;
         }
 
-        /* Navbar, scoped to landing only */
-        .landing-page > header {
-            background: rgba(255, 255, 255, 0.78);
-            border-bottom: 1px solid rgba(203, 213, 225, 0.62);
-            box-shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
-            backdrop-filter: blur(18px);
-        }
-
-        .landing-page > header > div {
-            max-width: 1180px;
-            padding-left: 24px;
-            padding-right: 24px;
-        }
-
-        .landing-page > header > div > div {
-            min-height: 68px;
-            align-items: center;
-        }
-
-        .landing-page > header > div > div > a:first-child {
-            gap: 12px;
-            text-decoration: none;
-        }
-
-        .landing-page > header > div > div > a:first-child > div {
-            width: 40px;
-            height: 40px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, #0284c7 0%, #0f766e 100%);
-            box-shadow: 0 12px 28px rgba(2, 132, 199, 0.18);
-        }
-
-        .landing-page > header > div > div > a:first-child span {
-            color: var(--landing-ink);
-            font-size: 1.08rem;
-            letter-spacing: 0;
-        }
-
-        .landing-page > header nav {
-            gap: 18px;
-        }
-
-        .landing-page > header nav a {
-            display: inline-flex;
-            align-items: center;
-            min-height: 38px;
-            padding: 8px 13px;
-            border-radius: 999px;
-            color: #475569;
-            transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .landing-page > header nav a:hover {
-            color: #075985;
-            background: rgba(224, 242, 254, 0.72);
-            box-shadow: inset 0 0 0 1px rgba(14, 116, 144, 0.08);
-        }
-
-        .landing-page > header a[href*="login"] {
-            border-radius: 999px;
-            background: #0369a1;
-            color: white;
-            padding: 10px 18px;
-            font-weight: 700;
-            box-shadow: 0 14px 32px rgba(2, 132, 199, 0.18);
-            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .landing-page > header a[href*="login"]:hover {
-            background: #075985;
-            transform: translateY(-1px);
-            box-shadow: 0 18px 38px rgba(2, 132, 199, 0.22);
-        }
-
         /* Hero */
         .landing-hero {
             min-height: calc(100vh - 68px);
@@ -647,7 +573,7 @@
             text-align: center;
             color: #f8fafc;
             background:
-                linear-gradient(135deg, rgba(12, 74, 110, 0.94) 0%, rgba(15, 118, 110, 0.88) 56%, rgba(30, 64, 175, 0.78) 100%),
+                linear-gradient(135deg, rgba(12, 74, 110, 0.94) 0%, rgba(3, 105, 161, 0.88) 56%, rgba(30, 64, 175, 0.78) 100%),
                 linear-gradient(135deg, rgba(254, 243, 199, 0.16), transparent);
             border: 1px solid rgba(255, 255, 255, 0.18);
             box-shadow: 0 28px 78px rgba(15, 23, 42, 0.14);
@@ -722,26 +648,6 @@
             box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
         }
 
-        /* Footer, scoped to landing only */
-        .landing-page > footer {
-            margin-top: 0;
-            background: #111827;
-            border-top: 1px solid rgba(148, 163, 184, 0.18);
-        }
-
-        .landing-page > footer > div {
-            max-width: 1180px;
-        }
-
-        .landing-page > footer .bg-brand-600 {
-            background: linear-gradient(135deg, #0284c7, #0f766e);
-            border-radius: 14px;
-        }
-
-        .landing-page > footer a:hover {
-            color: #7dd3fc;
-        }
-
         @media (max-width: 1024px) {
             .landing-hero {
                 min-height: 720px;
@@ -774,19 +680,6 @@
         }
 
         @media (max-width: 768px) {
-            .landing-page > header > div {
-                padding-left: 18px;
-                padding-right: 18px;
-            }
-
-            .landing-page > header > div > div {
-                min-height: 64px;
-            }
-
-            .landing-page > header nav {
-                gap: 12px;
-            }
-
             .landing-hero {
                 min-height: 620px;
                 padding: 68px 22px 70px;
@@ -846,14 +739,6 @@
         }
 
         @media (max-width: 520px) {
-            .landing-page > header > div > div {
-                gap: 12px;
-            }
-
-            .landing-page > header a[href*="login"] {
-                padding: 9px 14px;
-            }
-
             .landing-tag {
                 font-size: 0.62rem;
                 letter-spacing: 0.10em;
