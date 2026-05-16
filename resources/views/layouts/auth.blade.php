@@ -9,66 +9,69 @@
         <img
             src="{{ $heroBg ?? asset('images/destination/Destinasi_Wilayah_Bali.jpg') }}"
             alt="Destinasi Wisata Bali"
-            class="absolute inset-0 h-full w-full scale-[1.02] object-cover brightness-[0.82] contrast-[0.92] saturate-[0.82]"
+            class="absolute inset-0 h-full w-full scale-[1.03] object-cover brightness-[0.78] contrast-[0.9] saturate-[0.78]"
         >
 
         {{-- Soft image treatment --}}
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-950/35 via-slate-900/15 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/42 via-slate-900/18 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-950/24 via-transparent to-amber-100/10"></div>
         <div class="absolute inset-0 bg-gradient-to-tr from-amber-100/20 via-stone-50/5 to-sky-100/10"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/28 via-transparent to-white/10"></div>
-        <div class="absolute inset-0 opacity-[0.035] [background-image:radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] [background-size:30px_30px]"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/22 via-transparent to-white/12"></div>
+        <div class="absolute inset-0 opacity-[0.025] [background-image:radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] [background-size:30px_30px]"></div>
 
         {{-- Content on hero --}}
-        <div class="relative z-10 flex w-full flex-col justify-between p-10 xl:p-14">
+        <div class="relative z-10 flex min-h-screen w-full flex-col p-10 xl:p-14">
 
-            {{-- Logo --}}
-            <div class="flex items-center gap-3">
-                <div class="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.07] backdrop-blur-sm">
-                    <svg class="h-5 w-5 text-stone-50/85" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                </div>
-                <span class="font-display text-xl font-semibold tracking-normal text-stone-50/90">Jelajah Bali</span>
-            </div>
-
-            {{-- Hero tagline --}}
-            <div class="max-w-xl space-y-6">
-                <div class="space-y-4">
-                    <p class="text-sm font-semibold uppercase tracking-widest text-stone-100/70">
-                        Sistem Rekomendasi Wisata
-                    </p>
-                    <h1 class="font-display text-4xl leading-tight text-stone-50/90 xl:text-5xl">
-                        Temukan Sisi<br>
-                        <span class="text-amber-100/85">Bali</span> yang<br>
-                        Belum Terjamah.
-                    </h1>
-                    <p class="max-w-sm text-base leading-relaxed text-stone-100/70">
-                        Rekomendasi destinasi personal berdasarkan preferensi perjalanan Anda.
-                    </p>
+            <div class="space-y-14 xl:space-y-16">
+                {{-- Logo --}}
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-sm">
+                        <svg class="h-4 w-4 text-stone-50/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                    </div>
+                    <span class="font-display text-lg font-semibold tracking-normal text-stone-50/90">Jelajah Bali</span>
                 </div>
 
-                {{-- Stats strip --}}
-                <div class="grid max-w-md grid-cols-3 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.18] shadow-[0_18px_48px_rgba(15,23,42,0.12)] backdrop-blur-xl">
-                    <div class="px-4 py-4">
-                        <div class="font-display text-2xl font-bold text-stone-50/90">142K+</div>
-                        <div class="mt-1 text-xs text-stone-100/60">Wisatawan</div>
+                {{-- Hero tagline --}}
+                <div class="max-w-lg space-y-7">
+                    <div class="space-y-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-stone-100/60">
+                            Sistem Rekomendasi Wisata
+                        </p>
+                        <h1 class="font-display text-[2.35rem] leading-[1.14] text-stone-50/90 xl:text-[2.7rem]">
+                            Temukan Sisi<br>
+                            <span class="text-amber-100/75">Bali</span> yang<br>
+                            Belum Terjamah.
+                        </h1>
+                        <p class="max-w-sm text-sm leading-7 text-stone-100/70 xl:text-[0.95rem]">
+                            Rekomendasi destinasi personal berdasarkan preferensi perjalanan Anda.
+                        </p>
                     </div>
-                    <div class="border-x border-white/[0.08] px-4 py-4">
-                        <div class="font-display text-2xl font-bold text-stone-50/90">4,760</div>
-                        <div class="mt-1 text-xs text-stone-100/60">Destinasi</div>
-                    </div>
-                    <div class="px-4 py-4">
-                        <div class="font-display text-2xl font-bold text-stone-50/90">24.5K</div>
-                        <div class="mt-1 text-xs text-stone-100/60">Ulasan</div>
+
+                    {{-- Stats strip --}}
+                    <div class="grid max-w-[25rem] grid-cols-3 overflow-hidden rounded-3xl border border-white/15 bg-white/[0.13] shadow-[0_18px_54px_rgba(15,23,42,0.10)] backdrop-blur-xl backdrop-saturate-150">
+                        <div class="px-4 py-4">
+                            <div class="font-display text-[1.45rem] font-bold leading-none text-stone-50/90">142K+</div>
+                            <div class="mt-1.5 text-xs text-stone-100/60">Wisatawan</div>
+                        </div>
+                        <div class="border-x border-white/[0.07] px-4 py-4">
+                            <div class="font-display text-[1.45rem] font-bold leading-none text-stone-50/90">4,760</div>
+                            <div class="mt-1.5 text-xs text-stone-100/60">Destinasi</div>
+                        </div>
+                        <div class="px-4 py-4">
+                            <div class="font-display text-[1.45rem] font-bold leading-none text-stone-50/90">24.5K</div>
+                            <div class="mt-1.5 text-xs text-stone-100/60">Ulasan</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {{-- Bottom credit --}}
-            <p class="text-xs text-stone-100/50">
+            <p class="mt-auto pt-10 text-xs text-stone-100/50">
                 &copy; {{ date('Y') }} Jelajah Bali. Hak cipta dilindungi.
             </p>
         </div>
