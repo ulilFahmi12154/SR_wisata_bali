@@ -68,12 +68,6 @@ Route::middleware('guest')->name('user.')->group(function () {
     )->name('register');
 
     Route::post('/register', function () {
-
-        // TODO: implementasi registrasi
-
-        return redirect()->route('user.login')
-            ->with('status', 'Registrasi berhasil, silakan login.');
-
         $data = request()->validate([
             'name' => ['required', 'string', 'max:255', "regex:/^[A-Za-z\s]+$/"],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],

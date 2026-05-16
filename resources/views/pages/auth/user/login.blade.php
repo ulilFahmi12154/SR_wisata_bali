@@ -18,6 +18,12 @@
         </p>
     </div>
 
+    @if (session('success') || session('status'))
+        <div class="mb-5 rounded-2xl border border-sky-100 bg-sky-50/80 px-4 py-3 text-sm font-medium text-sky-800 shadow-sm shadow-sky-100/60">
+            {{ session('success') ?? session('status') }}
+        </div>
+    @endif
+
     {{-- Login Form --}}
     <form
         action="{{ route('user.login') }}"

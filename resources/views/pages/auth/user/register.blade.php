@@ -25,7 +25,7 @@
 
     {{-- Form --}}
     <form
-        action="{{ route('user.register') }}"
+        action="{{ route('user.register.process') }}"
         method="POST"
         class="space-y-4"
         x-data="{ loading: false }"
