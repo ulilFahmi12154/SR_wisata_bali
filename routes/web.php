@@ -3,7 +3,6 @@
 use App\Http\Controllers\RekomendasiController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LandingPageController;
@@ -311,14 +310,3 @@ Route::post('/logout', function () {
 
     return redirect()->route('user.login');
 })->name('logout')->middleware('auth');
-
-
-/*
-|--------------------------------------------------------------------------
-| TEST DB (hapus di production!)
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/test-db', function () {
-    return DB::select('SHOW TABLES');
-});
