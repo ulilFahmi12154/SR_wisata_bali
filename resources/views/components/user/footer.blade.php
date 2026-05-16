@@ -25,7 +25,7 @@
                     <li><a href="{{ route('privacy') }}" class="hover:text-brand-400 transition">Kebijakan Privasi</a></li>
                     <li><a href="{{ route('terms') }}" class="hover:text-brand-400 transition">Ketentuan</a></li>
                     <li><a href="{{ route('contact') }}" class="hover:text-brand-400 transition">Kontak</a></li>
-                    <li><a href="https://bali.com/" target="_blank" class="hover:text-brand-400 transition">Panduan Bali ↗</a></li>
+                    <li><a href="https://bali.com/" target="_blank" class="hover:text-brand-400 transition">Panduan Bali &nearr;</a></li>
                 </ul>
             </div>
 
@@ -54,7 +54,7 @@
         </div>
 
         <div class="border-t border-slate-800 pt-8">
-            <p class="text-center text-sm">© {{ date('Y') }} Kelompok 2. Semua hak dilindungi.</p>
+            <p class="text-center text-sm">&copy; {{ date('Y') }} Kelompok 2. Semua hak dilindungi.</p>
             <p class="text-center text-xs text-slate-400 mt-2">Dibuat untuk perencanaan perjalanan Bali yang lebih cerdas.</p>
         </div>
 
