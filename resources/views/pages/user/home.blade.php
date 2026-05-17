@@ -4,9 +4,10 @@
 
 @section('content')
 @php
-    $selectedInterest = request('interest', 'all');
-    $selectedAmenities = collect(request('amenities', []))->map(fn ($value) => (string) $value)->all();
-    $selectedBudget = (int) request('budget', 500000);
+    $selectedRegency = 'all';
+    $selectedInterest = 'all';
+    $selectedAmenities = [];
+    $selectedBudget = 500000;
 @endphp
 
 <style>
@@ -586,7 +587,7 @@
                 Temukan <span>Liburan Bali</span> Terbaik.
             </h1>
             <p class="pref-description">
-                Temukan destinasi impian Anda di Bali dengan algoritma perankingan yang akurat. Masukkan kriteria perjalanan Anda di bawah ini.
+                Pilih preferensi perjalanan Anda untuk mendapatkan rekomendasi destinasi yang sesuai. Form ini selalu dimulai dari pilihan netral agar hasil dihitung dari input terbaru.
             </p>
 
             <article class="pref-highlight animate-fade-up animate-delay-100" aria-label="Highlight destinasi">
@@ -603,7 +604,13 @@
 
         <section class="pref-form-card animate-fade-up animate-delay-200" aria-label="Form input preferensi">
             <h2 class="pref-form-title">Filter Utama</h2>
-            <form method="GET" action="{{ route('user.destinations') }}" x-data="{ budget: {{ $selectedBudget }} }">
+            @if (session('status'))
+                <div class="mb-5 rounded-3xl border border-sky-100 bg-sky-50/80 px-4 py-3 text-sm font-semibold leading-6 text-sky-800">
+                    {{ session('status') }}
+                </div>
+            @endif
+            <form method="POST" action="{{ route('user.recommendations.process') }}" x-data="{ budget: {{ $selectedBudget }} }">
+                @csrf
                 <div class="pref-group">
                     <p class="pref-label">
                         <img class="pref-icon" src="{{ asset('images/mos268mb-l3nqqp7.svg') }}" alt="" aria-hidden="true">
@@ -611,11 +618,11 @@
                     </p>
                     <div class="pref-field-caption">Kabupaten/Kota</div>
                     <select class="pref-select" name="regency" aria-label="Pilih kabupaten">
-                        <option value="all" @selected(request('regency', 'all') === 'all')>Pilih Kabupaten</option>
-                        <option value="badung" @selected(request('regency') === 'badung')>Badung</option>
-                        <option value="gianyar" @selected(request('regency') === 'gianyar')>Gianyar</option>
-                        <option value="bangli" @selected(request('regency') === 'bangli')>Bangli</option>
-                        <option value="buleleng" @selected(request('regency') === 'buleleng')>Buleleng</option>
+                        <option value="all" @selected($selectedRegency === 'all')>Pilih Kabupaten</option>
+                        <option value="badung" @selected($selectedRegency === 'badung')>Badung</option>
+                        <option value="gianyar" @selected($selectedRegency === 'gianyar')>Gianyar</option>
+                        <option value="bangli" @selected($selectedRegency === 'bangli')>Bangli</option>
+                        <option value="buleleng" @selected($selectedRegency === 'buleleng')>Buleleng</option>
                     </select>
                 </div>
 

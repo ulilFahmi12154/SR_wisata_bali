@@ -21,7 +21,7 @@
                         <a
                             href="{{ route('user.destinations') }}"
                             class="inline-flex min-h-10 items-center rounded-full px-3.5 text-sm font-semibold transition
-                                   {{ request()->routeIs('user.destinations*') ? 'bg-sky-50 text-sky-700 shadow-[inset_0_0_0_1px_rgba(14,116,144,0.10)]' : 'text-slate-600 hover:bg-sky-50/80 hover:text-sky-800' }}"
+                                   {{ request()->routeIs('user.destinations') ? 'bg-sky-50 text-sky-700 shadow-[inset_0_0_0_1px_rgba(14,116,144,0.10)]' : 'text-slate-600 hover:bg-sky-50/80 hover:text-sky-800' }}"
                         >
                             Destinasi
                         </a>
@@ -152,7 +152,7 @@
                 <a
                     href="{{ route('user.destinations') }}"
                     class="inline-flex min-h-9 flex-shrink-0 items-center rounded-full px-3 text-sm font-semibold transition
-                           {{ request()->routeIs('user.destinations*') ? 'bg-sky-50 text-sky-700 shadow-[inset_0_0_0_1px_rgba(14,116,144,0.10)]' : 'text-slate-600 hover:bg-sky-50/80 hover:text-sky-800' }}"
+                           {{ request()->routeIs('user.destinations') ? 'bg-sky-50 text-sky-700 shadow-[inset_0_0_0_1px_rgba(14,116,144,0.10)]' : 'text-slate-600 hover:bg-sky-50/80 hover:text-sky-800' }}"
                 >
                     Destinasi
                 </a>

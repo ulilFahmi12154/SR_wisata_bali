@@ -142,7 +142,7 @@
                             @endif
                         </p>
 
-                        <a href="{{ route('user.destinations.show', $destination->id) }}" class="block w-full px-4 py-2.5 rounded-lg bg-slate-950 text-white font-medium hover:bg-slate-800 transition-colors text-center">
+                        <a href="{{ route('user.destinations.detail', $destination->id) }}" class="block w-full px-4 py-2.5 rounded-lg bg-slate-950 text-white font-medium hover:bg-slate-800 transition-colors text-center">
                             Lihat Detail
                         </a>
                         <button class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-700 font-medium hover:bg-slate-50 transition-colors">
@@ -160,7 +160,7 @@
             </svg>
             <p class="text-slate-500 text-lg font-medium">Tidak ada rekomendasi saat ini</p>
             <p class="text-slate-400 text-sm mt-2">Mulai jelajahi destinasi untuk mendapatkan rekomendasi yang dipersonalisasi</p>
-            <a href="{{ route('user.destinations.index') }}" class="inline-block mt-4 px-6 py-2.5 rounded-lg bg-slate-950 text-white font-medium hover:bg-slate-800 transition-colors">
+            <a href="{{ route('user.destinations') }}" class="inline-block mt-4 px-6 py-2.5 rounded-lg bg-slate-950 text-white font-medium hover:bg-slate-800 transition-colors">
                 Jelajahi Destinasi
             </a>
         </div>

@@ -140,13 +140,19 @@ Route::middleware('auth')->name('user.')->group(function () {
         view('pages.user.home')
     )->name('home');
 
-    Route::get('/destinations', [RekomendasiController::class, 'index'])->name('destinations');
+    Route::get('/destinasi', [RekomendasiController::class, 'index'])->name('destinations');
 
-    Route::get('/destinations/{id}', [RekomendasiController::class, 'show'])->name('destinations.detail');
+    Route::get('/destinations', fn () => redirect()->route('user.destinations'))->name('destinations.legacy');
 
-    Route::get('/recommendation', fn () =>
-        view('pages.user.recommendation')
-    )->name('recommendation');
+    Route::get('/destinasi/{id}', [RekomendasiController::class, 'show'])->name('destinations.detail');
+
+    Route::get('/destinations/{id}', fn ($id) => redirect()->route('user.destinations.detail', ['id' => $id]))->name('destinations.detail.legacy');
+
+    Route::post('/rekomendasi', [RekomendasiController::class, 'process'])->name('recommendations.process');
+
+    Route::get('/rekomendasi/hasil', [RekomendasiController::class, 'results'])->name('recommendations.results');
+
+    Route::redirect('/recommendation', '/rekomendasi/hasil')->name('recommendation');
 
     Route::get('/profile', fn () =>
         view('pages.user.profile')
