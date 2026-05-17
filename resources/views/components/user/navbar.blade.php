@@ -54,7 +54,7 @@
                             {{ $userInitial }}
                         </a>
 
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Yakin ingin keluar?\n\nSesi Anda akan diakhiri dan Anda perlu masuk kembali untuk menggunakan fitur rekomendasi.');">
                             @csrf
                             <button
                                 type="submit"
