@@ -312,5 +312,5 @@ Route::post('/logout', function () {
     request()->session()->invalidate();
     request()->session()->regenerateToken();
 
-    return redirect()->route('user.login');
+    return redirect()->route('landingpage');
 })->name('logout')->middleware('auth');
