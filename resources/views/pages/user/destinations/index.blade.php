@@ -5,9 +5,16 @@
 @section('content')
 @php
     $destinations = $destinations ?? collect();
+    $destinationsPaginator = $destinationsPaginator ?? null;
+    $totalDestinations = $totalDestinations ?? $destinations->count();
+    $perPage = $perPage ?? 12;
     $topDestination = $destinations->first();
     $otherDestinations = $destinations->skip(1);
     $maxScore = $destinations->max('skor_akhir') ?: 0;
+    $pageStart = $destinationsPaginator ? $destinationsPaginator->firstItem() : ($destinations->isNotEmpty() ? 1 : 0);
+    $pageEnd = $destinationsPaginator ? $destinationsPaginator->lastItem() : $destinations->count();
+    $currentPage = $destinationsPaginator ? $destinationsPaginator->currentPage() : 1;
+    $topRank = $pageStart ?: 1;
 
     $formatPrice = function ($amount) {
         $value = is_numeric($amount) ? (int) $amount : null;
@@ -64,13 +71,13 @@
             </div>
             <p class="text-xs font-bold uppercase tracking-[0.28em] text-sky-700">Hasil Rekomendasi</p>
             <h1 class="mt-3 font-display text-3xl font-semibold leading-tight text-slate-950 sm:text-4xl">
-                Destinasi tidak ditemukan
+                Belum ada destinasi yang sesuai dengan filter Anda.
             </h1>
             <p class="mx-auto mt-4 max-w-xl text-base leading-7 text-slate-600">
-                Coba ubah kata kunci, kabupaten, estimasi biaya, atau fasilitas yang Anda pilih agar kami bisa menemukan rekomendasi yang lebih sesuai.
+                Coba ubah kategori, lokasi, biaya, atau fasilitas yang dipilih agar kami bisa menemukan rekomendasi yang lebih sesuai.
             </p>
             <a href="{{ route('user.home') }}" class="mt-8 inline-flex items-center justify-center rounded-full bg-sky-700 px-6 py-3 text-sm font-bold text-white shadow-[0_14px_34px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-100">
-                Atur Ulang Filter
+                Ubah Filter
             </a>
         </section>
     @else
@@ -85,11 +92,18 @@
                 <p class="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
                     Destinasi diurutkan berdasarkan kecocokan preferensi, biaya, rating, dan fasilitas yang Anda pilih pada filter rekomendasi.
                 </p>
+                <p class="mt-3 max-w-2xl text-sm font-semibold leading-6 text-slate-500">
+                    @if($currentPage > 1)
+                        Menampilkan {{ number_format($pageStart, 0, ',', '.') }}-{{ number_format($pageEnd, 0, ',', '.') }} dari {{ number_format($totalDestinations, 0, ',', '.') }} hasil.
+                    @else
+                        Menampilkan {{ number_format(min($pageEnd, $perPage), 0, ',', '.') }} rekomendasi terbaik dari {{ number_format($totalDestinations, 0, ',', '.') }} destinasi yang sesuai.
+                    @endif
+                </p>
             </div>
 
             <div class="flex flex-wrap gap-2 lg:justify-end">
                 <span class="rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">Metode SAW</span>
-                <span class="rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">{{ $destinations->count() }} hasil</span>
+                <span class="rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">{{ number_format($totalDestinations, 0, ',', '.') }} hasil ditemukan</span>
                 <span class="rounded-full border border-amber-100 bg-amber-50/80 px-4 py-2 text-xs font-semibold text-amber-700 shadow-sm">Data sesuai filter</span>
             </div>
         </section>
@@ -123,7 +137,7 @@
                         <div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-700">Skor {{ $formatScore($topDestination->skor_akhir ?? 0) }}</span>
-                                <span class="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">Peringkat #1</span>
+                                <span class="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">Peringkat #{{ $topRank }}</span>
                             </div>
                             <h2 class="mt-4 font-display text-3xl font-semibold leading-tight text-slate-950 sm:text-4xl">
                                 {{ $topDestination->nama }}
@@ -169,7 +183,7 @@
             <aside class="space-y-4 animate-fade-up animate-delay-200">
                 <section class="rounded-[2rem] border border-sky-100/80 bg-white/90 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
                     <div class="mb-4 flex items-center justify-between gap-4">
-                        <h2 class="text-lg font-bold text-slate-950">Peringkat Teratas</h2>
+                        <h2 class="text-lg font-bold text-slate-950">Peringkat Halaman Ini</h2>
                         <span class="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">Skor</span>
                     </div>
 
@@ -183,7 +197,7 @@
                             <a href="{{ $rankLink }}" class="group block rounded-3xl border border-slate-100 bg-slate-50/70 p-4 transition hover:-translate-y-0.5 hover:border-sky-100 hover:bg-sky-50/70">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="min-w-0">
-                                        <span class="text-xs font-bold text-sky-700">#{{ sprintf('%02d', $loop->iteration) }}</span>
+                                        <span class="text-xs font-bold text-sky-700">#{{ sprintf('%02d', ($pageStart ?: 1) + $loop->iteration - 1) }}</span>
                                         <h3 class="mt-1 line-clamp-2 text-sm font-bold leading-snug text-slate-900 group-hover:text-sky-800">{{ $ranked->nama }}</h3>
                                     </div>
                                     <span class="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-700 shadow-sm">{{ $formatScore($score) }}</span>
@@ -220,7 +234,7 @@
                 <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                     @foreach($otherDestinations as $destination)
                         @php
-                            $rankNumber = $loop->iteration + 1;
+                            $rankNumber = ($pageStart ?: 1) + $loop->iteration;
                             $imageUrl = $destinationImage($destination, 'default beach.jpeg');
                             $location = optional($destination->lokasi)->nama_kabupaten ?? 'Bali';
                             $category = optional($destination->kategori)->nama_kategori ?? 'Destinasi';
@@ -268,6 +282,45 @@
                     @endforeach
                 </div>
             </section>
+        @endif
+
+        @if($destinationsPaginator && $destinationsPaginator->hasPages())
+            <nav class="mt-8 flex flex-col items-center justify-between gap-4 rounded-[1.5rem] border border-sky-100 bg-white/85 px-4 py-4 shadow-[0_16px_45px_rgba(15,23,42,0.07)] animate-fade-up sm:flex-row" aria-label="Navigasi halaman rekomendasi">
+                <p class="text-sm font-semibold text-slate-500">
+                    Halaman {{ number_format($destinationsPaginator->currentPage(), 0, ',', '.') }} dari {{ number_format($destinationsPaginator->lastPage(), 0, ',', '.') }}
+                </p>
+
+                <div class="flex flex-wrap justify-center gap-2">
+                    @if($destinationsPaginator->onFirstPage())
+                        <span class="inline-flex cursor-not-allowed items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-300">Sebelumnya</span>
+                    @else
+                        <a href="{{ $destinationsPaginator->previousPageUrl() }}" class="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-sky-100 hover:bg-sky-50 hover:text-sky-800">Sebelumnya</a>
+                    @endif
+
+                    @php $lastRenderedPage = 0; @endphp
+                    @foreach(range(1, $destinationsPaginator->lastPage()) as $page)
+                        @if($page === 1 || $page === $destinationsPaginator->lastPage() || abs($page - $destinationsPaginator->currentPage()) <= 1)
+                            @if($lastRenderedPage && $page > $lastRenderedPage + 1)
+                                <span class="inline-flex items-center px-2 py-2 text-sm font-bold text-slate-400">...</span>
+                            @endif
+
+                            @if($page === $destinationsPaginator->currentPage())
+                                <span class="inline-flex h-10 min-w-10 items-center justify-center rounded-full bg-sky-700 px-3 text-sm font-bold text-white shadow-[0_10px_24px_rgba(3,105,161,0.20)]">{{ $page }}</span>
+                            @else
+                                <a href="{{ $destinationsPaginator->url($page) }}" class="inline-flex h-10 min-w-10 items-center justify-center rounded-full border border-slate-200 bg-white px-3 text-sm font-bold text-slate-600 transition hover:border-sky-100 hover:bg-sky-50 hover:text-sky-800">{{ $page }}</a>
+                            @endif
+
+                            @php $lastRenderedPage = $page; @endphp
+                        @endif
+                    @endforeach
+
+                    @if($destinationsPaginator->hasMorePages())
+                        <a href="{{ $destinationsPaginator->nextPageUrl() }}" class="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-sky-100 hover:bg-sky-50 hover:text-sky-800">Berikutnya</a>
+                    @else
+                        <span class="inline-flex cursor-not-allowed items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-300">Berikutnya</span>
+                    @endif
+                </div>
+            </nav>
         @endif
 
         <section class="mt-10 rounded-[2rem] border border-sky-100 bg-gradient-to-br from-sky-50 via-white to-amber-50/70 p-6 text-center shadow-[0_22px_64px_rgba(15,23,42,0.08)] sm:p-8">

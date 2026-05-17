@@ -6,6 +6,7 @@ use App\Models\Kriteria;
 use App\Models\Penilaian;
 use App\Models\Wisata;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
@@ -203,10 +204,16 @@ class RekomendasiController extends Controller
                     return $item;
                 })
                 ->filter()
+                ->sortByDesc('skor_akhir')
                 ->values();
 
+            $paginatedDestinations = $this->paginateRecommendations($destinations, $request);
+
             return view('pages.user.destinations.index', [
-                'destinations' => $destinations,
+                'destinations' => $paginatedDestinations->getCollection(),
+                'destinationsPaginator' => $paginatedDestinations,
+                'totalDestinations' => $destinations->count(),
+                'perPage' => 12,
             ]);
         } catch (\Throwable $e) {
             report($e);
@@ -215,5 +222,23 @@ class RekomendasiController extends Controller
                 'destinations' => collect(),
             ]);
         }
+    }
+
+    private function paginateRecommendations($destinations, Request $request, int $perPage = 12): LengthAwarePaginator
+    {
+        $total = $destinations->count();
+        $lastPage = max(1, (int) ceil($total / $perPage));
+        $page = min(max(1, (int) $request->query('page', 1)), $lastPage);
+
+        return new LengthAwarePaginator(
+            $destinations->slice(($page - 1) * $perPage, $perPage)->values(),
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => collect($request->query())->except('page')->all(),
+            ]
+        );
     }
 }
