@@ -150,11 +150,21 @@ Route::middleware('auth')->name('user.')->group(function () {
         view('pages.user.profile')
     )->name('profile');
 
-    Route::post('/profile', function () {
+    Route::match(['post', 'patch'], '/profile', function () {
+        $data = request()->validate([
+            'name' => ['required', 'string', 'max:255'],
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'name.string' => 'Nama lengkap harus berupa teks.',
+            'name.max' => 'Nama lengkap maksimal :max karakter.',
+        ]);
 
-        // TODO: update profile
+        $user = request()->user();
+        $user->forceFill([
+            'name' => trim($data['name']),
+        ])->save();
 
-        return back()->with('status', 'Profile berhasil diupdate.');
+        return back()->with('status', 'Profil berhasil diperbarui.');
 
     })->name('profile.update');
 
