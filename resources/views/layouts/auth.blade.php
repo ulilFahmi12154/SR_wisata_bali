@@ -118,9 +118,9 @@
         <div class="border-t border-sky-100/80 px-6 py-4 text-center lg:px-16 lg:text-left">
             <p class="text-xs leading-relaxed text-slate-500">
                 Dengan masuk, Anda menyetujui
-                <a href="#" class="font-medium text-sky-700 hover:text-sky-800 hover:underline">Syarat &amp; Ketentuan</a>
+                <a href="{{ route('terms') }}" class="font-medium text-sky-700 hover:text-sky-800 hover:underline">Syarat &amp; Ketentuan</a>
                 dan
-                <a href="#" class="font-medium text-sky-700 hover:text-sky-800 hover:underline">Kebijakan Privasi</a>
+                <a href="{{ route('privacy') }}" class="font-medium text-sky-700 hover:text-sky-800 hover:underline">Kebijakan Privasi</a>
                 kami.
             </p>
         </div>

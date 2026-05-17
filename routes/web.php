@@ -23,9 +23,11 @@ Route::get('/', [LandingPageController::class, 'index'])->name('landingpage');
 */
 
 Route::view('/about', 'pages.about')->name('about');
-Route::view('/privacy-policy', 'pages.privacy')->name('privacy');
-Route::view('/terms', 'pages.terms')->name('terms');
-Route::view('/contact', 'pages.contact')->name('contact');
+Route::view('/kebijakan-privasi', 'pages.privacy')->name('privacy');
+Route::redirect('/privacy-policy', '/kebijakan-privasi');
+Route::view('/syarat-ketentuan', 'pages.terms')->name('terms');
+Route::redirect('/terms', '/syarat-ketentuan');
+Route::redirect('/contact', '/#kontak')->name('contact');
 
 
 /*

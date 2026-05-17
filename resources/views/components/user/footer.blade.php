@@ -1,4 +1,4 @@
-<footer class="mt-0 border-t border-white/10 bg-slate-950 text-slate-300">
+<footer id="kontak" class="mt-0 border-t border-white/10 bg-slate-950 text-slate-300">
     <div class="mx-auto max-w-[1180px] px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
         <div class="grid gap-10 md:grid-cols-[1.25fr_0.8fr_1fr]">
             {{-- Brand --}}
@@ -26,13 +26,17 @@
                         <a href="{{ route('about') }}" class="transition hover:text-sky-300">Tentang</a>
                     </li>
                     <li>
+                        @auth
+                            <a href="{{ route('user.destinations') }}" class="transition hover:text-sky-300">Destinasi</a>
+                        @else
+                            <a href="{{ route('user.login') }}" class="transition hover:text-sky-300">Destinasi</a>
+                        @endauth
+                    </li>
+                    <li>
                         <a href="{{ route('privacy') }}" class="transition hover:text-sky-300">Kebijakan Privasi</a>
                     </li>
                     <li>
                         <a href="{{ route('terms') }}" class="transition hover:text-sky-300">Ketentuan</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('contact') }}" class="transition hover:text-sky-300">Kontak</a>
                     </li>
                 </ul>
             </div>

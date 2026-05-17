@@ -408,11 +408,11 @@
                 class="text-sm leading-relaxed text-slate-600"
             >
                 Saya menyetujui
-                <a href="#" class="font-semibold text-sky-700 transition-colors hover:text-sky-800 hover:underline">
+                <a href="{{ route('terms') }}" class="font-semibold text-sky-700 transition-colors hover:text-sky-800 hover:underline">
                     Syarat &amp; Ketentuan
                 </a>
                 dan
-                <a href="#" class="font-semibold text-sky-700 transition-colors hover:text-sky-800 hover:underline">
+                <a href="{{ route('privacy') }}" class="font-semibold text-sky-700 transition-colors hover:text-sky-800 hover:underline">
                     Kebijakan Privasi
                 </a>
             </label>
