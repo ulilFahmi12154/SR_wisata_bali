@@ -1,692 +1,254 @@
 @extends('layouts.app')
 
-@section('title', ($destination->nama ?? 'Destination') . ' - Detail')
+@section('title', ($destination->nama ?? 'Detail Destinasi') . ' - Detail')
 
 @section('content')
 @php
-    $imagePath = $destination->image ?? '';
-    $imageUrl = $imagePath 
-        ? (preg_match('/^https?:\/\//', $imagePath) ? $imagePath : asset('images/destination/' . ltrim($imagePath, '/')))
-        : 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?auto=format&fit=crop&w=1200&q=80';
-    
+    $destinationImage = function ($item, $fallback = 'default bali.jpg') {
+        $imagePath = trim((string) ($item->image ?? ''));
+        $fallbackPath = 'images/' . ltrim($fallback, '/');
+
+        if ($imagePath === '') {
+            return asset($fallbackPath);
+        }
+
+        if (preg_match('/^https?:\/\//', $imagePath)) {
+            return $imagePath;
+        }
+
+        $normalized = str_replace('\\', '/', $imagePath);
+        $normalized = preg_replace('#^/?public/#', '', $normalized);
+        $normalized = ltrim($normalized, '/');
+
+        $candidates = str_starts_with($normalized, 'images/')
+            ? [$normalized]
+            : [
+                'images/' . $normalized,
+                'images/destination/' . $normalized,
+                $normalized,
+            ];
+
+        foreach ($candidates as $candidate) {
+            if (file_exists(public_path($candidate))) {
+                return asset($candidate);
+            }
+        }
+
+        return asset($fallbackPath);
+    };
+
+    $formatRange = function ($min, $max = null) {
+        $minValue = is_numeric($min) ? (int) $min : null;
+        $maxValue = is_numeric($max) ? (int) $max : null;
+
+        if ((!$minValue || $minValue <= 0) && (!$maxValue || $maxValue <= 0)) {
+            return 'Gratis';
+        }
+
+        if ($minValue && $maxValue && $maxValue > $minValue) {
+            return 'Rp ' . number_format($minValue, 0, ',', '.') . ' - Rp ' . number_format($maxValue, 0, ',', '.');
+        }
+
+        return 'Rp ' . number_format($minValue ?: $maxValue, 0, ',', '.');
+    };
+
+    $imageUrl = $destinationImage($destination);
     $location = $destination->nama_kabupaten ?? 'Bali';
-    $description = $destination->deskripsi ?? $destination->keterangan ?? 'No description available.';
-    $entryFee = $destination->harga_wni_min ?? $destination->harga_wna_min;
-    $rating = $destination->rating ? number_format($destination->rating, 1) : 'New';
-    $category = $destination->nama_kategori ?? 'Destination';
-    $operatingHours = $destination->jam_operasional ?? '08:00 - 18:00';
-    $mapsLink = $destination->link ?? '#';
+    $description = $destination->deskripsi ?? $destination->keterangan ?? 'Deskripsi destinasi belum tersedia.';
+    $category = $destination->nama_kategori ?? 'Destinasi';
+    $operatingHours = $destination->jam_operasional ?: 'Jam operasional belum tersedia';
+    $rating = $destination->rating ? number_format($destination->rating, 1) : null;
+    $mapsLink = $destination->link ?? null;
+    $hasMapsLink = $mapsLink && $mapsLink !== '#';
+    $priceWni = $formatRange($destination->harga_wni_min ?? null, $destination->harga_wni_max ?? null);
+    $priceWna = $formatRange($destination->harga_wna_min ?? null, $destination->harga_wna_max ?? null);
 @endphp
 
-<div class="destination-detail">
-    <!-- Hero Section -->
-    <section class="hero-banner" style="background-color: #171c1f; background-image: linear-gradient(180deg, rgba(23, 28, 31, 0) 0%, rgba(23, 28, 31, 0.8) 100%), url('{{ $imageUrl }}');">
-        <div class="container hero-content">
-            <div class="hero-meta">
-                <span class="category-badge">{{ strtoupper($category) }}</span>
-                <div class="rating">
-                    <img src="{{ asset('images/mok69ali-fm56qoo.svg') }}" alt="Star icon" class="icon-star">
-                    <span>{{ $rating }} (Traveler Rating)</span>
-                </div>
-            </div>
-            <h1 class="hero-title">{{ $destination->nama }}</h1>
-            <div class="hero-location">
-                <img src="{{ asset('images/mok69ali-wgs75rk.svg') }}" alt="Location pin" class="icon-pin">
-                <span>{{ $location }}, Bali</span>
-            </div>
-        </div>
-    </section>
-
-    <!-- Main Content -->
-    <div class="container main-layout">
-        <div class="content-left">
-            <!-- Description Card -->
-            <div class="card info-card">
-                <h2 class="section-title">Precision Description</h2>
-                <p class="description-text">
-                    {{ $description }}
-                </p>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">ENTRANCE FEE</span>
-                        <span class="info-value price">{{ $entryFee ? 'IDR ' . number_format($entryFee, 0, ',', '.') : 'Free Entry' }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">BEST VISIT</span>
-                        <span class="info-value">{{ $operatingHours }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">ACCESSIBILITY</span>
-                        <span class="info-value">Easy Access</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">EST. DURATION</span>
-                        <span class="info-value">2-4 Hours</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Facilities Section -->
-            <div class="card facilities-card">
-                <div class="facilities-header">
-                    <img src="{{ asset('images/mok69ali-ko6krcz.svg') }}" alt="Facilities icon" class="section-icon">
-                    <h2 class="section-title-sm">Site Facilities</h2>
-                </div>
-                <div class="facilities-grid">
-                    @forelse($facilities as $facility)
-                        <div class="facility-item">
-                            <div class="facility-icon-wrapper">
-                                @php
-                                    $facilityIcon = 'mok69ali-x9v3lix.svg'; // Default icon
-                                    $fLower = strtolower($facility);
-                                    if (str_contains($fLower, 'parkir')) $facilityIcon = 'mok69ali-wod7egb.svg';
-                                    elseif (str_contains($fLower, 'toilet')) $facilityIcon = 'mok69ali-s3atnk2.svg';
-                                    elseif (str_contains($fLower, 'toko') || str_contains($fLower, 'market')) $facilityIcon = 'mok69ali-jnu45vc.svg';
-                                @endphp
-                                <img src="{{ asset('images/' . $facilityIcon) }}" alt="{{ $facility }}">
-                            </div>
-                            <span>{{ $facility }}</span>
-                        </div>
-                    @empty
-                        <p>No facilities listed.</p>
-                    @endforelse
-                </div>
-            </div>
-        </div>
-
-        <aside class="content-right">
-            <!-- Booking Sidebar -->
-            <div class="card sidebar-card">
-                <div class="sidebar-header">
-                    <span class="sidebar-eyebrow">CURATED PACKAGE</span>
-                    <h2 class="sidebar-title">Standard Access</h2>
-                    <div class="sidebar-price">
-                        <span class="price-amount">{{ $entryFee ? 'IDR ' . number_format($entryFee / 1000, 0) . 'k' : 'Free' }}</span>
-                        <span class="price-unit">/person</span>
-                    </div>
-                </div>
-
-                <div class="sidebar-features">
-                    <div class="sidebar-feature">
-                        <img src="{{ asset('images/mok69ali-rx1fx04.svg') }}" alt="Clock" class="feature-icon">
-                        <div class="feature-text">
-                            <span class="feature-label">OPERATING HOURS</span>
-                            <span class="feature-value">{{ $operatingHours }}</span>
-                        </div>
-                    </div>
-                    <div class="sidebar-feature">
-                        <img src="{{ asset('images/mok69ali-0jd28pp.svg') }}" alt="Ticket" class="feature-icon">
-                        <div class="feature-text">
-                            <span class="feature-label">INSTANT ACCESS</span>
-                            <span class="feature-value">Digital Entry Available</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sidebar-actions">
-                    <button class="btn-book">Book Access Now</button>
-                    <button class="btn-itinerary">Save to Itinerary</button>
-                </div>
-
-                <div class="map-preview">
-                    <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=500&q=60" alt="Map Preview" class="map-img">
-                    <div class="map-overlay">
-                        <a href="{{ $mapsLink }}" target="_blank" class="btn-maps">
-                            <img src="{{ asset('images/mok69alj-1z3v3s6.svg') }}" alt="Maps icon">
-                            <span>Open in Maps</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </aside>
+<div class="mx-auto max-w-[1180px] animate-page-in">
+    <div class="mb-5 mt-2 flex flex-wrap items-center justify-between gap-3 animate-fade-up">
+        <a href="{{ route('user.destinations') }}" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-sm font-bold text-slate-600 shadow-sm transition hover:border-sky-100 hover:bg-sky-50 hover:text-sky-800">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M19 12H5m6 6-6-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Kembali ke Destinasi
+        </a>
+        <span class="rounded-full border border-sky-100 bg-sky-50/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-sky-700">
+            Detail Destinasi
+        </span>
     </div>
 
-    <!-- Recommendations Section -->
-    <section class="container recommendations">
-        <div class="recommendations-header">
-            <div class="header-left">
-                <span class="section-eyebrow">INTELLIGENT MATCHING</span>
-                <h2 class="section-title-lg">Rekomendasi Serupa</h2>
+    <section class="overflow-hidden rounded-[2.25rem] border border-sky-100/80 bg-white/90 shadow-[0_26px_80px_rgba(15,23,42,0.11)] backdrop-blur lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] animate-fade-up animate-delay-100">
+        <div class="relative min-h-[360px] overflow-hidden bg-slate-200 lg:min-h-[600px]">
+            <img src="{{ $imageUrl }}" alt="{{ $destination->nama }}" class="h-full w-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-slate-900/8 to-transparent"></div>
+            <div class="absolute bottom-6 left-6 right-6 flex flex-wrap gap-2">
+                <span class="rounded-full border border-white/30 bg-white/85 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-sky-800 shadow-sm backdrop-blur">{{ $category }}</span>
+                <span class="rounded-full border border-white/25 bg-slate-950/25 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-white backdrop-blur">{{ $location }}</span>
             </div>
-            <p class="header-right">
-                Based on your interest in <strong>{{ $category }}</strong>, our horizon engine recommends these curated experiences.
-            </p>
         </div>
 
-        <div class="recommendations-grid">
-            @foreach($recommendations as $rec)
-                @php
-                    $recImage = $rec->image ?? '';
-                    $recImageUrl = $recImage 
-                        ? (preg_match('/^https?:\/\//', $recImage) ? $recImage : asset('images/destination/' . ltrim($recImage, '/')))
-                        : 'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?auto=format&fit=crop&w=500&q=80';
-                    $recFee = $rec->harga_wni_min ?? $rec->harga_wna_min;
-                @endphp
-                <div class="rec-card" onclick="window.location='{{ route('user.destinations.detail', $rec->id) }}'" style="cursor: pointer;">
-                    <div class="rec-media" style="background-image: url('{{ $recImageUrl }}');">
-                        <span class="rec-badge">{{ strtoupper($rec->nama_kategori ?? 'BALI') }}</span>
-                        <div class="rec-overlay">
-                            <div class="rec-match">
-                                <img src="{{ asset('images/mok69ali-w2uljcd.svg') }}" alt="Match icon">
-                                <span>SIMILAR MATCH</span>
-                            </div>
-                            <h3 class="rec-title">{{ $rec->nama }}</h3>
-                        </div>
-                    </div>
-                    <div class="rec-content">
-                        <div class="rec-info">
-                            <p class="rec-loc">{{ $rec->nama_kabupaten ?? 'Bali' }}</p>
-                            <p class="rec-tags">{{ $rec->nama_kategori }} • Scenic • Explore</p>
-                        </div>
-                        <div class="rec-price">
-                            <span class="price-val">{{ $recFee ? 'IDR ' . number_format($recFee / 1000, 0) . 'k' : 'Free' }}</span>
-                            <span class="price-label">ACCESS</span>
-                        </div>
-                    </div>
+        <div class="flex flex-col justify-between gap-8 p-6 sm:p-8 lg:p-10">
+            <div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-700">Wisata Bali</span>
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="m12 3.7 2.27 4.6 5.08.74-3.67 3.58.87 5.06L12 15.29l-4.55 2.39.87-5.06-3.67-3.58 5.08-.74L12 3.7Z"/>
+                        </svg>
+                        Rating {{ $rating ?? 'Belum ada' }}
+                    </span>
                 </div>
-            @endforeach
+
+                <h1 class="mt-5 font-display text-4xl font-semibold leading-[1.04] text-slate-950 sm:text-5xl">
+                    {{ $destination->nama }}
+                </h1>
+                <p class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-slate-500">
+                    <svg class="h-4 w-4 text-sky-700" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 21s7-6.08 7-12A7 7 0 1 0 5 9c0 5.92 7 12 7 12Z" stroke="currentColor" stroke-width="1.8"/>
+                        <path d="M12 11.5A2.5 2.5 0 1 0 12 6a2.5 2.5 0 0 0 0 5.5Z" stroke="currentColor" stroke-width="1.8"/>
+                    </svg>
+                    {{ $location }}, Bali
+                </p>
+
+                <p class="mt-6 text-base leading-7 text-slate-600">
+                    {{ \Illuminate\Support\Str::limit($description, 280) }}
+                </p>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+                <div class="rounded-3xl border border-slate-200 bg-slate-50/80 p-4">
+                    <span class="block text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Harga WNI</span>
+                    <strong class="mt-2 block text-lg font-bold text-slate-950">{{ $priceWni }}</strong>
+                </div>
+                <div class="rounded-3xl border border-slate-200 bg-slate-50/80 p-4">
+                    <span class="block text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Jam Buka</span>
+                    <strong class="mt-2 block text-lg font-bold text-slate-950">{{ $operatingHours }}</strong>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 sm:flex-row">
+                @if($hasMapsLink)
+                    <a href="{{ $mapsLink }}" target="_blank" rel="noopener noreferrer" class="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-sky-700 px-6 py-3.5 text-sm font-bold text-white shadow-[0_16px_38px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-100">
+                        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M12 21s7-6.08 7-12A7 7 0 1 0 5 9c0 5.92 7 12 7 12Z" stroke="currentColor" stroke-width="1.8"/>
+                            <path d="M12 11.5A2.5 2.5 0 1 0 12 6a2.5 2.5 0 0 0 0 5.5Z" stroke="currentColor" stroke-width="1.8"/>
+                        </svg>
+                        Buka di Google Maps
+                    </a>
+                @endif
+                <a href="{{ route('user.home') }}" class="inline-flex flex-1 items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-sky-50 hover:text-sky-800">
+                    Ubah Preferensi
+                </a>
+            </div>
         </div>
     </section>
+
+    <section class="mt-7 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div class="space-y-6">
+            <article class="rounded-[2rem] border border-sky-100/80 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] animate-fade-up animate-delay-200 sm:p-8">
+                <p class="text-xs font-bold uppercase tracking-[0.22em] text-sky-700">Deskripsi</p>
+                <h2 class="mt-3 font-display text-3xl font-semibold text-slate-950">Tentang destinasi ini</h2>
+                <p class="mt-4 text-base leading-8 text-slate-600">
+                    {{ $description }}
+                </p>
+            </article>
+
+            <article class="rounded-[2rem] border border-sky-100/80 bg-gradient-to-br from-sky-50/70 via-white to-amber-50/60 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.07)] animate-fade-up animate-delay-300 sm:p-8">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[0.22em] text-sky-700">Fasilitas</p>
+                        <h2 class="mt-3 font-display text-3xl font-semibold text-slate-950">Fasilitas tersedia</h2>
+                    </div>
+                    <p class="max-w-sm text-sm leading-6 text-slate-500">Gunakan daftar ini untuk menyesuaikan kebutuhan perjalanan Anda.</p>
+                </div>
+
+                <div class="mt-6 flex flex-wrap gap-3">
+                    @forelse($facilities as $facility)
+                        <span class="inline-flex items-center rounded-full border border-sky-100 bg-white/85 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm">
+                            {{ $facility }}
+                        </span>
+                    @empty
+                        <p class="rounded-3xl border border-slate-200 bg-white/75 px-5 py-4 text-sm font-semibold text-slate-500">
+                            Fasilitas belum tersedia.
+                        </p>
+                    @endforelse
+                </div>
+            </article>
+        </div>
+
+        <aside class="space-y-6">
+            <article class="rounded-[2rem] border border-sky-100/80 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] lg:sticky lg:top-24">
+                <p class="text-xs font-bold uppercase tracking-[0.22em] text-sky-700">Ringkasan</p>
+                <h2 class="mt-3 font-display text-2xl font-semibold text-slate-950">Informasi kunjungan</h2>
+
+                <div class="mt-5 space-y-3">
+                    <div class="rounded-3xl border border-slate-200 bg-slate-50/80 p-4">
+                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Harga WNI</span>
+                        <strong class="mt-2 block text-lg font-bold text-slate-950">{{ $priceWni }}</strong>
+                    </div>
+                    <div class="rounded-3xl border border-slate-200 bg-slate-50/80 p-4">
+                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Harga WNA</span>
+                        <strong class="mt-2 block text-lg font-bold text-slate-950">{{ $priceWna }}</strong>
+                    </div>
+                    <div class="rounded-3xl border border-slate-200 bg-slate-50/80 p-4">
+                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Kategori</span>
+                        <strong class="mt-2 block text-lg font-bold text-slate-950">{{ $category }}</strong>
+                    </div>
+                    <div class="rounded-3xl border border-slate-200 bg-slate-50/80 p-4">
+                        <span class="block text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Rating</span>
+                        <strong class="mt-2 inline-flex items-center gap-1.5 text-lg font-bold text-slate-950">
+                            <svg class="h-4 w-4 text-amber-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="m12 3.7 2.27 4.6 5.08.74-3.67 3.58.87 5.06L12 15.29l-4.55 2.39.87-5.06-3.67-3.58 5.08-.74L12 3.7Z"/>
+                            </svg>
+                            {{ $rating ?? 'Belum ada' }}
+                        </strong>
+                    </div>
+                </div>
+            </article>
+        </aside>
+    </section>
+
+    @if($recommendations->isNotEmpty())
+        <section class="mt-10 animate-fade-up animate-delay-300">
+            <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.22em] text-sky-700">Destinasi Serupa</p>
+                    <h2 class="mt-2 font-display text-3xl font-semibold text-slate-950">Rekomendasi destinasi lainnya</h2>
+                </div>
+                <p class="max-w-md text-sm leading-6 text-slate-500">
+                    Pilihan lain dengan kategori yang masih berdekatan dengan destinasi ini.
+                </p>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                @foreach($recommendations as $rec)
+                    @php
+                        $recImageUrl = $destinationImage($rec, 'default beach.jpeg');
+                        $recFee = $rec->harga_wni_min ?? $rec->harga_wna_min;
+                        $recLink = route('user.destinations.detail', $rec->id);
+                    @endphp
+                    <article class="group overflow-hidden rounded-[1.75rem] border border-sky-100/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.12)]">
+                        <a href="{{ $recLink }}" class="relative block h-56 overflow-hidden bg-slate-200" aria-label="Lihat detail {{ $rec->nama }}">
+                            <img src="{{ $recImageUrl }}" alt="{{ $rec->nama }}" class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent"></div>
+                            <span class="absolute left-4 top-4 rounded-full border border-white/30 bg-white/85 px-3 py-1.5 text-xs font-bold text-sky-800 shadow-sm backdrop-blur">{{ $rec->nama_kategori ?? 'Destinasi' }}</span>
+                        </a>
+
+                        <div class="p-5">
+                            <h3 class="line-clamp-2 text-xl font-bold leading-snug text-slate-950 group-hover:text-sky-800">{{ $rec->nama }}</h3>
+                            <p class="mt-2 text-sm font-semibold text-slate-500">{{ $rec->nama_kabupaten ?? 'Bali' }}, Bali</p>
+                            <div class="mt-5 flex items-center justify-between gap-3 rounded-2xl bg-slate-50 p-3">
+                                <div>
+                                    <span class="block text-[0.68rem] font-bold uppercase tracking-[0.16em] text-slate-400">Harga</span>
+                                    <strong class="mt-1 block text-sm font-bold text-slate-900">{{ $formatRange($recFee, null) }}</strong>
+                                </div>
+                                <a href="{{ $recLink }}" class="rounded-full bg-sky-50 px-4 py-2 text-xs font-bold text-sky-800 transition hover:bg-sky-100">Lihat Detail</a>
+                            </div>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        </section>
+    @endif
 </div>
-
-<style>
-    .destination-detail {
-        background: #f6fafe;
-        padding-bottom: 80px;
-    }
-
-    .hero-banner {
-        height: 760px;
-        background-size: cover;
-        background-position: center center;
-        background-color: #171c1f; /* Fallback color */
-        display: flex;
-        align-items: flex-end;
-        color: white;
-        padding-bottom: 160px;
-        margin-bottom: -140px;
-        width: 100%;
-        overflow: hidden;
-    }
-
-    .hero-content {
-        max-width: 1400px;
-        width: 100%;
-        margin: 0 auto;
-        padding: 0 40px;
-    }
-
-    .hero-meta {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 16px;
-    }
-
-    .category-badge {
-        background: #b1f0ce;
-        color: #0e5138;
-        padding: 4px 16px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.6px;
-    }
-
-    .rating {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        color: #cde5ff;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .hero-title {
-        font-size: 96px;
-        font-weight: 800;
-        margin: 0 0 16px 0;
-        letter-spacing: -3px;
-        line-height: 1;
-    }
-
-    .hero-location {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 18px;
-        color: rgba(255, 255, 255, 0.9);
-        font-weight: 500;
-    }
-
-    .main-layout {
-        display: grid;
-        grid-template-columns: 1fr 380px;
-        gap: 32px;
-        position: relative;
-        z-index: 10;
-    }
-
-    .content-left {
-        display: flex;
-        flex-direction: column;
-        gap: 32px;
-    }
-
-    .section-title {
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 20px;
-        color: #171c1f;
-    }
-
-    .description-text {
-        font-size: 17px;
-        line-height: 1.6;
-        color: #404850;
-        margin-bottom: 32px;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 24px;
-        padding-top: 32px;
-        border-top: 1px solid #bfc7d140;
-    }
-
-    .info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .info-label {
-        font-size: 11px;
-        font-weight: 600;
-        color: #707881;
-        letter-spacing: 1px;
-    }
-
-    .info-value {
-        font-size: 18px;
-        font-weight: 600;
-        color: #171c1f;
-    }
-
-    .info-value.price {
-        color: #005d90;
-    }
-
-    /* Facilities */
-    .facilities-card {
-        background: #eaeef2 !important;
-        padding: 40px !important;
-    }
-
-    .facilities-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 32px;
-    }
-
-    .section-title-sm {
-        font-size: 20px;
-        font-weight: 700;
-        color: #171c1f;
-        margin: 0;
-    }
-
-    .facilities-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 24px;
-    }
-
-    .facility-item {
-        background: white;
-        padding: 24px 16px;
-        border-radius: 12px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-        text-align: center;
-    }
-
-    .facility-item span {
-        font-size: 14px;
-        font-weight: 600;
-        color: #171c1f;
-    }
-
-    .facility-icon-wrapper {
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Sidebar */
-    .sidebar-card {
-        padding: 32px !important;
-        position: sticky;
-        top: 100px;
-    }
-
-    .sidebar-eyebrow {
-        font-size: 12px;
-        font-weight: 600;
-        color: #707881;
-        letter-spacing: 1.2px;
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    .sidebar-title {
-        font-size: 28px;
-        font-weight: 700;
-        margin: 0 0 12px 0;
-    }
-
-    .sidebar-price {
-        display: flex;
-        align-items: baseline;
-        gap: 4px;
-        margin-bottom: 24px;
-    }
-
-    .price-amount {
-        font-size: 32px;
-        font-weight: 700;
-        color: #005d90;
-    }
-
-    .price-unit {
-        font-size: 16px;
-        color: #404850;
-    }
-
-    .sidebar-features {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        margin-bottom: 24px;
-        padding: 16px 0;
-    }
-
-    .sidebar-feature {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        background: #f0f4f8;
-        padding: 12px 16px;
-        border-radius: 8px;
-    }
-
-    .feature-text {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .feature-label {
-        font-size: 10px;
-        font-weight: 600;
-        color: #707881;
-    }
-
-    .feature-value {
-        font-size: 13px;
-        font-weight: 600;
-        color: #171c1f;
-    }
-
-    .sidebar-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-bottom: 24px;
-    }
-
-    .btn-book {
-        background: linear-gradient(135deg, #005d90 0%, #0077b6 100%);
-        color: white;
-        border: none;
-        padding: 16px;
-        border-radius: 999px;
-        font-size: 18px;
-        font-weight: 600;
-        cursor: pointer;
-        box-shadow: 0 10px 15px -3px rgba(0, 93, 144, 0.2);
-    }
-
-    .btn-itinerary {
-        background: transparent;
-        border: 2px solid #bfc7d140;
-        padding: 14px;
-        border-radius: 999px;
-        font-size: 18px;
-        font-weight: 600;
-        color: #171c1f;
-        cursor: pointer;
-    }
-
-    .map-preview {
-        border-radius: 12px;
-        overflow: hidden;
-        position: relative;
-        height: 200px;
-    }
-
-    .map-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .map-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(0, 93, 144, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .btn-maps {
-        background: white;
-        padding: 8px 16px;
-        border-radius: 999px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-decoration: none;
-        color: #171c1f;
-        font-size: 14px;
-        font-weight: 600;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Recommendations */
-    .recommendations {
-        margin-top: 80px;
-    }
-
-    .recommendations-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        margin-bottom: 48px;
-    }
-
-    .section-eyebrow {
-        font-size: 14px;
-        font-weight: 600;
-        color: #005d90;
-        letter-spacing: 2px;
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    .section-title-lg {
-        font-size: 48px;
-        font-weight: 800;
-        margin: 0;
-        letter-spacing: -1.5px;
-    }
-
-    .header-right {
-        max-width: 440px;
-        font-size: 14px;
-        line-height: 1.6;
-        color: #404850;
-        margin: 0;
-    }
-
-    .recommendations-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 32px;
-    }
-
-    .rec-card {
-        background: white;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    }
-
-    .rec-media {
-        height: 280px;
-        background-size: cover;
-        background-position: center;
-        background-color: #2a343d; /* Fallback color */
-        position: relative;
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-
-    .rec-badge {
-        position: relative;
-        z-index: 5;
-        background: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(4px);
-        color: white;
-        padding: 4px 12px;
-        border-radius: 999px;
-        font-size: 10px;
-        font-weight: 700;
-        align-self: flex-start;
-        letter-spacing: 1px;
-    }
-
-    .rec-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(0deg, rgba(23, 28, 31, 0.9) 0%, rgba(23, 28, 31, 0) 100%);
-        padding: 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .rec-match {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        color: #b1f0ce;
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 1px;
-    }
-
-    .rec-title {
-        color: white;
-        font-size: 24px;
-        font-weight: 700;
-        margin: 0;
-    }
-
-    .rec-content {
-        padding: 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .rec-loc {
-        font-size: 14px;
-        font-weight: 600;
-        color: #171c1f;
-        margin-bottom: 2px;
-    }
-
-    .rec-tags {
-        font-size: 12px;
-        color: #707881;
-        margin: 0;
-    }
-
-    .rec-price {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-    }
-
-    .price-val {
-        font-size: 18px;
-        font-weight: 700;
-        color: #005d90;
-    }
-
-    .price-label {
-        font-size: 10px;
-        font-weight: 700;
-        color: #707881;
-    }
-
-    /* Responsive */
-    @media (max-width: 1024px) {
-        .main-layout {
-            grid-template-columns: 1fr;
-        }
-
-        .sidebar-card {
-            position: static;
-        }
-
-        .recommendations-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .hero-title {
-            font-size: 72px;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .recommendations-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .recommendations-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 20px;
-        }
-
-        .hero-title {
-            font-size: 48px;
-        }
-
-        .hero-banner {
-            height: 520px;
-        }
-    }
-</style>
 @endsection
