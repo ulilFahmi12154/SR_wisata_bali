@@ -62,16 +62,36 @@
     $hasMapsLink = $mapsLink && $mapsLink !== '#';
     $priceWni = $formatRange($destination->harga_wni_min ?? null, $destination->harga_wni_max ?? null);
     $priceWna = $formatRange($destination->harga_wna_min ?? null, $destination->harga_wna_max ?? null);
+
+    $detailSource = request('from', 'destinasi');
+    $returnQuery = collect(request()->query())->except('from')->all();
+    $backUrl = $detailSource === 'rekomendasi'
+        ? route('user.recommendations.results', $returnQuery)
+        : route('user.destinations', collect($returnQuery)->only('page')->all());
+    $backLabel = $detailSource === 'rekomendasi'
+        ? 'Kembali ke Hasil Rekomendasi'
+        : 'Kembali ke Destinasi';
+    $relatedDetailQuery = collect(request()->query())->except('id')->all();
 @endphp
 
 <div class="mx-auto max-w-[1180px] animate-page-in">
     <div class="mb-5 mt-2 flex flex-wrap items-center justify-between gap-3 animate-fade-up">
-        <a href="{{ route('user.destinations') }}" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-sm font-bold text-slate-600 shadow-sm transition hover:border-sky-100 hover:bg-sky-50 hover:text-sky-800">
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M19 12H5m6 6-6-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Kembali ke Destinasi
-        </a>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ $backUrl }}" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-sm font-bold text-slate-600 shadow-sm transition hover:border-sky-100 hover:bg-sky-50 hover:text-sky-800">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M19 12H5m6 6-6-6 6-6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                {{ $backLabel }}
+            </a>
+            <a href="{{ route('user.home') }}" class="inline-flex items-center rounded-full border border-sky-100 bg-sky-50/85 px-4 py-2 text-sm font-bold text-sky-800 shadow-sm transition hover:bg-sky-100">
+                Ubah Preferensi
+            </a>
+            @if($detailSource === 'rekomendasi')
+                <a href="{{ route('user.destinations') }}" class="inline-flex items-center rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900">
+                    Lihat Semua Destinasi
+                </a>
+            @endif
+        </div>
         <span class="rounded-full border border-sky-100 bg-sky-50/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-sky-700">
             Detail Destinasi
         </span>
@@ -225,7 +245,7 @@
                     @php
                         $recImageUrl = $destinationImage($rec, 'default beach.jpeg');
                         $recFee = $rec->harga_wni_min ?? $rec->harga_wna_min;
-                        $recLink = route('user.destinations.detail', $rec->id);
+                        $recLink = route('user.destinations.detail', array_merge(['id' => $rec->id], $relatedDetailQuery));
                     @endphp
                     <article class="group overflow-hidden rounded-[1.75rem] border border-sky-100/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.12)]">
                         <a href="{{ $recLink }}" class="relative block h-56 overflow-hidden bg-slate-200" aria-label="Lihat detail {{ $rec->nama }}">

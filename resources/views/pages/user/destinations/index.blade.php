@@ -7,6 +7,10 @@
     $destinations = $destinations ?? collect();
     $destinationsPaginator = $destinationsPaginator ?? null;
     $totalDestinations = $totalDestinations ?? $destinations->count();
+    $detailContextQuery = array_filter([
+        'from' => 'destinasi',
+        'page' => request('page'),
+    ], fn ($value) => filled($value));
 
     $formatPrice = function ($amount) {
         $value = is_numeric($amount) ? (int) $amount : null;
@@ -92,7 +96,7 @@
                     $category = optional($destination->kategori)->nama_kategori ?? 'Destinasi';
                     $description = $destination->deskripsi ?? $destination->keterangan ?? 'Deskripsi destinasi belum tersedia.';
                     $price = $destination->harga_wni_min ?? $destination->harga_wna_min;
-                    $detailLink = route('user.destinations.detail', ['id' => $destination->id]);
+                    $detailLink = route('user.destinations.detail', array_merge(['id' => $destination->id], $detailContextQuery));
                 @endphp
 
                 <article class="group overflow-hidden rounded-[1.75rem] border border-sky-100/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.12)] animate-fade-up">

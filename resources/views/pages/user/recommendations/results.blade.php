@@ -21,6 +21,7 @@
         'budget' => 'Tidak dibatasi',
         'amenities' => [],
     ];
+    $detailContextQuery = array_merge(collect(request()->query())->except('id')->all(), ['from' => 'rekomendasi']);
 
     $formatPrice = function ($amount) {
         $value = is_numeric($amount) ? (int) $amount : null;
@@ -82,9 +83,14 @@
             <p class="mx-auto mt-4 max-w-xl text-base leading-7 text-slate-600">
                 Coba ubah kategori, lokasi, biaya, atau fasilitas yang dipilih agar kami bisa menemukan rekomendasi yang lebih sesuai.
             </p>
-            <a href="{{ route('user.home') }}" class="mt-8 inline-flex items-center justify-center rounded-full bg-sky-700 px-6 py-3 text-sm font-bold text-white shadow-[0_14px_34px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-100">
-                Ubah Preferensi
-            </a>
+            <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <a href="{{ route('user.home') }}" class="inline-flex w-full items-center justify-center rounded-full bg-sky-700 px-6 py-3 text-sm font-bold text-white shadow-[0_14px_34px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-100 sm:w-auto">
+                    Ubah Preferensi
+                </a>
+                <a href="{{ route('user.destinations') }}" class="inline-flex w-full items-center justify-center rounded-full border border-slate-200 bg-white/85 px-6 py-3 text-sm font-bold text-slate-700 transition hover:bg-sky-50 hover:text-sky-800 sm:w-auto">
+                    Lihat Semua Destinasi
+                </a>
+            </div>
         </section>
     @else
         <section class="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end animate-fade-up">
@@ -107,10 +113,20 @@
                 </p>
             </div>
 
-            <div class="flex flex-wrap gap-2 lg:justify-end">
-                <span class="rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">Metode SAW</span>
-                <span class="rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">{{ number_format($totalDestinations, 0, ',', '.') }} hasil ditemukan</span>
-                <span class="rounded-full border border-amber-100 bg-amber-50/80 px-4 py-2 text-xs font-semibold text-amber-700 shadow-sm">Data sesuai preferensi</span>
+            <div class="flex flex-col gap-3 lg:items-end">
+                <div class="flex flex-wrap gap-2 lg:justify-end">
+                    <span class="rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">Metode SAW</span>
+                    <span class="rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">{{ number_format($totalDestinations, 0, ',', '.') }} hasil ditemukan</span>
+                    <span class="rounded-full border border-amber-100 bg-amber-50/80 px-4 py-2 text-xs font-semibold text-amber-700 shadow-sm">Data sesuai preferensi</span>
+                </div>
+                <div class="flex flex-wrap gap-2 lg:justify-end">
+                    <a href="{{ route('user.home') }}" class="inline-flex items-center justify-center rounded-full bg-sky-700 px-5 py-2.5 text-sm font-bold text-white shadow-[0_14px_34px_rgba(3,105,161,0.18)] transition hover:-translate-y-0.5 hover:bg-sky-800">
+                        Ubah Preferensi
+                    </a>
+                    <a href="{{ route('user.destinations') }}" class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/85 px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-sky-50 hover:text-sky-800">
+                        Lihat Semua Destinasi
+                    </a>
+                </div>
             </div>
         </section>
 
@@ -143,7 +159,7 @@
                     $topCategory = optional($topDestination->kategori)->nama_kategori ?? 'Destinasi';
                     $topDescription = $topDestination->deskripsi ?? $topDestination->keterangan ?? '';
                     $topEntryFee = $topDestination->harga_wni_min ?? $topDestination->harga_wna_min;
-                    $topLink = route('user.destinations.detail', ['id' => $topDestination->id]);
+                    $topLink = route('user.destinations.detail', array_merge(['id' => $topDestination->id], $detailContextQuery));
                 @endphp
 
                 <article class="overflow-hidden rounded-[2rem] border border-sky-100/80 bg-white/90 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur transition hover:-translate-y-1 hover:shadow-[0_30px_80px_rgba(15,23,42,0.13)] lg:grid lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] animate-fade-up animate-delay-100">
@@ -219,7 +235,7 @@
                             @php
                                 $score = $ranked->skor_akhir ?? 0;
                                 $scorePercent = $maxScore > 0 ? min(100, max(0, ($score / $maxScore) * 100)) : 0;
-                                $rankLink = route('user.destinations.detail', ['id' => $ranked->id]);
+                                $rankLink = route('user.destinations.detail', array_merge(['id' => $ranked->id], $detailContextQuery));
                             @endphp
                             <a href="{{ $rankLink }}" class="group block rounded-3xl border border-slate-100 bg-slate-50/70 p-4 transition hover:-translate-y-0.5 hover:border-sky-100 hover:bg-sky-50/70">
                                 <div class="flex items-start justify-between gap-3">
@@ -266,7 +282,7 @@
                             $location = optional($destination->lokasi)->nama_kabupaten ?? 'Bali';
                             $category = optional($destination->kategori)->nama_kategori ?? 'Destinasi';
                             $price = $destination->harga_wni_min ?? $destination->harga_wna_min;
-                            $detailLink = route('user.destinations.detail', ['id' => $destination->id]);
+                            $detailLink = route('user.destinations.detail', array_merge(['id' => $destination->id], $detailContextQuery));
                         @endphp
                         <article class="group overflow-hidden rounded-[1.75rem] border border-sky-100/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.12)]">
                             <a href="{{ $detailLink }}" class="relative block h-56 overflow-hidden bg-slate-200" aria-label="Lihat detail {{ $destination->nama }}">
