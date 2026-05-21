@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RekomendasiController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Models\User;
@@ -156,27 +157,11 @@ Route::middleware('auth')->name('user.')->group(function () {
 
     Route::redirect('/recommendation', '/rekomendasi/hasil')->name('recommendation');
 
-    Route::get('/profile', fn () =>
-        view('pages.user.profile')
-    )->name('profile');
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
 
-    Route::match(['post', 'patch'], '/profile', function () {
-        $data = request()->validate([
-            'name' => ['required', 'string', 'max:255'],
-        ], [
-            'name.required' => 'Nama lengkap wajib diisi.',
-            'name.string' => 'Nama lengkap harus berupa teks.',
-            'name.max' => 'Nama lengkap maksimal :max karakter.',
-        ]);
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-        $user = request()->user();
-        $user->forceFill([
-            'name' => trim($data['name']),
-        ])->save();
-
-        return back()->with('status', 'Profil berhasil diperbarui.');
-
-    })->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
 });
 
