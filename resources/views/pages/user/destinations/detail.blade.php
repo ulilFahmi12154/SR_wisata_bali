@@ -67,7 +67,7 @@
     $returnQuery = collect(request()->query())->except('from')->all();
     $backUrl = $detailSource === 'rekomendasi'
         ? route('user.recommendations.results', $returnQuery)
-        : route('user.destinations', collect($returnQuery)->only('page')->all());
+        : route('user.destinations', $returnQuery);
     $backLabel = $detailSource === 'rekomendasi'
         ? 'Kembali ke Hasil Rekomendasi'
         : 'Kembali ke Destinasi';
