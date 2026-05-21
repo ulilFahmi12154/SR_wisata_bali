@@ -1,89 +1,153 @@
 @extends('layouts.auth')
 
-@section('title', 'Lupa Password — Jelajah Bali')
+@section('title', 'Lupa Password - Jelajah Bali')
 
 @section('auth-content')
 
-    {{-- Back link --}}
-    <a href="{{ route('user.login') }}"
-       class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-brand-600 transition-colors mb-8 group">
-        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-        </svg>
-        Kembali ke halaman masuk
-    </a>
+    <div class="mb-8 animate-fade-up">
+        <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-sky-700">
+            Bantuan Akun
+        </p>
 
-    {{-- Icon --}}
-    <div class="w-14 h-14 rounded-2xl bg-brand-100 flex items-center justify-center mb-6">
-        <svg class="w-7 h-7 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-                  d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-        </svg>
-    </div>
-
-    {{-- Heading --}}
-    <div class="mb-7">
-        <h2 class="font-display text-3xl font-semibold text-slate-900">
+        <h2 class="font-display text-3xl font-semibold leading-tight text-slate-900">
             Lupa Password?
         </h2>
-        <p class="text-slate-500 text-sm mt-2 leading-relaxed">
-            Tidak masalah. Masukkan email Anda dan kami akan mengirimkan link untuk mengatur ulang password.
+
+        <p class="mt-3 text-sm leading-relaxed text-slate-500">
+            Masukkan email akun Anda. Kami akan mengirimkan tautan untuk mengatur ulang password.
         </p>
     </div>
 
-    {{-- Success state --}}
     @if (session('status'))
-        <div class="rounded-2xl bg-emerald-50 border border-emerald-200 p-5 space-y-3">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-emerald-800">Email terkirim!</p>
-                    <p class="text-xs text-emerald-600 mt-0.5">{{ session('status') }}</p>
-                </div>
-            </div>
-            <p class="text-xs text-emerald-700 pl-13">
-                Periksa folder spam jika email tidak muncul dalam beberapa menit.
-            </p>
+        <div class="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/80 px-4 py-3 text-sm font-medium leading-relaxed text-emerald-800 shadow-sm shadow-emerald-100/60">
+            {{ session('status') }}
         </div>
-
-        <div class="mt-6 text-center">
-            <a href="{{ route('user.login') }}" class="text-sm text-brand-600 font-medium hover:underline">
-                Kembali ke halaman masuk →
-            </a>
-        </div>
-
-    @else
-        {{-- Form --}}
-        <form action="{{ route('user.password.email') }}" method="POST" class="space-y-5"
-              x-data="{ loading: false }" @submit="loading = true">
-            @csrf
-
-            <x-ui.input
-                name="email"
-                label="Alamat Email"
-                type="email"
-                placeholder="nama@email.com"
-                autocomplete="email"
-                required
-                icon="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-            />
-
-            <x-ui.button type="submit" variant="primary" size="lg" :full-width="true" x-bind:disabled="loading">
-                <span x-show="!loading">Kirim Link Reset Password</span>
-                <span x-show="loading" class="flex items-center gap-2" style="display:none">
-                    <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
-                    Mengirim...
-                </span>
-            </x-ui.button>
-
-        </form>
     @endif
+
+    <form
+        action="{{ route('password.email') }}"
+        method="POST"
+        class="space-y-5 animate-fade-up animate-delay-100"
+        x-data="{ loading: false }"
+        @submit="loading = true"
+    >
+        @csrf
+
+        <div class="space-y-2">
+            <label
+                for="email"
+                class="block text-sm font-semibold text-slate-700"
+            >
+                Alamat Email
+                <span class="text-red-500">*</span>
+            </label>
+
+            <div class="relative">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                    <svg
+                        class="h-4 w-4 text-slate-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.75"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        />
+                    </svg>
+                </div>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="{{ old('email') }}"
+                    placeholder="nama@email.com"
+                    autocomplete="email"
+                    required
+                    data-label="Alamat Email"
+                    oninvalid="const label = this.getAttribute('data-label') || 'Email'; let message = ''; if (this.validity.valueMissing) { message = label + ' wajib diisi.'; } else if (this.validity.typeMismatch) { message = 'Format email tidak valid.'; } this.setCustomValidity(message);"
+                    oninput="this.setCustomValidity('');"
+                    class="h-12 w-full rounded-2xl border pl-11 pr-4 text-sm text-slate-800 shadow-sm shadow-slate-200/40 transition-all duration-200 placeholder:text-slate-400 focus:outline-none focus:ring-4
+                           @error('email')
+                               border-red-300 bg-red-50/60 focus:border-red-400 focus:bg-white focus:ring-red-100
+                           @else
+                               border-slate-200 bg-slate-50/70 focus:border-sky-400 focus:bg-white focus:ring-sky-100
+                           @enderror"
+                >
+            </div>
+
+            @error('email')
+                <p class="flex items-center gap-1.5 text-xs text-red-500">
+                    <svg
+                        class="h-3.5 w-3.5 flex-shrink-0"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                            clip-rule="evenodd"
+                        />
+                    </svg>
+
+                    {{ $message }}
+                </p>
+            @enderror
+        </div>
+
+        <button
+            type="submit"
+            class="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-sky-600 bg-sky-700 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(2,132,199,0.20)] transition-all duration-200 hover:-translate-y-0.5 hover:border-sky-700 hover:bg-sky-800 hover:shadow-[0_18px_38px_rgba(2,132,199,0.24)] focus:outline-none focus:ring-4 focus:ring-sky-100"
+            x-bind:disabled="loading"
+            x-bind:class="{ 'opacity-70 cursor-not-allowed hover:translate-y-0': loading }"
+        >
+            <span x-show="!loading">
+                Kirim Tautan Reset
+            </span>
+
+            <span
+                x-show="loading"
+                x-cloak
+                class="flex items-center gap-2"
+            >
+                <svg
+                    class="h-4 w-4 animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                    />
+
+                    <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
+                </svg>
+
+                Mengirim...
+            </span>
+        </button>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-slate-500">
+        Sudah ingat password?
+
+        <a
+            href="{{ route('user.login') }}"
+            class="font-semibold text-sky-700 transition-colors hover:text-sky-800 hover:underline"
+        >
+            Kembali ke Login
+        </a>
+    </p>
 
 @endsection

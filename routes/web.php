@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\RekomendasiController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -29,6 +31,18 @@ Route::view('/syarat-ketentuan', 'pages.terms')->name('terms');
 Route::redirect('/terms', '/syarat-ketentuan');
 Route::redirect('/contact', '/#kontak')->name('contact');
 
+/*
+|--------------------------------------------------------------------------
+| PASSWORD RESET (PUBLIC)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/lupa-password', [ForgotPasswordController::class, 'create'])->name('password.request');
+Route::post('/lupa-password', [ForgotPasswordController::class, 'store'])->name('password.email');
+Route::get('/forgot-password', fn () => redirect()->route('password.request'));
+
+Route::get('/reset-password/{token}', [ResetPasswordController::class, 'create'])->name('password.reset');
+Route::post('/reset-password', [ResetPasswordController::class, 'store'])->name('password.update');
 
 /*
 |--------------------------------------------------------------------------
@@ -112,18 +126,6 @@ Route::middleware('guest')->name('user.')->group(function () {
         }
     })->name('register.process');
 
-
-    Route::get('/forgot-password', fn () =>
-        view('pages.auth.user.forgot-password')
-    )->name('password.request');
-
-    Route::post('/forgot-password', function () {
-
-        // TODO: kirim link reset password
-
-        return back()->with('status', 'Link reset password telah dikirim.');
-
-    })->name('password.email');
 
 });
 
