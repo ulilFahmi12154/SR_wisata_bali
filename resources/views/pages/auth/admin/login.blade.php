@@ -114,7 +114,7 @@
                             <label for="password" class="block text-xs font-semibold text-slate-700 tracking-wide">
                                 Password
                             </label>
-                            <a href="#" class="text-xs text-sky-600 font-semibold hover:text-sky-700 transition-colors">
+                            <a href="{{ route('admin.password.request') }}" class="text-xs text-sky-600 font-semibold hover:text-sky-700 transition-colors">
                                 Forgot Password?
                             </a>
                         </div>
@@ -184,7 +184,7 @@
             {{-- Footer Card (Don't have any account? Sign Up) --}}
             <div class="bg-slate-50 border-t border-slate-100 py-4 text-center text-xs font-medium">
                 <span class="text-slate-500">Don't have any account?</span>
-                <a href="{{ route('user.login') }}" class="text-sky-700 hover:text-sky-800 font-bold transition-colors ml-0.5">
+                <a href="{{ route('admin.register') }}" class="text-sky-700 hover:text-sky-800 font-bold transition-colors ml-0.5">
                     Sign Up
                 </a>
             </div>

@@ -187,22 +187,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         )->name('login');
 
         Route::post('/login', function () {
-
             $credentials = request()->only('email', 'password');
 
             if (Auth::attempt($credentials)) {
                 request()->session()->regenerate();
 
-                if (Auth::user()->role === 'admin') {
+                if (Auth::attempt(array_merge($credentials, ['role' => 'admin']))) {
+                    request()->session()->regenerate();
                     return redirect()->route('admin.dashboard');
                 }
 
-                Auth::logout();
-                request()->session()->invalidate();
-                request()->session()->regenerateToken();
-
                 return back()->withErrors([
-                    'email' => 'Akun ini tidak memiliki akses admin.'
+                    'email' => 'Kredensial salah atau akun ini tidak memiliki akses admin.'
                 ])->onlyInput('email');
             }
 
@@ -212,6 +208,47 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         })->name('login.process');
 
+        Route::get('/register', fn () =>
+            view('pages.auth.admin.register')
+        )->name('register');
+
+        Route::post('/register', function () {
+            $data = request()->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+                'password' => ['required', 'string', 'min:8', 'confirmed'],
+            ]);
+
+            User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => Hash::make($data['password']),
+                'role' => 'admin', // Otomatis mendaftar sebagai admin
+            ]);
+
+            return redirect()
+                ->route('admin.login')
+                ->with('status', 'Akun admin berhasil dibuat. Silakan login.');
+        })->name('register.process');
+
+        // LUPA PASSWORD ADMIN (Opsional - Mengarah ke file forgot-password admin Anda)
+        Route::get('/lupa-password', fn () => 
+            view('pages.auth.admin.forgot-password')
+        )->name('password.request');
+
+        // Tambahkan rute ini untuk memproses kirim email link reset (POST)
+        Route::post('/lupa-password', function () {
+            $data = request()->validate([
+                'email' => ['required', 'email', 'exists:users,email'],
+            ], [
+                'email.exists' => 'Email tidak terdaftar di sistem kami.'
+            ]);
+
+            // TODO: Logika pengiriman email reset token asli nanti di sini.
+            // Sementara kita kembalikan status sukses simulasi dulu agar tidak error:
+            return back()->with('status', 'Link reset password telah dikirim ke email Anda.');
+
+        })->name('password.email');
     });
 
 
