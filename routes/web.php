@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RekomendasiController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -29,6 +32,18 @@ Route::view('/syarat-ketentuan', 'pages.terms')->name('terms');
 Route::redirect('/terms', '/syarat-ketentuan');
 Route::redirect('/contact', '/#kontak')->name('contact');
 
+/*
+|--------------------------------------------------------------------------
+| PASSWORD RESET (PUBLIC)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/lupa-password', [ForgotPasswordController::class, 'create'])->name('password.request');
+Route::post('/lupa-password', [ForgotPasswordController::class, 'store'])->name('password.email');
+Route::get('/forgot-password', fn () => redirect()->route('password.request'));
+
+Route::get('/reset-password/{token}', [ResetPasswordController::class, 'create'])->name('password.reset');
+Route::post('/reset-password', [ResetPasswordController::class, 'store'])->name('password.update');
 
 /*
 |--------------------------------------------------------------------------
@@ -113,18 +128,6 @@ Route::middleware('guest')->name('user.')->group(function () {
     })->name('register.process');
 
 
-    Route::get('/forgot-password', fn () =>
-        view('pages.auth.user.forgot-password')
-    )->name('password.request');
-
-    Route::post('/forgot-password', function () {
-
-        // TODO: kirim link reset password
-
-        return back()->with('status', 'Link reset password telah dikirim.');
-
-    })->name('password.email');
-
 });
 
 
@@ -154,27 +157,11 @@ Route::middleware('auth')->name('user.')->group(function () {
 
     Route::redirect('/recommendation', '/rekomendasi/hasil')->name('recommendation');
 
-    Route::get('/profile', fn () =>
-        view('pages.user.profile')
-    )->name('profile');
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
 
-    Route::match(['post', 'patch'], '/profile', function () {
-        $data = request()->validate([
-            'name' => ['required', 'string', 'max:255'],
-        ], [
-            'name.required' => 'Nama lengkap wajib diisi.',
-            'name.string' => 'Nama lengkap harus berupa teks.',
-            'name.max' => 'Nama lengkap maksimal :max karakter.',
-        ]);
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-        $user = request()->user();
-        $user->forceFill([
-            'name' => trim($data['name']),
-        ])->save();
-
-        return back()->with('status', 'Profil berhasil diperbarui.');
-
-    })->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
 });
 

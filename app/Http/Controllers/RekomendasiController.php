@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kategori;
 use App\Models\Kriteria;
+use App\Models\Lokasi;
 use App\Models\Penilaian;
 use App\Models\Wisata;
 use Illuminate\Http\Request;
@@ -49,17 +51,75 @@ class RekomendasiController extends Controller
 
     public function index(Request $request)
     {
-        $destinationsPaginator = Wisata::query()
-            ->with(['lokasi', 'kategori'])
-            ->orderBy('nama')
-            ->paginate(12)
-            ->withQueryString();
+        $perPage = 12;
+        $sortOptions = [
+            'terbaru' => 'Terbaru',
+            'name_asc' => 'Nama A-Z',
+            'rating_desc' => 'Rating Tertinggi',
+            'harga_asc' => 'Harga Terendah',
+            'harga_desc' => 'Harga Tertinggi',
+        ];
+
+        $search = trim((string) $request->query('search', ''));
+        $kategoriId = $request->filled('kategori_id') ? (int) $request->query('kategori_id') : null;
+        $lokasiId = $request->filled('lokasi_id') ? (int) $request->query('lokasi_id') : null;
+        $sort = (string) $request->query('sort', 'terbaru');
+        $sort = array_key_exists($sort, $sortOptions) ? $sort : 'terbaru';
+
+        $destinationsQuery = Wisata::query()
+            ->with(['lokasi', 'kategori']);
+
+        if ($search !== '') {
+            $destinationsQuery->where(function ($query) use ($search) {
+                $like = '%' . $search . '%';
+
+                $query->where('nama', 'like', $like)
+                    ->orWhere('deskripsi', 'like', $like)
+                    ->orWhere('keterangan', 'like', $like)
+                    ->orWhereHas('lokasi', function ($locationQuery) use ($like) {
+                        $locationQuery->where('nama_kabupaten', 'like', $like);
+                    });
+            });
+        }
+
+        if ($kategoriId) {
+            $destinationsQuery->where('kategori_id', $kategoriId);
+        }
+
+        if ($lokasiId) {
+            $destinationsQuery->where('lokasi_id', $lokasiId);
+        }
+
+        match ($sort) {
+            'name_asc' => $destinationsQuery->orderBy('nama'),
+            'rating_desc' => $destinationsQuery->orderByDesc('rating')->orderBy('nama'),
+            'harga_asc' => $destinationsQuery->orderByRaw('COALESCE(harga_wni_min, harga_wna_min, 0) ASC')->orderBy('nama'),
+            'harga_desc' => $destinationsQuery->orderByRaw('COALESCE(harga_wni_min, harga_wna_min, 0) DESC')->orderBy('nama'),
+            default => $destinationsQuery->orderByDesc('created_at')->orderByDesc('id'),
+        };
+
+        $destinationsPaginator = $destinationsQuery
+            ->paginate($perPage)
+            ->appends($request->query());
+
+        $hasCatalogFilters = $search !== '' || $kategoriId || $lokasiId || $sort !== 'terbaru';
 
         return view('pages.user.destinations.index', [
             'destinations' => $destinationsPaginator->getCollection(),
             'destinationsPaginator' => $destinationsPaginator,
             'totalDestinations' => $destinationsPaginator->total(),
-            'perPage' => 12,
+            'totalAvailableDestinations' => Wisata::query()->count(),
+            'categories' => Kategori::query()->orderBy('nama_kategori')->get(['id', 'nama_kategori']),
+            'locations' => Lokasi::query()->orderBy('nama_kabupaten')->get(['id', 'nama_kabupaten']),
+            'filters' => [
+                'search' => $search,
+                'kategori_id' => $kategoriId,
+                'lokasi_id' => $lokasiId,
+                'sort' => $sort,
+            ],
+            'sortOptions' => $sortOptions,
+            'hasCatalogFilters' => $hasCatalogFilters,
+            'perPage' => $perPage,
         ]);
     }
 

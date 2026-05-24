@@ -113,7 +113,7 @@
                 </label>
 
                 <a
-                    href="{{ route('user.password.request') }}"
+                    href="{{ route('password.request') }}"
                     class="text-xs font-medium text-sky-700 transition-colors hover:text-sky-800 hover:underline"
                 >
                     Lupa password?
@@ -166,7 +166,7 @@
                     @click="show = !show"
                     class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 transition-colors hover:text-slate-600"
                     tabindex="-1"
-                    aria-label="Toggle password visibility"
+                    aria-label="Tampilkan atau sembunyikan password"
                 >
                     {{-- Eye --}}
                     <svg
