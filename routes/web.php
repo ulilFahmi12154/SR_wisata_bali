@@ -173,6 +173,7 @@ Route::middleware('auth')->name('user.')->group(function () {
 */
 
 Route::prefix('admin')->name('admin.')->group(function () {
+    Route::redirect('/', '/admin/login');
 
     /*
     |----------------------------------------------------------------------
