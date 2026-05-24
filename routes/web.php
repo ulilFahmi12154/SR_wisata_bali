@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\Admin\DestinationController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\AnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -261,63 +264,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::middleware('auth')->group(function () {
 
-        Route::get('/dashboard', fn () =>
-            view('pages.admin.dashboard')
-        )->name('dashboard');
+        Route::get('/dashboard', 
+            [App\Http\Controllers\Admin\DashboardController::class, 'index'
+        ])->name('dashboard');
 
         // Users
-        Route::get('/users', fn () =>
-            view('pages.admin.users.index')
-        )->name('users.index');
+        Route::resource('users', 
+            UserController::class);
 
-        Route::get('/users/{id}', fn ($id) =>
-            view('pages.admin.users.detail', compact('id'))
-        )->name('users.detail');
-
-        // Destinations — /create WAJIB sebelum /{id}
-        Route::get('/destinations', fn () =>
-            view('pages.admin.destinations.index')
-        )->name('destinations.index');
-
-        Route::get('/destinations/create', fn () =>
-            view('pages.admin.destinations.create')
-        )->name('destinations.create');
-
-        Route::post('/destinations', function () {
-
-            // TODO: simpan destination
-
-            return redirect()->route('admin.destinations.index')
-                ->with('status', 'Destination berhasil ditambahkan.');
-
-        })->name('destinations.store');
-
-        Route::get('/destinations/{id}/edit', fn ($id) =>
-            view('pages.admin.destinations.edit', compact('id'))
-        )->name('destinations.edit');
-
-        Route::put('/destinations/{id}', function ($id) {
-
-            // TODO: update destination
-
-            return redirect()->route('admin.destinations.index')
-                ->with('status', 'Destination berhasil diupdate.');
-
-        })->name('destinations.update');
-
-        Route::delete('/destinations/{id}', function ($id) {
-
-            // TODO: hapus destination
-
-            return redirect()->route('admin.destinations.index')
-                ->with('status', 'Destination berhasil dihapus.');
-
-        })->name('destinations.destroy');
+        // Destinations 
+        Route::resource('destinations', 
+            DestinationController::class);
 
         // Analytics
-        Route::get('/analytics', fn () =>
-            view('pages.admin.analytics')
-        )->name('analytics');
+        Route::get('/analytics', 
+            [AnalyticsController::class, 'index'])
+        ->name('analytics');
 
         // Admin Logout
         Route::post('/logout', function () {

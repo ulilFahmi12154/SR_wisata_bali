@@ -1,245 +1,217 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
-@section('admin-content')
-<div class="space-y-6">
-    {{-- Page Header --}}
-    <header class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div class="space-y-2">
-                <p class="text-sm uppercase tracking-[0.24em] text-slate-500">Analytics</p>
-                <h1 class="text-3xl font-semibold tracking-tight text-slate-900">Analitik Sistem</h1>
-                <p class="max-w-2xl text-sm leading-6 text-slate-500">Pantau metrik kinerja sistem, pengunjung, dan aktivitas pengguna secara real-time.</p>
-            </div>
-            <div class="flex gap-3">
-                <select class="px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Periode: 30 Hari</option>
-                    <option>7 Hari</option>
-                    <option>30 Hari</option>
-                    <option>90 Hari</option>
-                    <option>1 Tahun</option>
-                </select>
-                <button class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </header>
+@section('topbar_title', 'Analisis')
 
-    {{-- Key Metrics --}}
-    <section class="grid gap-4 xl:grid-cols-4">
-        <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm text-slate-500">Total Pengunjung</p>
-                    <p class="mt-2 text-3xl font-semibold text-slate-900">142.8K</p>
-                    <p class="mt-2 text-sm text-emerald-600 font-medium">↑ 12% dari bulan lalu</p>
-                </div>
-                <div class="p-3 rounded-lg bg-blue-100">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                    </svg>
-                </div>
-            </div>
-        </article>
+@section('title', 'Analisis Performa — Admin Jelajah')
 
-        <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm text-slate-500">Pencarian Destinasi</p>
-                    <p class="mt-2 text-3xl font-semibold text-slate-900">28.4K</p>
-                    <p class="mt-2 text-sm text-emerald-600 font-medium">↑ 8% dari bulan lalu</p>
-                </div>
-                <div class="p-3 rounded-lg bg-emerald-100">
-                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </div>
-            </div>
-        </article>
+@section('body')
+<div class="min-h-screen bg-[#f8fafc] flex font-sans antialiased text-slate-800">
+    @include('components.admin.sidebar')
 
-        <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm text-slate-500">Ulasan Baru</p>
-                    <p class="mt-2 text-3xl font-semibold text-slate-900">1.240</p>
-                    <p class="mt-2 text-sm text-red-600 font-medium">↓ 3% dari bulan lalu</p>
-                </div>
-                <div class="p-3 rounded-lg bg-amber-100">
-                    <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-2-4 2V5a2 2 0 012-2h8a2 2 0 012 2v11l-4-2-4 2V5z"/>
-                    </svg>
-                </div>
-            </div>
-        </article>
+    <main class="flex-1 pl-0 sm:pl-64 min-h-screen flex flex-col justify-between transition-all duration-300">
+        <div class="p-8 max-w-7xl w-full mx-auto space-y-6">
+            @include('components.admin.topbar')
 
-        <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm text-slate-500">Rating Rata-rata</p>
-                    <p class="mt-2 text-3xl font-semibold text-slate-900">4.6</p>
-                    <p class="mt-2 text-sm text-emerald-600 font-medium">↑ 0.2 dari bulan lalu</p>
-                </div>
-                <div class="p-3 rounded-lg bg-purple-100">
-                    <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                    </svg>
-                </div>
-            </div>
-        </article>
-    </section>
-
-    {{-- Charts --}}
-    <div class="grid gap-6 xl:grid-cols-2">
-        {{-- Visitor Trend Chart --}}
-        <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <p class="text-sm text-slate-500">Tren Pengunjung</p>
-                    <h3 class="mt-1 text-lg font-semibold text-slate-900">Pengunjung per Hari</h3>
-                </div>
-                <div class="text-sm text-emerald-600 font-medium bg-emerald-50 px-3 py-1 rounded-full">↑ 12%</div>
-            </div>
-
-            <div class="h-64 flex items-end justify-between gap-2 bg-slate-50 p-4 rounded-xl">
-                <div class="flex-1 h-32 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Mon: 2,400"></div>
-                <div class="flex-1 h-40 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Tue: 2,800"></div>
-                <div class="flex-1 h-36 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Wed: 2,600"></div>
-                <div class="flex-1 h-44 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Thu: 3,200"></div>
-                <div class="flex-1 h-48 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Fri: 3,500"></div>
-                <div class="flex-1 h-52 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Sat: 3,800"></div>
-                <div class="flex-1 h-44 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Sun: 3,100"></div>
-            </div>
-
-            <div class="mt-4 grid grid-cols-7 gap-2 text-xs text-slate-500 text-center">
-                <span>Sen</span>
-                <span>Sel</span>
-                <span>Rab</span>
-                <span>Kam</span>
-                <span>Jum</span>
-                <span>Sab</span>
-                <span>Min</span>
-            </div>
-        </div>
-
-        {{-- Top Destinations --}}
-        <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <p class="text-sm text-slate-500">Destinasi Populer</p>
-                    <h3 class="mt-1 text-lg font-semibold text-slate-900">Destinasi Paling Dicari</h3>
-                </div>
-            </div>
-
-            <div class="space-y-3">
-                @for($i = 1; $i <= 5; $i++)
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3 flex-1">
-                        <span class="text-sm font-semibold text-slate-500">{{ $i }}</span>
-                        <span class="text-sm font-medium text-slate-900">Destinasi {{ $i }}</span>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Kunjungan</span>
+                        <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ number_format($analyticsStats['total_kunjungan'] ?? 0) }}</h3>
+                        <p class="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                            +12.4% vs bln lalu
+                        </p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-500" style="width: {{ (100 - $i * 10) }}%;"></div>
+                    <div class="p-3 bg-sky-50 text-sky-600 rounded-xl">
+                        <svg class="w-5 h-5 text-[#1e617a]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rata-rata Harian</span>
+                        <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ number_format($analyticsStats['rata_rata_harian'] ?? 0) }}</h3>
+                        <p class="text-[10px] font-bold text-emerald-500 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> +5.2% stabil
+                        </p>
+                    </div>
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Durasi Sesi Rata-rata</span>
+                        <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ $analyticsStats['durasi_sesi'] ?? '0m 0s' }}</h3>
+                        <p class="text-[10px] font-bold text-red-500 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6"/></svg>
+                            -1.8% vs bln lalu
+                        </p>
+                    </div>
+                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-sm font-bold text-sky-900 tracking-tight">Tren Kunjungan Harian</h3>
+                            <p class="text-[10px] text-slate-400 font-medium">Visualisasi fluktuasi pengunjung 7 hari terakhir</p>
                         </div>
-                        <span class="text-sm font-medium text-slate-900 w-12 text-right">{{ 100 - $i * 10 }}%</span>
+                        <span class="text-[10px] font-bold text-slate-400 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-[#1e617a]"></span> Minggu Ini
+                        </span>
+                    </div>
+                    <div class="h-64 relative w-full">
+                        <canvas id="analyticsWeeklyChart"></canvas>
                     </div>
                 </div>
-                @endfor
-            </div>
-        </div>
-    </div>
 
-    {{-- Bottom Charts --}}
-    <div class="grid gap-6 xl:grid-cols-3">
-        {{-- Rating Distribution --}}
-        <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div>
-                <p class="text-sm text-slate-500">Distribusi Rating</p>
-                <h3 class="mt-1 text-lg font-semibold text-slate-900">Rating Destinasi</h3>
-            </div>
-
-            <div class="mt-6 space-y-3">
-                @for($stars = 5; $stars >= 1; $stars--)
-                <div class="flex items-center gap-3">
-                    <span class="text-sm text-slate-600 w-8">⭐ {{ $stars }}</span>
-                    <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
-                        <div class="h-full rounded-full bg-amber-400" style="width: {{ 80 - $stars * 10 }}%;"></div>
+                <div class="bg-[#1e617a] p-6 rounded-2xl text-white shadow-sm flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <span class="px-2.5 py-1 bg-white/10 text-[9px] font-black uppercase tracking-wider rounded-md backdrop-blur-sm">Growth Insight</span>
+                        <div class="space-y-2">
+                            <h4 class="text-base font-bold tracking-tight leading-snug">Pertumbuhan Destinasi Wisata {{ $growthInsight['kategori_top'] }}</h4>
+                            <p class="text-xs text-sky-100/80 leading-relaxed font-light">
+                                Kategori <strong class="text-white font-bold">{{ $growthInsight['kategori_top'] }}</strong> mencatat kenaikan minat tertinggi sebesar 
+                                <strong class="text-white font-bold">{{ $growthInsight['persentase'] }}%</strong> pada minggu ini dibandingkan kategori {{ $growthInsight['kategori_pembanding'] }}.
+                            </p>
+                        </div>
                     </div>
-                    <span class="text-sm font-medium text-slate-900 w-8 text-right">{{ 80 - $stars * 10 }}%</span>
+
+                    <div class="space-y-3 pt-6">
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-sky-200">
+                                <span>Target Bulanan</span>
+                                <span>{{ $growthInsight['persentase'] + 45 > 100 ? 92 : $growthInsight['persentase'] + 45 }}%</span>
+                            </div>
+                            <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                                <div class="bg-white h-full rounded-full" style="width: {{ $growthInsight['persentase'] + 45 > 100 ? 92 : $growthInsight['persentase'] + 45 }}%"></div>
+                            </div>
+                        </div>
+                        <button class="w-full py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all backdrop-blur-sm">
+                            Lihat Detail Kategori
+                        </button>
+                    </div>
                 </div>
-                @endfor
-            </div>
-        </div>
-
-        {{-- Category Breakdown --}}
-        <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div>
-                <p class="text-sm text-slate-500">Kategori Destinasi</p>
-                <h3 class="mt-1 text-lg font-semibold text-slate-900">Distribusi Kategori</h3>
             </div>
 
-            <div class="mt-6 space-y-3">
-                @php
-                    $categories = [
-                        ['name' => 'Pantai', 'count' => 8, 'color' => 'bg-blue-500'],
-                        ['name' => 'Gunung', 'count' => 6, 'color' => 'bg-emerald-500'],
-                        ['name' => 'Kuil', 'count' => 5, 'color' => 'bg-purple-500'],
-                        ['name' => 'Seni & Budaya', 'count' => 3, 'color' => 'bg-amber-500'],
-                    ];
-                @endphp
-
-                @foreach($categories as $cat)
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden space-y-4 p-6">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full {{ $cat['color'] }}"></div>
-                        <span class="text-sm text-slate-700">{{ $cat['name'] }}</span>
+                    <div>
+                        <h3 class="text-sm font-bold text-sky-900 tracking-tight">Peringkat Destinasi Populer Global</h3>
+                        <p class="text-[10px] text-slate-400 font-medium">Berdasarkan volume pencarian dan kunjungan unik aplikasi</p>
                     </div>
-                    <span class="text-sm font-medium text-slate-900">{{ $cat['count'] }}</span>
+                    <a href="{{ route('admin.destinations.index') }}" class="text-[11px] font-bold text-sky-600 hover:underline">Lihat Semua</a>
                 </div>
-                @endforeach
-            </div>
-        </div>
 
-        {{-- Recent Activities --}}
-        <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div>
-                <p class="text-sm text-slate-500">Aktivitas Terbaru</p>
-                <h3 class="mt-1 text-lg font-semibold text-slate-900">Log Sistem</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <th class="px-6 py-4">Destinasi</th>
+                                <th class="px-6 py-4">Kategori</th>
+                                <th class="px-6 py-4 text-center">Trend</th>
+                                <th class="px-6 py-4 text-right">Kunjungan</th>
+                                <th class="px-6 py-4 text-right">Pertumbuhan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50 text-xs">
+                            @forelse($peringkatDestinasi as $index => $row)
+                            <tr class="hover:bg-slate-50/40 transition-colors">
+                                <td class="px-6 py-3.5 flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-slate-100 overflow-hidden shadow-sm flex-shrink-0">
+                                        <img src="{{ $row->image ? asset('storage/' . $row->image) : 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=80&q=80' }}" class="w-full h-full object-cover" alt="wisata">
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h4 class="font-bold text-slate-800 truncate">{{ $row->nama_wisata ?? $row->name }}</h4>
+                                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">ID: DEST-0{{ $row->id }}</p>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-3.5">
+                                    <span class="px-2.5 py-1 bg-sky-50 text-sky-600 rounded-full text-[10px] font-bold uppercase whitespace-nowrap">
+                                        {{ $row->kategori->nama_kategori ?? 'Umum' }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-3.5 text-center">
+                                    @if(($index % 3) === 2)
+                                        <span class="text-red-500 font-bold text-sm" title="Menurun">📉</span>
+                                    @else
+                                        <span class="text-emerald-500 font-bold text-sm" title="Meningkat">📈</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-3.5 text-right font-bold text-slate-700">
+                                    {{ number_format($row->views ?? 0) }}
+                                </td>
+                                <td class="px-6 py-3.5 text-right font-bold {{ ($index % 3) === 2 ? 'text-red-500' : 'text-emerald-600' }}">
+                                    {{ ($index % 3) === 2 ? '-' : '+' }}{{ rand(2, 18) }}.{{ rand(1, 9) }}%
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-xs text-slate-400">Belum ada data statistik destinasi tersedia.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pt-2">
+                    {{ $peringkatDestinasi->links() }}
+                </div>
             </div>
 
-            <div class="mt-6 space-y-2 text-sm max-h-64 overflow-y-auto">
-                <div class="flex gap-2 pb-2 border-b border-slate-200">
-                    <span class="text-blue-600">●</span>
-                    <div>
-                        <p class="text-slate-900 font-medium">Pengguna baru terdaftar</p>
-                        <p class="text-xs text-slate-500">2 menit yang lalu</p>
-                    </div>
-                </div>
-                <div class="flex gap-2 pb-2 border-b border-slate-200">
-                    <span class="text-emerald-600">●</span>
-                    <div>
-                        <p class="text-slate-900 font-medium">Destinasi dipublikasikan</p>
-                        <p class="text-xs text-slate-500">15 menit yang lalu</p>
-                    </div>
-                </div>
-                <div class="flex gap-2 pb-2 border-b border-slate-200">
-                    <span class="text-amber-600">●</span>
-                    <div>
-                        <p class="text-slate-900 font-medium">Review baru diterima</p>
-                        <p class="text-xs text-slate-500">1 jam yang lalu</p>
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <span class="text-purple-600">●</span>
-                    <div>
-                        <p class="text-slate-900 font-medium">Preferensi pengguna diperbarui</p>
-                        <p class="text-xs text-slate-500">3 jam yang lalu</p>
-                    </div>
-                </div>
-            </div>
         </div>
-    </div>
+    </main>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById('analyticsWeeklyChart').getContext('2d');
+        
+        // Parsing data aman dari Controller PHP ke JavaScript Array
+        const labelsData = {!! json_encode($trenKunjungan['labels'] ?? ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min']) !!};
+        const trafficData = {!! json_encode($trenKunjungan['data'] ?? [0,0,0,0,0,0,0]) !!};
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labelsData,
+                datasets: [{
+                    label: 'Pengunjung Unik',
+                    data: trafficData,
+                    backgroundColor: '#1e617a', 
+                    borderRadius: 6,
+                    barThickness: 'flex',
+                    maxBarThickness: 28
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        grid: { color: '#f1f5f9' },
+                        border: { display: false },
+                        ticks: { color: '#94a3b8', font: { size: 10, weight: '600' } },
+                        beginAtZero: true
+                    },
+                    x: {
+                        grid: { display: false },
+                        border: { display: false },
+                        ticks: { color: '#475569', font: { size: 10, weight: '600' } }
+                    }
+                }
+            }
+        });
+    });
+</script>
 @endsection

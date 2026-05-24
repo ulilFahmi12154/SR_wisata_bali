@@ -39,3 +39,25 @@
     @stack('scripts')
 </body>
 </html>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById('toggle-sidebar-btn');
+        const sidebar = document.getElementById('admin-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        if (toggleBtn && sidebar && overlay) {
+            // Membuka / Menutup Sidebar di Mobile
+            toggleBtn.addEventListener('click', function () {
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            });
+
+            // Menutup Sidebar jika area luar (overlay) diklik
+            overlay.addEventListener('click', function () {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            });
+        }
+    });
+</script>
