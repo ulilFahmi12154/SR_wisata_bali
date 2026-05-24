@@ -28,7 +28,6 @@
     @hasSection('body')
         @yield('body')
     @else
-        <x-user.navbar />
 
         <main class="min-h-screen px-4 md:px-8 py-6">
             @yield('content')
