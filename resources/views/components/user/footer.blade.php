@@ -1,9 +1,13 @@
+@php
+    $brandUrl = auth()->check() ? route('user.home') : route('landingpage');
+@endphp
+
 <footer id="kontak" class="mt-0 border-t border-white/10 bg-slate-950 text-slate-300">
     <div class="mx-auto max-w-[1180px] px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
         <div class="grid gap-10 md:grid-cols-[1.25fr_0.8fr_1fr]">
             {{-- Brand --}}
             <div class="max-w-md">
-                <a href="{{ route('landingpage') }}" class="group inline-flex items-center gap-3 no-underline">
+                <a href="{{ $brandUrl }}" class="group inline-flex items-center gap-3 no-underline">
                     <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl border border-sky-400/20 bg-sky-700 shadow-[0_16px_34px_rgba(2,132,199,0.24)] transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:bg-sky-600">
                         <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
