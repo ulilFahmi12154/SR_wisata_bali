@@ -86,14 +86,13 @@ class DashboardController extends Controller
             }
 
             $popularDestinations[] = [
-                'rank' => $index + 1,
-                'name' => $dest->nama_wisata ?? $dest->name, 
-                'location' => $dest->location ?? $lokasiNama, 
-                'views' => number_format($dest->views),
-                'percentage' => $percentage,
-                'image' => $dest->image && file_exists(storage_path('app/public/' . $dest->image)) 
-                            ? asset('storage/' . $dest->image) 
-                            : 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=150&q=80'
+                'rank'        => $index + 1,
+                'name'        => $dest->nama ?? 'Tujuan Tidak Diketahui',
+                // Kondisional URL asset langsung dari controller
+                'image'       => $dest->image ? asset($dest->image) : asset('images/default-wisata.jpg'), 
+                'location'    => $lokasiNama,
+                'views'       => $dest->total_views ?? 0, 
+                'percentage'  => $percentage,
             ];
         }
 

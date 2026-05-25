@@ -14,11 +14,17 @@ class DestinationController extends Controller
     /**
      * Menampilkan daftar destinasi wisata (Halaman Index)
      */
-    public function index()
+    // Di dalam DestinationController.php
+    public function index(Request $request)
     {
-        // Mengambil data wisata beserta relasi kategori dan lokasi, lalu di-paginate
-        $destinations = Wisata::with(['kategori', 'lokasi'])->latest()->paginate(5);
-        
+        $destinations = \App\Models\Wisata::query()
+            ->when($request->keyword, function($query, $keyword) {
+                $query->where('nama', 'like', "%{$keyword}%");
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString(); // PENTING: agar filter pencarian tidak hilang saat pindah halaman
+
         return view('pages.admin.destinations.index', compact('destinations'));
     }
 

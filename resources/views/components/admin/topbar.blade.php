@@ -5,19 +5,25 @@
         </h1>
 
         @if(View::hasSection('topbar_search_placeholder'))
-            <div class="relative w-full max-w-md">
+            {{-- Tambahkan form di sini --}}
+            <form id="filterForm" action="{{ route('admin.destinations.index') }}" method="GET" class="relative w-full max-w-md">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                 </span>
+                
+                {{-- Input yang dilihat user --}}
                 <input 
                     type="text" 
                     id="topbarSearchInput" 
                     placeholder="@yield('topbar_search_placeholder', 'Cari sesuatu...')"
                     class="w-full py-2.5 pl-11 pr-4 text-sm bg-gray-50/60 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-[#1e617a]/20 focus:border-[#1e617a] text-gray-700 transition-all placeholder-gray-400"
                 >
-            </div>
+
+                {{-- Input Tersembunyi: WAJIB ADA agar data terkirim --}}
+                <input type="hidden" id="hiddenSearchInput" name="keyword" value="{{ request('keyword') }}">
+            </form>
         @endif
     </div>
 

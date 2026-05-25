@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('topbar_title', 'Kelola Wisata')
+
 @section('title', 'Edit Destinasi — Admin Jelajah')
 
 @section('body')
