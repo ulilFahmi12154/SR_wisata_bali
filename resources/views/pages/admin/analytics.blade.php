@@ -154,9 +154,9 @@
                                 <div class="bg-white h-full rounded-full" style="width: {{ $growthInsight['persentase'] + 45 > 100 ? 92 : $growthInsight['persentase'] + 45 }}%"></div>
                             </div>
                         </div>
-                        <button class="w-full py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all backdrop-blur-sm">
+                        <a href="{{ route('admin.analytics.category-details') }}" class="w-full block text-center py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all backdrop-blur-sm">
                             See Category Details
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

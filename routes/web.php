@@ -280,6 +280,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/analytics', 
             [AnalyticsController::class, 'index'])
         ->name('analytics');
+        Route::get('/analytics/category-details', [AnalyticsController::class, 'categoryDetails'])->name('analytics.category-details');
+        
 
         // Admin Logout
         Route::post('/logout', function () {

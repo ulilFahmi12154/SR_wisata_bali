@@ -146,6 +146,14 @@ class AnalyticsController extends Controller
         ));
     }
 
+    // =========================================================================
+    // FUNGSI BARU: MENAMPILKAN HALAMAN SEE CATEGORY DETAILS
+    // =========================================================================
+    public function categoryDetails()
+    {
+        return view('pages.admin.users.see_category_details');
+    }
+
     private function hitungPersentaseTren($sekarang, $lalu, $fallbackPersen = 0)
     {
         if ($lalu == 0 && $sekarang == 0) {
