@@ -6,20 +6,20 @@
 
     {{-- Heading --}}
     <div class="mb-8">
-        <p class="mb-3 text-xs font-semibold uppercase tracking-widest text-sky-700">
+        <p class="mb-3 text-xs font-bold uppercase tracking-widest text-sky-800">
             Masuk Akun
         </p>
-        <h2 class="font-display text-3xl font-semibold leading-tight text-slate-900">
+        <h2 class="font-display text-3xl font-semibold leading-tight text-slate-950">
             Selamat Datang<br>Kembali
         </h2>
 
-        <p class="mt-3 text-sm leading-relaxed text-slate-500">
+        <p class="mt-3 text-sm leading-relaxed text-slate-700">
             Masuk untuk melanjutkan perjalanan Anda di Bali.
         </p>
     </div>
 
     @if (session('success') || session('status'))
-        <div class="mb-5 rounded-2xl border border-sky-100 bg-sky-50/80 px-4 py-3 text-sm font-medium text-sky-800 shadow-sm shadow-sky-100/60">
+        <div class="mb-5 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-900 shadow-sm shadow-sky-100/60">
             {{ session('success') ?? session('status') }}
         </div>
     @endif
@@ -38,16 +38,16 @@
         <div class="space-y-2">
             <label
                 for="email"
-                class="block text-sm font-semibold text-slate-700"
+                class="block text-sm font-semibold text-slate-800"
             >
                 Alamat Email
-                <span class="text-red-500">*</span>
+                <span class="text-red-600">*</span>
             </label>
 
             <div class="relative">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
                     <svg
-                        class="h-4 w-4 text-slate-400"
+                        class="h-4 w-4 text-slate-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -72,11 +72,11 @@
                     data-label="Alamat Email"
                     oninvalid="const label = this.getAttribute('data-label') || 'Email'; let message = ''; if (this.validity.valueMissing) { message = label + ' wajib diisi.'; } else if (this.validity.typeMismatch) { message = 'Format email tidak valid.'; } this.setCustomValidity(message);"
                     oninput="this.setCustomValidity('');"
-                    class="h-12 w-full rounded-2xl border pl-11 pr-4 text-sm text-slate-800 shadow-sm shadow-slate-200/40 transition-all duration-200 placeholder:text-slate-400 focus:outline-none focus:ring-4
+                    class="h-12 w-full rounded-2xl border pl-11 pr-4 text-sm text-slate-900 shadow-sm shadow-slate-200/50 transition-all duration-200 placeholder:text-slate-500 focus:outline-none focus:ring-4
                            @error('email')
-                               border-red-300 bg-red-50/60 focus:border-red-400 focus:bg-white focus:ring-red-100
+                               border-red-300 bg-red-50/80 focus:border-red-500 focus:bg-white focus:ring-red-100
                            @else
-                               border-slate-200 bg-slate-50/70 focus:border-sky-400 focus:bg-white focus:ring-sky-100
+                               border-slate-300 bg-white focus:border-sky-500 focus:ring-sky-100
                            @enderror"
                 >
             </div>
@@ -106,15 +106,15 @@
             <div class="flex items-center justify-between gap-4">
                 <label
                     for="password"
-                    class="block text-sm font-semibold text-slate-700"
+                    class="block text-sm font-semibold text-slate-800"
                 >
                     Password
-                    <span class="text-red-500">*</span>
+                    <span class="text-red-600">*</span>
                 </label>
 
                 <a
                     href="{{ route('password.request') }}"
-                    class="text-xs font-medium text-sky-700 transition-colors hover:text-sky-800 hover:underline"
+                    class="text-xs font-semibold text-sky-800 transition-colors hover:text-sky-900 hover:underline"
                 >
                     Lupa password?
                 </a>
@@ -127,7 +127,7 @@
                 {{-- Icon --}}
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
                     <svg
-                        class="h-4 w-4 text-slate-400"
+                        class="h-4 w-4 text-slate-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -152,11 +152,11 @@
                     data-label="Password"
                     oninvalid="const label = this.getAttribute('data-label') || 'Password'; let message = ''; if (this.validity.valueMissing) { message = label + ' wajib diisi.'; } this.setCustomValidity(message);"
                     oninput="this.setCustomValidity('');"
-                    class="h-12 w-full rounded-2xl border pl-11 pr-11 text-sm text-slate-800 shadow-sm shadow-slate-200/40 transition-all duration-200 placeholder:text-slate-400 focus:outline-none focus:ring-4
+                    class="h-12 w-full rounded-2xl border pl-11 pr-11 text-sm text-slate-900 shadow-sm shadow-slate-200/50 transition-all duration-200 placeholder:text-slate-500 focus:outline-none focus:ring-4
                            @error('password')
-                               border-red-300 bg-red-50/60 focus:border-red-400 focus:bg-white focus:ring-red-100
+                               border-red-300 bg-red-50/80 focus:border-red-500 focus:bg-white focus:ring-red-100
                            @else
-                               border-slate-200 bg-slate-50/70 focus:border-sky-400 focus:bg-white focus:ring-sky-100
+                               border-slate-300 bg-white focus:border-sky-500 focus:ring-sky-100
                            @enderror"
                 >
 
@@ -164,7 +164,7 @@
                 <button
                     type="button"
                     @click="show = !show"
-                    class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 transition-colors hover:text-slate-600"
+                    class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-500 transition-colors hover:text-slate-700"
                     tabindex="-1"
                     aria-label="Tampilkan atau sembunyikan password"
                 >
@@ -242,7 +242,7 @@
 
             <label
                 for="remember"
-                class="cursor-pointer select-none text-sm text-slate-600"
+                class="cursor-pointer select-none text-sm text-slate-700"
             >
                 Ingat saya selama 30 hari
             </label>
@@ -295,22 +295,22 @@
 
     {{-- Divider --}}
     <div class="my-7 flex items-center gap-4">
-        <div class="h-px flex-1 bg-slate-200/80"></div>
+        <div class="h-px flex-1 bg-slate-300/80"></div>
 
-        <span class="text-xs font-medium text-slate-400">
+        <span class="text-xs font-semibold text-slate-500">
             atau
         </span>
 
-        <div class="h-px flex-1 bg-slate-200/80"></div>
+        <div class="h-px flex-1 bg-slate-300/80"></div>
     </div>
 
     {{-- Register --}}
-    <p class="text-center text-sm text-slate-500">
+    <p class="text-center text-sm text-slate-600">
         Belum punya akun?
 
         <a
             href="{{ route('user.register') }}"
-            class="font-semibold text-sky-700 transition-colors hover:text-sky-800 hover:underline"
+            class="font-semibold text-sky-800 transition-colors hover:text-sky-900 hover:underline"
         >
             Daftar sekarang
         </a>
