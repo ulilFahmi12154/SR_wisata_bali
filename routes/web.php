@@ -15,18 +15,11 @@ use App\Http\Controllers\Admin\AnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
-| ROOT (LANDING PAGE PUBLIC)
+| ROOT & PUBLIC PAGES
 |--------------------------------------------------------------------------
 */
 
 Route::get('/', [LandingPageController::class, 'index'])->name('landingpage');
-
-
-/*
-|--------------------------------------------------------------------------
-| PUBLIC PAGES
-|--------------------------------------------------------------------------
-*/
 
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/kebijakan-privasi', 'pages.privacy')->name('privacy');
@@ -34,6 +27,21 @@ Route::redirect('/privacy-policy', '/kebijakan-privasi');
 Route::view('/syarat-ketentuan', 'pages.terms')->name('terms');
 Route::redirect('/terms', '/syarat-ketentuan');
 Route::redirect('/contact', '/#kontak')->name('contact');
+
+
+/*
+|--------------------------------------------------------------------------
+| UTILITY ROUTES FOR ADMIN LOGIN PORTAL
+|--------------------------------------------------------------------------
+| PERBAIKAN: Menggunakan rute eksplisit di luar grup admin agar namanya
+| sesuai 100% dengan yang dipanggil pada file login.blade.php kamu.
+|--------------------------------------------------------------------------
+*/
+
+Route::view('/admin/help', 'pages.auth.admin.help')->name('admin.help');
+Route::view('/admin/privacy-policy', 'pages.auth.admin.privacy')->name('privacy.policy');
+Route::view('/admin/support', 'pages.auth.admin.support')->name('admin.support');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +56,7 @@ Route::get('/forgot-password', fn () => redirect()->route('password.request'));
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'create'])->name('password.reset');
 Route::post('/reset-password', [ResetPasswordController::class, 'store'])->name('password.update');
 
+
 /*
 |--------------------------------------------------------------------------
 | USER AUTH (GUEST ONLY)
@@ -58,15 +67,13 @@ Route::middleware('guest')->name('user.')->group(function () {
 
     Route::get('/login', fn () =>
         view('pages.auth.user.login')
-    )->name('login'); // → route name jadi 'user.login' ✅
+    )->name('login');
 
     Route::post('/login', function () {
-
         $credentials = request()->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
             request()->session()->regenerate();
-
             $user = Auth::user();
 
             if ($user->role === 'admin') {
@@ -79,7 +86,6 @@ Route::middleware('guest')->name('user.')->group(function () {
         return back()->withErrors([
             'email' => 'Email atau password salah.'
         ])->onlyInput('email');
-
     })->name('login.process');
 
 
@@ -121,50 +127,46 @@ Route::middleware('guest')->name('user.')->group(function () {
             return redirect()
                 ->route('user.login')
                 ->with('success', 'Registrasi berhasil. Silakan login.');
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             report($e);
-
             return back()
                 ->withInput()
                 ->with('error', 'Registrasi gagal. Silakan coba lagi.');
         }
     })->name('register.process');
 
-
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| USER AREA (PROTECTED)
+| USER AREA & USER LOGOUT (PROTECTED)
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('auth')->name('user.')->group(function () {
 
-    Route::get('/home', fn () =>
-        view('pages.user.home')
-    )->name('home');
-
+    Route::get('/home', fn () => view('pages.user.home'))->name('home');
     Route::get('/destinasi', [RekomendasiController::class, 'index'])->name('destinations');
-
     Route::get('/destinations', fn () => redirect()->route('user.destinations'))->name('destinations.legacy');
-
     Route::get('/destinasi/{id}', [RekomendasiController::class, 'show'])->name('destinations.detail');
-
     Route::get('/destinations/{id}', fn ($id) => redirect()->route('user.destinations.detail', ['id' => $id]))->name('destinations.detail.legacy');
-
+    
     Route::post('/rekomendasi', [RekomendasiController::class, 'process'])->name('recommendations.process');
-
     Route::get('/rekomendasi/hasil', [RekomendasiController::class, 'results'])->name('recommendations.results');
-
     Route::redirect('/recommendation', '/rekomendasi/hasil')->name('recommendation');
-
+    
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
-
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    // User Logout (Ditempatkan di dalam middleware auth user agar aman)
+    Route::post('/logout', function () {
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return redirect()->route('landingpage');
+    })->name('logout');
 
 });
 
@@ -183,7 +185,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     | ADMIN AUTH (GUEST ONLY)
     |----------------------------------------------------------------------
     */
-
     Route::middleware('guest')->group(function () {
 
         Route::get('/login', fn () =>
@@ -227,7 +228,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
-                'role' => 'admin', // Otomatis mendaftar sebagai admin
+                'role' => 'admin',
             ]);
 
             return redirect()
@@ -235,12 +236,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->with('status', 'Akun admin berhasil dibuat. Silakan login.');
         })->name('register.process');
 
-        // LUPA PASSWORD ADMIN (Opsional - Mengarah ke file forgot-password admin Anda)
         Route::get('/lupa-password', fn () => 
             view('pages.auth.admin.forgot-password')
         )->name('password.request');
 
-        // Tambahkan rute ini untuk memproses kirim email link reset (POST)
         Route::post('/lupa-password', function () {
             $data = request()->validate([
                 'email' => ['required', 'email', 'exists:users,email'],
@@ -248,66 +247,37 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 'email.exists' => 'Email tidak terdaftar di sistem kami.'
             ]);
 
-            // TODO: Logika pengiriman email reset token asli nanti di sini.
-            // Sementara kita kembalikan status sukses simulasi dulu agar tidak error:
             return back()->with('status', 'Link reset password telah dikirim ke email Anda.');
-
         })->name('password.email');
     });
 
-
     /*
     |----------------------------------------------------------------------
-    | ADMIN PROTECTED
+    | ADMIN PROTECTED (AUTH ONLY)
     |----------------------------------------------------------------------
     */
-
     Route::middleware('auth')->group(function () {
 
-        Route::get('/dashboard', 
-            [App\Http\Controllers\Admin\DashboardController::class, 'index'
-        ])->name('dashboard');
+        Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
-        // Users
-        Route::resource('users', 
-            UserController::class);
+        // Users Management
+        Route::resource('users', UserController::class);
 
-        // Destinations 
-        Route::resource('destinations', 
-            DestinationController::class);
+        // Destinations Management
+        Route::resource('destinations', DestinationController::class);
 
         // Analytics
-        Route::get('/analytics', 
-            [AnalyticsController::class, 'index'])
-        ->name('analytics');
+        Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
         Route::get('/analytics/category-details', [AnalyticsController::class, 'categoryDetails'])->name('analytics.category-details');
-        
 
         // Admin Logout
         Route::post('/logout', function () {
             Auth::logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
-
             return redirect()->route('admin.login');
-
         })->name('logout');
 
     });
 
 });
-
-
-/*
-|--------------------------------------------------------------------------
-| USER LOGOUT
-|--------------------------------------------------------------------------
-*/
-
-Route::post('/logout', function () {
-    Auth::logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-
-    return redirect()->route('landingpage');
-})->name('logout')->middleware('auth');

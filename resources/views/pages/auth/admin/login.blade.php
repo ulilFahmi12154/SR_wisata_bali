@@ -41,9 +41,9 @@
     <header class="w-full max-w-7xl mx-auto flex items-center justify-between px-4 py-2">
         <div class="text-sky-800 font-bold text-lg tracking-tight">Admin Jelajah</div>
         <nav class="flex items-center gap-6 text-sm font-medium text-slate-600">
-            <a href="#" class="hover:text-sky-700 transition-colors">Help</a>
-            <a href="#" class="hover:text-sky-700 transition-colors">Privacy</a>
-            <a href="{{ route('user.login') }}" class="text-sky-600 hover:text-sky-700 font-semibold transition-colors">Support</a>
+            <a href="{{ route('admin.help') }}" class="hover:text-sky-700 transition-colors">Help</a>
+            <a href="{{ route('privacy.policy') }}" class="hover:text-sky-700 transition-colors">Privacy</a>
+            <a href="{{ route('admin.support') }}" class="hover:text-sky-700 transition-colors">Support</a>
         </nav>
     </header>
 
@@ -76,8 +76,8 @@
                     </div>
                 @endif
 
-                {{-- Form Login --}}
-                <form action="{{ route('admin.login') }}" method="POST" class="space-y-5"
+                {{-- Form Login -> PERBAIKAN: Diarahkan ke rute .login.process --}}
+                <form action="{{ route('admin.login.process') }}" method="POST" class="space-y-5"
                       x-data="{ loading: false, showPass: false }" @submit="loading = true">
                     @csrf
 
@@ -198,13 +198,13 @@
         </div>
     </main>
 
-    {{-- Footer Bawah (Bottom Credits) --}}
+    {{-- Footer Bawah (Bottom Credits) -> PERBAIKAN: Menghubungkan link kosong ke rute yang pas --}}
     <footer class="w-full max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between border-t border-slate-300/40 pt-4 text-xs text-slate-500 gap-2 px-4">
         <div>© {{ date('Y') }} Kelompok 3.</div>
         <div class="flex items-center gap-5">
-            <a href="#" class="hover:text-slate-700 transition-colors">Terms of Service</a>
-            <a href="#" class="hover:text-slate-700 transition-colors">Privacy Policy</a>
-            <a href="#" class="hover:text-slate-700 transition-colors">Contact Support</a>
+            <a href="{{ route('terms') }}" class="hover:text-slate-700 transition-colors">Terms of Service</a>
+            <a href="{{ route('privacy.policy') }}" class="hover:text-slate-700 transition-colors">Privacy Policy</a>
+            <a href="{{ route('admin.support') }}" class="hover:text-slate-700 transition-colors">Contact Support</a>
         </div>
     </footer>
 
