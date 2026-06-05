@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use App\Helpers\ActivityHelper; // Tambahkan helper untuk logging
 
 class RekomendasiController extends Controller
 {
@@ -27,16 +28,13 @@ class RekomendasiController extends Controller
             return redirect()->back()->with('error', 'Destinasi tidak ditemukan.');
         }
 
-        // Simpan ke core memory: Schema tabel 'wisata' menggunakan 'keterangan' atau 'deskripsi'
-        // 'image' berisi nama file yang ada di public/images/destination/
-
         // Ambil fasilitas terkait
         $facilities = DB::table('wisata_fasilitas')
             ->join('fasilitas', 'wisata_fasilitas.fasilitas_id', '=', 'fasilitas.id')
             ->where('wisata_fasilitas.wisata_id', $id)
             ->pluck('fasilitas.nama_fasilitas');
 
-        // Ambil rekomendasi serupa (misal berdasarkan kategori yang sama)
+        // Ambil rekomendasi serupa
         $recommendations = DB::table('wisata')
             ->leftJoin('lokasi', 'wisata.lokasi_id', '=', 'lokasi.id')
             ->leftJoin('kategori', 'wisata.kategori_id', '=', 'kategori.id')
@@ -46,11 +44,18 @@ class RekomendasiController extends Controller
             ->limit(3)
             ->get();
 
+        ActivityHelper::log('visit_detail', 'Melihat detail: ' . $destination->nama, 'eye', null, $id);
         return view('pages.user.destinations.detail', compact('destination', 'facilities', 'recommendations'));
     }
 
     public function index(Request $request)
     {
+        // Logging pencarian jika ada keyword search
+        $keyword = trim($request->query('search', ''));
+        if ($keyword !== '') {
+            \App\Helpers\ActivityHelper::log('search', "Mencari '$keyword'", 'search', $keyword);
+        }
+
         $perPage = 12;
         $sortOptions = [
             'terbaru' => 'Terbaru',
@@ -60,7 +65,7 @@ class RekomendasiController extends Controller
             'harga_desc' => 'Harga Tertinggi',
         ];
 
-        $search = trim((string) $request->query('search', ''));
+        $search = $keyword;
         $kategoriId = $request->filled('kategori_id') ? (int) $request->query('kategori_id') : null;
         $lokasiId = $request->filled('lokasi_id') ? (int) $request->query('lokasi_id') : null;
         $sort = (string) $request->query('sort', 'terbaru');

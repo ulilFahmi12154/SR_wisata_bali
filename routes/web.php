@@ -5,20 +5,23 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RekomendasiController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Models\User;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\Admin\DestinationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Helpers\ActivityHelper;
 
 /*
 |--------------------------------------------------------------------------
 | ROOT & PUBLIC PAGES
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', [LandingPageController::class, 'index'])->name('landingpage');
 
 Route::view('/about', 'pages.about')->name('about');
@@ -28,46 +31,33 @@ Route::view('/syarat-ketentuan', 'pages.terms')->name('terms');
 Route::redirect('/terms', '/syarat-ketentuan');
 Route::redirect('/contact', '/#kontak')->name('contact');
 
-
 /*
 |--------------------------------------------------------------------------
 | UTILITY ROUTES FOR ADMIN LOGIN PORTAL
 |--------------------------------------------------------------------------
-| PERBAIKAN: Menggunakan rute eksplisit di luar grup admin agar namanya
-| sesuai 100% dengan yang dipanggil pada file login.blade.php kamu.
-|--------------------------------------------------------------------------
 */
-
 Route::view('/admin/help', 'pages.auth.admin.help')->name('admin.help');
 Route::view('/admin/privacy-policy', 'pages.auth.admin.privacy')->name('privacy.policy');
 Route::view('/admin/support', 'pages.auth.admin.support')->name('admin.support');
-
 
 /*
 |--------------------------------------------------------------------------
 | PASSWORD RESET (PUBLIC)
 |--------------------------------------------------------------------------
 */
-
 Route::get('/lupa-password', [ForgotPasswordController::class, 'create'])->name('password.request');
 Route::post('/lupa-password', [ForgotPasswordController::class, 'store'])->name('password.email');
 Route::get('/forgot-password', fn () => redirect()->route('password.request'));
-
 Route::get('/reset-password/{token}', [ResetPasswordController::class, 'create'])->name('password.reset');
 Route::post('/reset-password', [ResetPasswordController::class, 'store'])->name('password.update');
-
 
 /*
 |--------------------------------------------------------------------------
 | USER AUTH (GUEST ONLY)
 |--------------------------------------------------------------------------
 */
-
 Route::middleware('guest')->name('user.')->group(function () {
-
-    Route::get('/login', fn () =>
-        view('pages.auth.user.login')
-    )->name('login');
+    Route::get('/login', fn () => view('pages.auth.user.login'))->name('login');
 
     Route::post('/login', function () {
         $credentials = request()->only('email', 'password');
@@ -76,10 +66,11 @@ Route::middleware('guest')->name('user.')->group(function () {
             request()->session()->regenerate();
             $user = Auth::user();
 
+            ActivityHelper::log('login', "User {$user->name} login", 'login');
+
             if ($user->role === 'admin') {
                 return redirect()->route('admin.dashboard');
             }
-
             return redirect()->intended(route('user.home'));
         }
 
@@ -88,10 +79,7 @@ Route::middleware('guest')->name('user.')->group(function () {
         ])->onlyInput('email');
     })->name('login.process');
 
-
-    Route::get('/register', fn () =>
-        view('pages.auth.user.register')
-    )->name('register');
+    Route::get('/register', fn () => view('pages.auth.user.register'))->name('register');
 
     Route::post('/register', function () {
         $data = request()->validate([
@@ -134,88 +122,65 @@ Route::middleware('guest')->name('user.')->group(function () {
                 ->with('error', 'Registrasi gagal. Silakan coba lagi.');
         }
     })->name('register.process');
-
 });
-
 
 /*
 |--------------------------------------------------------------------------
-| USER AREA & USER LOGOUT (PROTECTED)
+| USER AREA (AUTHENTICATED)
 |--------------------------------------------------------------------------
 */
-
 Route::middleware('auth')->name('user.')->group(function () {
-
     Route::get('/home', fn () => view('pages.user.home'))->name('home');
+
     Route::get('/destinasi', [RekomendasiController::class, 'index'])->name('destinations');
     Route::get('/destinations', fn () => redirect()->route('user.destinations'))->name('destinations.legacy');
     Route::get('/destinasi/{id}', [RekomendasiController::class, 'show'])->name('destinations.detail');
     Route::get('/destinations/{id}', fn ($id) => redirect()->route('user.destinations.detail', ['id' => $id]))->name('destinations.detail.legacy');
-    
+
     Route::post('/rekomendasi', [RekomendasiController::class, 'process'])->name('recommendations.process');
     Route::get('/rekomendasi/hasil', [RekomendasiController::class, 'results'])->name('recommendations.results');
     Route::redirect('/recommendation', '/rekomendasi/hasil')->name('recommendation');
-    
+
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
-    // User Logout (Ditempatkan di dalam middleware auth user agar aman)
+    // Logout user (gunakan route name 'user.logout' di view)
     Route::post('/logout', function () {
         Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
         return redirect()->route('landingpage');
     })->name('logout');
-
 });
-
 
 /*
 |--------------------------------------------------------------------------
 | ADMIN AREA
 |--------------------------------------------------------------------------
 */
-
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/login');
 
-    /*
-    |----------------------------------------------------------------------
-    | ADMIN AUTH (GUEST ONLY)
-    |----------------------------------------------------------------------
-    */
     Route::middleware('guest')->group(function () {
-
-        Route::get('/login', fn () =>
-            view('pages.auth.admin.login')
-        )->name('login');
+        Route::get('/login', fn () => view('pages.auth.admin.login'))->name('login');
 
         Route::post('/login', function () {
             $credentials = request()->only('email', 'password');
 
-            if (Auth::attempt($credentials)) {
+            if (Auth::attempt(array_merge($credentials, ['role' => 'admin']))) {
                 request()->session()->regenerate();
-
-                if (Auth::attempt(array_merge($credentials, ['role' => 'admin']))) {
-                    request()->session()->regenerate();
-                    return redirect()->route('admin.dashboard');
-                }
-
-                return back()->withErrors([
-                    'email' => 'Kredensial salah atau akun ini tidak memiliki akses admin.'
-                ])->onlyInput('email');
+                $user = Auth::user();
+                ActivityHelper::log('login', "Admin {$user->name} login", 'login');
+                return redirect()->route('admin.dashboard');
             }
 
             return back()->withErrors([
-                'email' => 'Email atau password salah.'
+                'email' => 'Kredensial salah atau akun ini tidak memiliki akses admin.'
             ])->onlyInput('email');
-
         })->name('login.process');
 
-        Route::get('/register', fn () =>
-            view('pages.auth.admin.register')
-        )->name('register');
+        Route::get('/register', fn () => view('pages.auth.admin.register'))->name('register');
 
         Route::post('/register', function () {
             $data = request()->validate([
@@ -236,48 +201,130 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->with('status', 'Akun admin berhasil dibuat. Silakan login.');
         })->name('register.process');
 
-        Route::get('/lupa-password', fn () => 
-            view('pages.auth.admin.forgot-password')
-        )->name('password.request');
-
+        Route::get('/lupa-password', fn () => view('pages.auth.admin.forgot-password'))->name('password.request');
         Route::post('/lupa-password', function () {
-            $data = request()->validate([
+            request()->validate([
                 'email' => ['required', 'email', 'exists:users,email'],
-            ], [
-                'email.exists' => 'Email tidak terdaftar di sistem kami.'
-            ]);
-
+            ], ['email.exists' => 'Email tidak terdaftar di sistem kami.']);
             return back()->with('status', 'Link reset password telah dikirim ke email Anda.');
         })->name('password.email');
     });
 
-    /*
-    |----------------------------------------------------------------------
-    | ADMIN PROTECTED (AUTH ONLY)
-    |----------------------------------------------------------------------
-    */
     Route::middleware('auth')->group(function () {
-
-        Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
-
-        // Users Management
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('users', UserController::class);
-
-        // Destinations Management
         Route::resource('destinations', DestinationController::class);
-
-        // Analytics
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
         Route::get('/analytics/category-details', [AnalyticsController::class, 'categoryDetails'])->name('analytics.category-details');
 
-        // Admin Logout
+        // Logout admin
         Route::post('/logout', function () {
             Auth::logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
             return redirect()->route('admin.login');
         })->name('logout');
+    });
+});
 
+/*
+|--------------------------------------------------------------------------
+| API ENDPOINTS (tanpa CSRF) untuk dashboard admin
+|--------------------------------------------------------------------------
+| Menggunakan middleware 'api' agar tidak terkena CSRF protection.
+| Jika ingin tetap menggunakan session, bisa ditambahkan 'web' tetapi harus
+| menyertakan token CSRF pada setiap fetch. Disarankan menggunakan 'api'.
+|--------------------------------------------------------------------------
+*/
+Route::prefix('api')->middleware('api')->group(function () {
+    Route::get('/daily-visits', function () {
+        $data = ActivityLog::where('action_type', 'visit')
+            ->where('created_at', '>=', now()->subDays(6)->startOfDay()) // 7 hari termasuk hari ini
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get();
+        
+        // Isi tanggal yang kosong dengan 0
+        $labels = [];
+        $values = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->toDateString();
+            $labels[] = now()->subDays($i)->format('D'); // atau 'd M'
+            $found = $data->firstWhere('date', $date);
+            $values[] = $found ? $found->total : 0;
+        }
+        
+        return response()->json([
+            'labels' => $labels,
+            'data' => $values
+        ]);
     });
 
+    Route::get('/daily-logins', function () {
+        $data = ActivityLog::where('action_type', 'login')
+            ->whereDate('created_at', '>=', now()->subDays(6))
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(DISTINCT user_id) as total'))
+            ->groupBy('date')
+            ->orderBy('date', 'asc')
+            ->get();
+
+        $labels = [];
+        $values = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->toDateString();
+            $labels[] = now()->subDays($i)->format('D'); // Sat, Sun, Mon, ...
+            $found = $data->firstWhere('date', $date);
+            $values[] = $found ? $found->total : 0;
+        }
+
+        return response()->json(['labels' => $labels, 'data' => $values]);
+    });
+
+    Route::get('/avg-session-duration', function () {
+        $sessions = ActivityLog::select('session_id', DB::raw('MIN(created_at) as start'), DB::raw('MAX(created_at) as end'))
+            ->groupBy('session_id')
+            ->get();
+        $avgDuration = $sessions->avg(fn($s) => strtotime($s->end) - strtotime($s->start));
+        return response()->json(['average_seconds' => round($avgDuration)]);
+    });
+
+    Route::get('/total-visits', function () {
+        $total = ActivityLog::where('action_type', 'visit')->count();
+        return response()->json(['total' => $total]);
+    });
+
+    Route::get('/avg-daily-visits', function () {
+        $dailyAvg = ActivityLog::where('action_type', 'visit')
+            ->whereDate('created_at', '>=', now()->subDays(30))
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
+            ->groupBy('date')
+            ->get()
+            ->avg('total');
+        return response()->json(['avg_daily_visits' => round($dailyAvg, 2)]);
+    });
+
+    Route::get('/avg-search-per-day', function () {
+        $avg = ActivityLog::where('action_type', 'search')
+            ->whereDate('created_at', '>=', now()->subDays(30))
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as total'))
+            ->groupBy('date')
+            ->get()
+            ->avg('total');
+        return response()->json(['avg_search_per_day' => round($avg, 2)]);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| FALLBACK ROUTE (404)
+|--------------------------------------------------------------------------
+*/
+Route::fallback(function () {
+    return view('errors.404');
+});
+
+Route::get('/test-log', function () {
+    \App\Helpers\ActivityHelper::log('search', 'Test pencarian dari route', 'search', 'test');
+    return 'Cek database, seharusnya ada baris baru dengan action_type=search';
 });
