@@ -41,7 +41,7 @@ class AuthController extends Controller
                 return redirect()->route('admin.dashboard');
             }
 
-            return redirect()->route('user.recommendation');
+            return redirect()->route('user.home');
         }
 
         return back()->withErrors([
@@ -59,6 +59,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect()->route('landingpage');
     }
 }

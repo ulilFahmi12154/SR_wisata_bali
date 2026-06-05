@@ -1,245 +1,293 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
-@section('admin-content')
-<div class="space-y-6">
-    {{-- Page Header --}}
-    <header class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div class="space-y-2">
-                <p class="text-sm uppercase tracking-[0.24em] text-slate-500">Analytics</p>
-                <h1 class="text-3xl font-semibold tracking-tight text-slate-900">Analitik Sistem</h1>
-                <p class="max-w-2xl text-sm leading-6 text-slate-500">Pantau metrik kinerja sistem, pengunjung, dan aktivitas pengguna secara real-time.</p>
-            </div>
-            <div class="flex gap-3">
-                <select class="px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Periode: 30 Hari</option>
-                    <option>7 Hari</option>
-                    <option>30 Hari</option>
-                    <option>90 Hari</option>
-                    <option>1 Tahun</option>
-                </select>
-                <button class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </header>
+@section('topbar_title', 'Analisis')
+@section('title', 'Analisis Performa — Admin Jelajah')
 
-    {{-- Key Metrics --}}
-    <section class="grid gap-4 xl:grid-cols-4">
-        <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm text-slate-500">Total Pengunjung</p>
-                    <p class="mt-2 text-3xl font-semibold text-slate-900">142.8K</p>
-                    <p class="mt-2 text-sm text-emerald-600 font-medium">↑ 12% dari bulan lalu</p>
-                </div>
-                <div class="p-3 rounded-lg bg-blue-100">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                    </svg>
-                </div>
-            </div>
-        </article>
+@section('body')
+<div class="min-h-screen bg-[#f8fafc] flex font-sans antialiased text-slate-800">
+    @include('components.admin.sidebar')
 
-        <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm text-slate-500">Pencarian Destinasi</p>
-                    <p class="mt-2 text-3xl font-semibold text-slate-900">28.4K</p>
-                    <p class="mt-2 text-sm text-emerald-600 font-medium">↑ 8% dari bulan lalu</p>
-                </div>
-                <div class="p-3 rounded-lg bg-emerald-100">
-                    <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </div>
-            </div>
-        </article>
+    <main class="flex-1 pl-0 sm:pl-64 min-h-screen flex flex-col justify-between transition-all duration-300">
+        <div class="p-8 max-w-7xl w-full mx-auto space-y-6">
+            @include('components.admin.topbar')
 
-        <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm text-slate-500">Ulasan Baru</p>
-                    <p class="mt-2 text-3xl font-semibold text-slate-900">1.240</p>
-                    <p class="mt-2 text-sm text-red-600 font-medium">↓ 3% dari bulan lalu</p>
-                </div>
-                <div class="p-3 rounded-lg bg-amber-100">
-                    <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-2-4 2V5a2 2 0 012-2h8a2 2 0 012 2v11l-4-2-4 2V5z"/>
-                    </svg>
-                </div>
-            </div>
-        </article>
-
-        <article class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm text-slate-500">Rating Rata-rata</p>
-                    <p class="mt-2 text-3xl font-semibold text-slate-900">4.6</p>
-                    <p class="mt-2 text-sm text-emerald-600 font-medium">↑ 0.2 dari bulan lalu</p>
-                </div>
-                <div class="p-3 rounded-lg bg-purple-100">
-                    <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                    </svg>
-                </div>
-            </div>
-        </article>
-    </section>
-
-    {{-- Charts --}}
-    <div class="grid gap-6 xl:grid-cols-2">
-        {{-- Visitor Trend Chart --}}
-        <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <p class="text-sm text-slate-500">Tren Pengunjung</p>
-                    <h3 class="mt-1 text-lg font-semibold text-slate-900">Pengunjung per Hari</h3>
-                </div>
-                <div class="text-sm text-emerald-600 font-medium bg-emerald-50 px-3 py-1 rounded-full">↑ 12%</div>
-            </div>
-
-            <div class="h-64 flex items-end justify-between gap-2 bg-slate-50 p-4 rounded-xl">
-                <div class="flex-1 h-32 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Mon: 2,400"></div>
-                <div class="flex-1 h-40 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Tue: 2,800"></div>
-                <div class="flex-1 h-36 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Wed: 2,600"></div>
-                <div class="flex-1 h-44 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Thu: 3,200"></div>
-                <div class="flex-1 h-48 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Fri: 3,500"></div>
-                <div class="flex-1 h-52 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Sat: 3,800"></div>
-                <div class="flex-1 h-44 bg-gradient-to-t from-blue-400 to-blue-500 rounded-t-lg hover:from-blue-500 hover:to-blue-600 cursor-pointer transition-all" title="Sun: 3,100"></div>
-            </div>
-
-            <div class="mt-4 grid grid-cols-7 gap-2 text-xs text-slate-500 text-center">
-                <span>Sen</span>
-                <span>Sel</span>
-                <span>Rab</span>
-                <span>Kam</span>
-                <span>Jum</span>
-                <span>Sab</span>
-                <span>Min</span>
-            </div>
-        </div>
-
-        {{-- Top Destinations --}}
-        <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <p class="text-sm text-slate-500">Destinasi Populer</p>
-                    <h3 class="mt-1 text-lg font-semibold text-slate-900">Destinasi Paling Dicari</h3>
-                </div>
-            </div>
-
-            <div class="space-y-3">
-                @for($i = 1; $i <= 5; $i++)
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3 flex-1">
-                        <span class="text-sm font-semibold text-slate-500">{{ $i }}</span>
-                        <span class="text-sm font-medium text-slate-900">Destinasi {{ $i }}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-500" style="width: {{ (100 - $i * 10) }}%;"></div>
+            {{-- KARTU STATISTIK UTAMA (4 KARTU) --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                {{-- KARTU 1: TOTAL KUNJUNGAN --}}
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Kunjungan</span>
+                        <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight">
+                            {{ number_format($analyticsStats['total_kunjungan'] ?? 0, 0, ',', '.') }}
+                        </h3>
+                        <div class="text-[10px] font-bold flex items-center gap-1 mt-1">
+                            @if(($analyticsStats['tren_kunjungan']['status'] ?? '') === 'naik')
+                                <span class="text-emerald-600 flex items-center gap-0.5">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                    </svg>
+                                    +{{ $analyticsStats['tren_kunjungan']['persen'] }}%
+                                </span>
+                                <span class="text-slate-400">vs bln lalu</span>
+                            @elseif(($analyticsStats['tren_kunjungan']['status'] ?? '') === 'turun')
+                                <span class="text-red-500 flex items-center gap-0.5">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6"/>
+                                    </svg>
+                                    -{{ $analyticsStats['tren_kunjungan']['persen'] }}%
+                                </span>
+                                <span class="text-slate-400">vs bln lalu</span>
+                            @else
+                                <span class="text-slate-500 flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                    Stabil
+                                </span>
+                            @endif
                         </div>
-                        <span class="text-sm font-medium text-slate-900 w-12 text-right">{{ 100 - $i * 10 }}%</span>
+                    </div>
+                    <div class="p-3 bg-sky-50 text-sky-600 rounded-xl">
+                        <svg class="w-5 h-5 text-[#1e617a]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
                     </div>
                 </div>
-                @endfor
-            </div>
-        </div>
-    </div>
 
-    {{-- Bottom Charts --}}
-    <div class="grid gap-6 xl:grid-cols-3">
-        {{-- Rating Distribution --}}
-        <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div>
-                <p class="text-sm text-slate-500">Distribusi Rating</p>
-                <h3 class="mt-1 text-lg font-semibold text-slate-900">Rating Destinasi</h3>
-            </div>
-
-            <div class="mt-6 space-y-3">
-                @for($stars = 5; $stars >= 1; $stars--)
-                <div class="flex items-center gap-3">
-                    <span class="text-sm text-slate-600 w-8">⭐ {{ $stars }}</span>
-                    <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
-                        <div class="h-full rounded-full bg-amber-400" style="width: {{ 80 - $stars * 10 }}%;"></div>
+                {{-- KARTU 2: RATA-RATA HARIAN --}}
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rata-rata Harian</span>
+                        <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight">
+                            {{ number_format($analyticsStats['rata_rata_harian'] ?? 0, 0, ',', '.') }}
+                        </h3>
+                        <div class="text-[10px] font-bold flex items-center gap-1 mt-1">
+                            @if(($analyticsStats['tren_rata_harian']['status'] ?? '') === 'naik')
+                                <span class="text-emerald-600">+{{ $analyticsStats['tren_rata_harian']['persen'] }}%</span>
+                            @elseif(($analyticsStats['tren_rata_harian']['status'] ?? '') === 'turun')
+                                <span class="text-red-500">-{{ $analyticsStats['tren_rata_harian']['persen'] }}%</span>
+                            @else
+                                <span class="text-slate-400">Stabil</span>
+                            @endif
+                            <span class="text-slate-400">vs bln lalu</span>
+                        </div>
                     </div>
-                    <span class="text-sm font-medium text-slate-900 w-8 text-right">{{ 80 - $stars * 10 }}%</span>
-                </div>
-                @endfor
-            </div>
-        </div>
-
-        {{-- Category Breakdown --}}
-        <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div>
-                <p class="text-sm text-slate-500">Kategori Destinasi</p>
-                <h3 class="mt-1 text-lg font-semibold text-slate-900">Distribusi Kategori</h3>
-            </div>
-
-            <div class="mt-6 space-y-3">
-                @php
-                    $categories = [
-                        ['name' => 'Pantai', 'count' => 8, 'color' => 'bg-blue-500'],
-                        ['name' => 'Gunung', 'count' => 6, 'color' => 'bg-emerald-500'],
-                        ['name' => 'Kuil', 'count' => 5, 'color' => 'bg-purple-500'],
-                        ['name' => 'Seni & Budaya', 'count' => 3, 'color' => 'bg-amber-500'],
-                    ];
-                @endphp
-
-                @foreach($categories as $cat)
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full {{ $cat['color'] }}"></div>
-                        <span class="text-sm text-slate-700">{{ $cat['name'] }}</span>
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"/>
+                        </svg>
                     </div>
-                    <span class="text-sm font-medium text-slate-900">{{ $cat['count'] }}</span>
                 </div>
-                @endforeach
-            </div>
-        </div>
 
-        {{-- Recent Activities --}}
-        <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <div>
-                <p class="text-sm text-slate-500">Aktivitas Terbaru</p>
-                <h3 class="mt-1 text-lg font-semibold text-slate-900">Log Sistem</h3>
+                {{-- KARTU 3: DURASI SESI RATA-RATA --}}
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Durasi Sesi</span>
+                        <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight">
+                            {{ $analyticsStats['durasi_sesi'] ?? '0m 0s' }}
+                        </h3>
+                        <div class="text-[10px] font-bold flex items-center gap-1 mt-1">
+                            @if(($analyticsStats['tren_durasi_sesi']['status'] ?? '') === 'naik')
+                                <span class="text-emerald-600">+{{ $analyticsStats['tren_durasi_sesi']['persen'] }}%</span>
+                            @elseif(($analyticsStats['tren_durasi_sesi']['status'] ?? '') === 'turun')
+                                <span class="text-red-500">-{{ $analyticsStats['tren_durasi_sesi']['persen'] }}%</span>
+                            @else
+                                <span class="text-slate-400">Stabil</span>
+                            @endif
+                            <span class="text-slate-400">vs bln lalu</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                {{-- KARTU 4: RATA-RATA PENCARIAN PER HARI --}}
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                    <div class="space-y-1">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rata-rata Pencarian/Hari</span>
+                        <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight">
+                            {{ number_format($analyticsStats['rata_pencarian_per_hari'] ?? 0, 1, ',', '.') }}
+                        </h3>
+                        <div class="text-[10px] font-bold flex items-center gap-1 mt-1">
+                            @if(($analyticsStats['tren_pencarian']['status'] ?? '') === 'naik')
+                                <span class="text-emerald-600">+{{ $analyticsStats['tren_pencarian']['persen'] }}%</span>
+                            @elseif(($analyticsStats['tren_pencarian']['status'] ?? '') === 'turun')
+                                <span class="text-red-500">-{{ $analyticsStats['tren_pencarian']['persen'] }}%</span>
+                            @else
+                                <span class="text-slate-400">Stabil</span>
+                            @endif
+                            <span class="text-slate-400">vs bln lalu</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                </div>
             </div>
 
-            <div class="mt-6 space-y-2 text-sm max-h-64 overflow-y-auto">
-                <div class="flex gap-2 pb-2 border-b border-slate-200">
-                    <span class="text-blue-600">●</span>
+            {{-- GRAFIK TREN KUNJUNGAN & LOGIN --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
                     <div>
-                        <p class="text-slate-900 font-medium">Pengguna baru terdaftar</p>
-                        <p class="text-xs text-slate-500">2 menit yang lalu</p>
+                        <h3 class="text-sm font-bold text-sky-900 tracking-tight">Tren Kunjungan Harian</h3>
+                        <p class="text-[10px] text-slate-400 font-medium">7 hari terakhir</p>
+                    </div>
+                    <div class="h-64 relative w-full">
+                        <canvas id="analyticsWeeklyChart"></canvas>
                     </div>
                 </div>
-                <div class="flex gap-2 pb-2 border-b border-slate-200">
-                    <span class="text-emerald-600">●</span>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
                     <div>
-                        <p class="text-slate-900 font-medium">Destinasi dipublikasikan</p>
-                        <p class="text-xs text-slate-500">15 menit yang lalu</p>
+                        <h3 class="text-sm font-bold text-sky-900 tracking-tight">Login Pengguna per Hari</h3>
+                        <p class="text-[10px] text-slate-400 font-medium">7 hari terakhir (user unik)</p>
                     </div>
-                </div>
-                <div class="flex gap-2 pb-2 border-b border-slate-200">
-                    <span class="text-amber-600">●</span>
-                    <div>
-                        <p class="text-slate-900 font-medium">Review baru diterima</p>
-                        <p class="text-xs text-slate-500">1 jam yang lalu</p>
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <span class="text-purple-600">●</span>
-                    <div>
-                        <p class="text-slate-900 font-medium">Preferensi pengguna diperbarui</p>
-                        <p class="text-xs text-slate-500">3 jam yang lalu</p>
+                    <div class="h-64 relative w-full">
+                        <canvas id="loginChart"></canvas>
                     </div>
                 </div>
             </div>
+
+            {{-- GROWTH INSIGHT & RINGKASAN --}}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-[#1e617a] p-6 rounded-2xl text-white shadow-sm flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <span class="px-2.5 py-1 bg-white/10 text-[9px] font-black uppercase tracking-wider rounded-md backdrop-blur-sm">
+                            Growth Insight
+                        </span>
+                        <div class="space-y-2">
+                            <h4 class="text-base font-bold tracking-tight leading-snug">
+                                Pertumbuhan Destinasi Wisata {{ $growthInsight['kategori_top'] ?? 'Alam' }}
+                            </h4>
+                            <p class="text-xs text-sky-100/80 leading-relaxed font-light">
+                                Kategori <strong class="text-white font-bold">{{ $growthInsight['kategori_top'] ?? 'Alam' }}</strong> mencatat kenaikan minat tertinggi sebesar 
+                                <strong class="text-white font-bold">{{ $growthInsight['persentase'] ?? 24 }}%</strong> pada minggu ini dibandingkan kategori {{ $growthInsight['kategori_pembanding'] ?? 'Rekreasi' }}.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="space-y-3 pt-6">
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between text-[11px] font-bold text-sky-200">
+                                <span>Target Bulanan</span>
+                                <span>{{ $growthInsight['target_bulanan'] ?? '69%' }}</span>
+                            </div>
+                            <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                                <div class="bg-white h-full rounded-full" style="width: {{ $growthInsight['target_bulanan_percent'] ?? '69' }}%"></div>
+                            </div>
+                        </div>
+                        <a href="{{ route('admin.analytics.category-details') }}" class="w-full block text-center py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all backdrop-blur-sm">
+                            See Category Details
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                    <h4 class="text-sm font-bold text-slate-700">Ringkasan Aktivitas</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Total Pencarian (30 hari)</span>
+                            <span class="font-bold">{{ number_format($analyticsStats['total_pencarian_30hari'] ?? 0, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Total Login (30 hari)</span>
+                            <span class="font-bold">{{ number_format($analyticsStats['total_login_30hari'] ?? 0, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Rata-rata Sesi per User</span>
+                            <span class="font-bold">{{ number_format($analyticsStats['rata_sesi_per_user'] ?? 0, 1) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- TABEL PERINGKAT DESTINASI POPULER --}}
+            <div id="tabel-peringkat-container">
+                @include('pages.admin.partials.tabel-peringkat')
+            </div>
+
+            <<script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Grafik kunjungan (sudah sesuai format {labels, data})
+                    const ctx = document.getElementById('analyticsWeeklyChart')?.getContext('2d');
+                    if (ctx) {
+                        fetch('/api/daily-visits')
+                            .then(res => res.json())
+                            .then(data => {
+                                new Chart(ctx, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: data.labels,
+                                        datasets: [{
+                                            label: 'Kunjungan',
+                                            data: data.data,
+                                            backgroundColor: '#1e617a',
+                                            borderRadius: 6,
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: { legend: { display: false } },
+                                        scales: { y: { beginAtZero: true, ticks: { callback: (v) => v.toLocaleString() } } }
+                                    }
+                                });
+                            })
+                            .catch(err => console.error('Gagal memuat kunjungan:', err));
+                    }
+
+                    // Grafik login per hari (menggunakan endpoint yang baru)
+                    const loginCtx = document.getElementById('loginChart')?.getContext('2d');
+                    if (loginCtx) {
+                        fetch('/api/daily-logins')
+                            .then(res => res.json())
+                            .then(data => {
+                                new Chart(loginCtx, {
+                                    type: 'line',
+                                    data: {
+                                        labels: data.labels,
+                                        datasets: [{
+                                            label: 'Login Unik',
+                                            data: data.data,
+                                            borderColor: '#f59e0b',
+                                            backgroundColor: 'rgba(245,158,11,0.1)',
+                                            fill: true,
+                                            tension: 0.3,
+                                            pointBackgroundColor: '#f59e0b',
+                                            pointBorderColor: '#f59e0b',
+                                            pointRadius: 4
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1, callback: (v) => v } } }
+                                    }
+                                });
+                            })
+                            .catch(err => console.error('Gagal memuat login:', err));
+                    }
+
+                    // AJAX pagination untuk tabel peringkat (tetap)
+                    const container = document.getElementById('tabel-peringkat-container');
+                    if (container) {
+                        container.addEventListener('click', function (e) {
+                            const link = e.target.closest('.AJAX-pagination a');
+                            if (link) {
+                                e.preventDefault();
+                                fetch(link.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                                    .then(res => res.text())
+                                    .then(html => container.innerHTML = html)
+                                    .catch(console.warn);
+                            }
+                        });
+                    }
+                });
+            </script>
         </div>
-    </div>
+    </main>
 </div>
 @endsection

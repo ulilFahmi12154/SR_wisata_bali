@@ -15,19 +15,19 @@
 
         <div class="landing-hero-buttons">
             <a href="{{ $startRoute }}" class="landing-btn-primary">
-                Mulai Cari Wisata →
+                Mulai Cari Wisata <span aria-hidden="true">&rarr;</span>
             </a>
 
-            <button class="landing-btn-secondary">
+            <a href="#fitur-utama" class="landing-btn-secondary">
                 Pelajari Metode SAW
-            </button>
+            </a>
         </div>
     </div>
 </section>
 
 
 {{-- Features Section --}}
-<section class="landing-features">
+<section id="fitur-utama" class="landing-features">
 
     <div class="landing-features-header">
 
@@ -48,7 +48,7 @@
 
         <div class="landing-feature-card light">
 
-            <div class="landing-feature-icon">☰</div>
+            <div class="landing-feature-icon" aria-hidden="true">&#9776;</div>
 
             <h3>Analisis Multi-Kriteria</h3>
 
@@ -68,7 +68,7 @@
 
         <div class="landing-feature-card dark">
 
-            <div class="landing-feature-icon">⇄</div>
+            <div class="landing-feature-icon" aria-hidden="true">&#8644;</div>
 
             <h3>Destinasi Serupa</h3>
 
@@ -78,7 +78,7 @@
             </p>
 
             <a href="{{ $startRoute }}" class="landing-explore-link">
-                MULAI JELAJAH ↗
+                MULAI JELAJAH <span aria-hidden="true">&nearr;</span>
             </a>
 
         </div>
@@ -95,7 +95,7 @@
                 <h3>Keindahan Tegalalang</h3>
 
                 <span class="landing-card-rating">
-                    ★ 4.8 Rating
+                    &#9733; 4.8 Rating
                 </span>
 
             </div>
@@ -130,7 +130,7 @@
                      style="background-image: url('{{ $imgUrl }}')">
 
                     <div class="landing-pop-match">
-                        ● {{ round($wisata->popularity_score) }} SCORE
+                        <span aria-hidden="true">&#9679;</span> {{ round($wisata->popularity_score) }} SCORE
                     </div>
 
                 </div>
@@ -210,7 +210,7 @@
                 Mulai Cari Wisata Sekarang
             </a>
 
-            <a href="#"
+            <a href="#fitur-utama"
                class="landing-cta-btn secondary">
                 Lihat Demo Sistem
             </a>

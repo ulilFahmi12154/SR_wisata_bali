@@ -15,10 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name'); // WAJIB untuk Laravel Auth
             $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-
             $table->string('role')->default('user'); // user / admin
-
             $table->rememberToken(); // penting untuk session login
             $table->timestamps(); // created_at & updated_at
         });

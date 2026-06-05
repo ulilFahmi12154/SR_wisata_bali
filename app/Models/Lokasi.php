@@ -9,4 +9,9 @@ class Lokasi extends Model
     protected $table = 'lokasi';
     protected $fillable = ['nama_kabupaten'];
     public $timestamps = false;
+
+    public function wisata()
+    {
+        return $this->hasMany(Wisata::class, 'lokasi_id');
+    }
 }

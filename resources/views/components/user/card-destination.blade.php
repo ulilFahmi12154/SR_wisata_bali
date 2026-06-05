@@ -14,7 +14,7 @@
     <div class="dest-mini-media">
         <img src="{{ $image }}" alt="{{ $name }}">
         @if($rank)
-            <span class="dest-mini-rank">Rank #{{ $rank }}</span>
+            <span class="dest-mini-rank">Peringkat #{{ $rank }}</span>
         @endif
     </div>
     @endif
@@ -31,7 +31,7 @@
 
         <div class="dest-mini-meta">
             <div>
-                <span>Price</span>
+                <span>Harga</span>
                 <strong>{{ $price }}</strong>
             </div>
             <div>
@@ -40,6 +40,6 @@
             </div>
         </div>
 
-        <a class="dest-mini-action" href="{{ $href }}">Explore Destination</a>
+        <a class="dest-mini-action" href="{{ $href }}">Jelajahi Destinasi</a>
     </div>
 </article>

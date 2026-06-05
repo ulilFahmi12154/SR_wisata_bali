@@ -17,14 +17,14 @@ class Wisata extends Model
         'keterangan', 'jam_operasional', 'link', 'image', 'latitude', 'longitude'
     ];
 
-    public function kategori(): BelongsTo
+    public function kategori()
     {
-        return $this->belongsTo(Kategori::class);
+        return $this->belongsTo(Kategori::class, 'kategori_id');
     }
 
-    public function lokasi(): BelongsTo
+    public function lokasi()
     {
-        return $this->belongsTo(Lokasi::class);
+        return $this->belongsTo(Lokasi::class, 'lokasi_id');
     }
 
     public function fasilitas(): BelongsToMany

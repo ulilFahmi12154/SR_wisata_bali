@@ -1,130 +1,241 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
-@section('admin-content')
-<div class="space-y-6">
-    {{-- Page Header --}}
-    <header class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div class="space-y-2">
-                <p class="text-sm uppercase tracking-[0.24em] text-slate-500">Manajemen Pengguna</p>
-                <h1 class="text-3xl font-semibold tracking-tight text-slate-900">Kelola Pengguna</h1>
-                <p class="max-w-2xl text-sm leading-6 text-slate-500">Lihat, edit, dan kelola semua pengguna dalam sistem. Pantau aktivitas dan status setiap pengguna secara real-time.</p>
+@section('topbar_title', 'Kelola User')
+@section('topbar_search_placeholder', 'Cari nama atau email...')
+@section('title', 'Kelola User — Admin Jelajah')
+
+@section('body')
+<div class="min-h-screen bg-[#f8fafc] flex font-sans antialiased text-slate-800">
+    @include('components.admin.sidebar')
+
+    <main class="flex-1 pl-0 sm:pl-64 min-h-screen flex flex-col justify-between transition-all duration-300">
+        <div class="p-8 max-w-7xl w-full mx-auto space-y-6">
+            @include('components.admin.topbar')
+            
+            {{-- Session Messages --}}
+            @if(session('success'))
+                <div class="p-4 mb-4 text-sm text-emerald-700 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center space-x-2">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="font-semibold">{{ session('success') }}</span>
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="p-4 mb-4 text-sm text-rose-700 bg-rose-50 rounded-xl border border-rose-100 flex items-center space-x-2">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span class="font-semibold">{{ session('error') }}</span>
+                </div>
+            @endif
+
+            {{-- Header & Tombol Tambah --}}
+            <div class="flex items-center justify-between">
+                <div class="space-y-1">
+                    <h2 class="text-xl font-bold text-[#1e465a]">Daftar User</h2>
+                    <p class="text-xs text-gray-400">Menampilkan total {{ number_format($users->total()) }} user yang terdaftar.</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    {{-- Filter Role --}}
+                    <form action="{{ route('admin.users.index') }}" method="GET" id="roleFilterForm" class="m-0">
+                        <input type="hidden" name="search" value="{{ request('search') }}">
+                        <select name="role" onchange="document.getElementById('roleFilterForm').submit()" class="appearance-none pl-4 pr-10 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1e617a]/10 focus:border-[#1e617a] cursor-pointer transition-all">
+                            <option value="">Semua Peran</option>
+                            <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>User</option>
+                        </select>
+                    </form>
+                    <button @click="openCreate = true" class="flex items-center space-x-2 px-5 py-2.5 bg-[#004e64] hover:bg-[#003d52] text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span>Tambah Pengguna Baru</span>
+                    </button>
+                </div>
             </div>
-            <a href="{{ route('admin.users.create') }}" class="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                </svg>
-                Tambah Pengguna
-            </a>
+
+            {{-- Tabel User --}}
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50/70 text-[11px] font-bold text-gray-400 uppercase tracking-wider border-b border-slate-100">
+                                <th class="px-6 py-4">Nama</th>
+                                <th class="px-6 py-4">Email</th>
+                                <th class="px-6 py-4">Peran</th>
+                                <th class="px-6 py-4">Tanggal Bergabung</th>
+                                <th class="px-6 py-4 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50 text-sm text-slate-700 font-medium">
+                            @forelse($users as $user)
+                            <tr class="hover:bg-slate-50/50 transition-colors" x-data="{ showOldPassword: false, showEditPassword: false }">
+                                <td class="px-6 py-4 flex items-center space-x-3">
+                                    <div class="w-8 h-8 rounded-full bg-sky-50 text-[#1e617a] flex items-center justify-center border border-slate-100 font-bold text-xs uppercase">
+                                        {{ substr($user->name, 0, 2) }}
+                                    </div>
+                                    <span class="font-bold text-[#1e465a]">{{ $user->name }}</span>
+                                </td>
+                                <td class="px-6 py-4 text-slate-500 font-normal">{{ $user->email }}</td>
+                                <td class="px-6 py-4">
+                                    @php $roleBadge = strtolower($user->role) === 'admin' ? 'bg-amber-50 text-amber-600' : 'bg-sky-50 text-sky-600'; @endphp
+                                    <span class="px-2.5 py-1 text-[10px] font-bold rounded-md capitalize {{ $roleBadge }}">{{ $user->role ?? 'User' }}</span>
+                                </td>
+                                <td class="px-6 py-4 text-slate-400 font-light">{{ $user->created_at->format('d M Y') }}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <div class="flex items-center justify-center space-x-3 text-gray-400">
+                                        <button @click="openEditId = '{{ $user->id }}'; showOldPassword = false; showEditPassword = false" class="hover:text-amber-500 transition-colors cursor-pointer">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                        </button>
+                                        <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Hapus pengguna ini?')" class="inline-block m-0">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="hover:text-rose-500 transition-colors flex items-center cursor-pointer">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    {{-- Modal Edit --}}
+                                    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm text-left" x-show="openEditId === '{{ $user->id }}'" x-transition.opacity style="display: none;" @keydown.escape.window="openEditId = null">
+                                        <div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl border border-slate-100 space-y-4" @click.away="openEditId = null">
+                                            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                                <h3 class="text-base font-bold text-[#1e465a]">Edit Data Pengguna</h3>
+                                                <button @click="openEditId = null" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                            </div>
+                                            <form action="{{ route('admin.users.update', $user->id) }}" method="POST" class="space-y-4 m-0">
+                                                @csrf @method('PUT')
+                                                <div class="space-y-1">
+                                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Nama Lengkap</label>
+                                                    <input type="text" name="name" value="{{ $user->name }}" required class="w-full px-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#1e617a] text-slate-700">
+                                                </div>
+                                                <div class="space-y-1">
+                                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Alamat Email</label>
+                                                    <input type="email" name="email" value="{{ $user->email }}" required class="w-full px-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#1e617a] text-slate-700">
+                                                </div>
+                                                <div class="space-y-1">
+                                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Peran Pengguna</label>
+                                                    <select name="role" required class="w-full px-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#1e617a] text-slate-700 cursor-pointer">
+                                                        <option value="user" {{ strtolower($user->role) == 'user' ? 'selected' : '' }}>User</option>
+                                                        <option value="admin" {{ strtolower($user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
+                                                    </select>
+                                                </div>
+                                                <div class="space-y-1">
+                                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Password Lama</label>
+                                                    <div class="relative flex items-center">
+                                                        <input :type="showOldPassword ? 'text' : 'password'" name="old_password" placeholder="Masukkan password saat ini" class="w-full pl-4 pr-10 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#1e617a] text-slate-700">
+                                                        <button type="button" @click="showOldPassword = !showOldPassword" class="absolute right-3 text-gray-400 hover:text-slate-600 focus:outline-none cursor-pointer">
+                                                            <svg x-show="showOldPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                            <svg x-show="!showOldPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.024 10.024 0 014.175-4.404m2.036-1.023A10.06 10.06 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.13 4.412m-6-5.412a3 3 0 11-4.243-4.243m1.414 1.414L4.929 4.93m14.142 14.142l-1.414-1.414"/></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="space-y-1">
+                                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Password Baru</label>
+                                                    <div class="relative flex items-center">
+                                                        <input :type="showEditPassword ? 'text' : 'password'" name="password" placeholder="••••••••" class="w-full pl-4 pr-10 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#1e617a] text-slate-700">
+                                                        <button type="button" @click="showEditPassword = !showEditPassword" class="absolute right-3 text-gray-400 hover:text-slate-600 focus:outline-none cursor-pointer">
+                                                            <svg x-show="showEditPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                            <svg x-show="!showEditPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.024 10.024 0 014.175-4.404m2.036-1.023A10.06 10.06 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.13 4.412m-6-5.412a3 3 0 11-4.243-4.243m1.414 1.414L4.929 4.93m14.142 14.142l-1.414-1.414"/></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+                                                    <button type="button" @click="openEditId = null" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all cursor-pointer">Batal</button>
+                                                    <button type="submit" class="px-4 py-2 bg-[#004e64] hover:bg-[#003d52] text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer">Simpan Perubahan</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-sm text-slate-400 font-light">Tidak ada data pengguna ditemukan.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Pagination --}}
+                <div class="p-5 flex items-center justify-between border-t border-slate-100 bg-white custom-pagination">
+                    <span class="text-xs text-gray-400 font-medium">Menampilkan {{ $users->firstItem() ?? 0 }} sampai {{ $users->lastItem() ?? 0 }} dari {{ $users->total() }} user</span>
+                    <div>{{ $users->appends(request()->query())->links() }}</div>
+                </div>
+            </div>
         </div>
-    </header>
+    </main>
 
-    {{-- Search and Filters --}}
-    <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div class="flex-1">
-                <input type="text"
-                       placeholder="Cari nama, email, atau ID pengguna..."
-                       class="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+    {{-- Modal Tambah User (sama seperti sebelumnya) --}}
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity" x-show="openCreate" x-transition.opacity style="display: none;" @keydown.escape.window="openCreate = false" x-data="{ showCreatePassword: false }">
+        <div class="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl border border-slate-100 space-y-4" @click.away="openCreate = false; showCreatePassword = false">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-[#1e465a]">Tambah Pengguna Baru</h3>
+                <button @click="openCreate = false; showCreatePassword = false" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
-            <div class="flex gap-2">
-                <select class="px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Status: Semua</option>
-                    <option>Aktif</option>
-                    <option>Nonaktif</option>
-                </select>
-                <select class="px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Peran: Semua</option>
-                    <option>User</option>
-                    <option>Admin</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    {{-- Users Table --}}
-    <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="border-b border-slate-200">
-                <tr class="text-left">
-                    <th class="px-4 py-3 font-semibold text-slate-900">Nama</th>
-                    <th class="px-4 py-3 font-semibold text-slate-900">Email</th>
-                    <th class="px-4 py-3 font-semibold text-slate-900">Peran</th>
-                    <th class="px-4 py-3 font-semibold text-slate-900">Status</th>
-                    <th class="px-4 py-3 font-semibold text-slate-900">Bergabung</th>
-                    <th class="px-4 py-3 font-semibold text-slate-900">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200">
-                @forelse($users ?? [] as $user)
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-4 py-3">
-                        <div class="flex items-center gap-2">
-                            <img src="{{ $user->avatar_url ?? 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&background=2E86C1&color=fff&size=80' }}"
-                                 alt="{{ $user->name }}"
-                                 class="w-8 h-8 rounded-full">
-                            <span class="font-medium text-slate-900">{{ $user->name }}</span>
-                        </div>
-                    </td>
-                    <td class="px-4 py-3 text-slate-600">{{ $user->email }}</td>
-                    <td class="px-4 py-3">
-                        <span class="inline-block px-3 py-1 rounded-full text-xs font-medium {{ $user->role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
-                            {{ ucfirst($user->role ?? 'User') }}
-                        </span>
-                    </td>
-                    <td class="px-4 py-3">
-                        <span class="inline-block px-3 py-1 rounded-full text-xs font-medium {{ $user->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700' }}">
-                            {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
-                        </span>
-                    </td>
-                    <td class="px-4 py-3 text-slate-600 text-xs">{{ $user->created_at?->format('d M Y') ?? '-' }}</td>
-                    <td class="px-4 py-3">
-                        <div class="flex items-center gap-2">
-                            <a href="{{ route('admin.users.show', $user->id) }}" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors" title="Lihat">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                            </a>
-                            <a href="{{ route('admin.users.edit', $user->id) }}" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors" title="Edit">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
-                            </a>
-                            <button class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6" class="px-4 py-8 text-center text-slate-500">
-                        <div class="flex flex-col items-center gap-2">
-                            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                            </svg>
-                            <span>Tidak ada pengguna ditemukan</span>
-                        </div>
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-
-        {{-- Pagination --}}
-        <div class="flex items-center justify-between mt-6 pt-6 border-t border-slate-200">
-            <p class="text-sm text-slate-600">Menampilkan 1 hingga 10 dari 45 pengguna</p>
-            <div class="flex gap-2">
-                <button class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm">← Sebelumnya</button>
-                <button class="px-3 py-2 rounded-lg border border-slate-200 bg-slate-950 text-white text-sm">1</button>
-                <button class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm">2</button>
-                <button class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm">3</button>
-                <button class="px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors text-sm">Selanjutnya →</button>
-            </div>
+            <form action="{{ route('admin.users.store') }}" method="POST" class="space-y-4 m-0">
+                @csrf
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Nama Lengkap</label>
+                    <input type="text" name="name" placeholder="Masukkan nama lengkap" required class="w-full px-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#1e617a] text-slate-700">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Alamat Email</label>
+                    <input type="email" name="email" placeholder="contoh@domain.com" required class="w-full px-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#1e617a] text-slate-700">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Peran Pengguna</label>
+                    <select name="role" required class="w-full px-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#1e617a] text-slate-700 cursor-pointer">
+                        <option value="user" selected>User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block">Password</label>
+                    <div class="relative flex items-center">
+                        <input :type="showCreatePassword ? 'text' : 'password'" name="password" placeholder="••••••••" required class="w-full pl-4 pr-10 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#1e617a] text-slate-700">
+                        <button type="button" @click="showCreatePassword = !showCreatePassword" class="absolute right-3 text-gray-400 hover:text-slate-600 focus:outline-none cursor-pointer">
+                            <svg x-show="showCreatePassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <svg x-show="!showCreatePassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a10.024 10.024 0 014.175-4.404m2.036-1.023A10.06 10.06 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.13 4.412m-6-5.412a3 3 0 11-4.243-4.243m1.414 1.414L4.929 4.93m14.142 14.142l-1.414-1.414"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" @click="openCreate = false; showCreatePassword = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all cursor-pointer">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-[#004e64] hover:bg-[#003d52] text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer">Tambah User</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+{{-- Script untuk menghubungkan pencarian di topbar --}}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const topbarSearch = document.getElementById('topbarSearchInput');
+        if (topbarSearch) {
+            // Set nilai input dari URL parameter 'search'
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchValue = urlParams.get('search') || '';
+            topbarSearch.value = searchValue;
+
+            let debounceTimer;
+            topbarSearch.addEventListener("input", function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    const newSearch = topbarSearch.value;
+                    const currentUrl = new URL(window.location.href);
+                    if (newSearch) {
+                        currentUrl.searchParams.set('search', newSearch);
+                    } else {
+                        currentUrl.searchParams.delete('search');
+                    }
+                    currentUrl.searchParams.delete('page'); // reset halaman
+                    window.location.href = currentUrl.toString();
+                }, 500);
+            });
+        }
+    });
+</script>
 @endsection
