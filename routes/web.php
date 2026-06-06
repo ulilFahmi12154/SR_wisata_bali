@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\DestinationController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Middleware\EnsureAdmin;
 use App\Helpers\ActivityHelper;
 
 /*
@@ -210,7 +211,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         })->name('password.email');
     });
 
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', EnsureAdmin::class])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('users', UserController::class);
         Route::resource('destinations', DestinationController::class);
