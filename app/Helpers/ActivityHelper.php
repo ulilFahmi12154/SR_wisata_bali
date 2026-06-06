@@ -3,13 +3,14 @@
 namespace App\Helpers;
 
 use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 class ActivityHelper
 {
-    public static function log($actionType, $actionText, $icon = 'view', $keyword = null)
+    public static function log($actionType, $actionText, $icon = 'view', $keyword = null, $wisataId = null)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         
         ActivityLog::create([
             'session_id'     => Session::getId(),
