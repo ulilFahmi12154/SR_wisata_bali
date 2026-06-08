@@ -169,70 +169,7 @@ class RekomendasiController extends Controller
 
         $filterSummary = $this->buildFilterSummary($regency, $interest, $budget, $amenities);
 
-        $wisataQuery = Wisata::query()->with(['lokasi', 'kategori']);
-
-        if ($regency && $regency !== 'all') {
-            $wisataQuery->whereHas('lokasi', function ($query) use ($regency) {
-                $query->whereRaw('LOWER(nama_kabupaten) LIKE ?', ['%' . strtolower($regency) . '%']);
-            });
-        }
-
-        if ($budget && (int) $budget > 0) {
-            $wisataQuery->where(function ($query) use ($budget) {
-                $query->where('harga_wni_min', '<=', (int) $budget)
-                    ->orWhereNull('harga_wni_min');
-            });
-        }
-
-        if (!empty($amenities)) {
-            $amenityMap = [
-                'parking' => ['parkir', 'parking'],
-                'wifi' => ['wifi'],
-                'restroom' => ['toilet', 'restroom', 'kamar mandi'],
-                'restaurant' => ['restoran', 'warung', 'makan'],
-            ];
-
-            $wisataQuery->whereHas('fasilitas', function ($query) use ($amenities, $amenityMap) {
-                $query->where(function ($inner) use ($amenities, $amenityMap) {
-                    foreach ($amenities as $amenity) {
-                        if (isset($amenityMap[$amenity])) {
-                            foreach ($amenityMap[$amenity] as $keyword) {
-                                $inner->orWhereRaw('LOWER(nama_fasilitas) LIKE ?', ['%' . strtolower($keyword) . '%']);
-                            }
-                        }
-                    }
-                });
-            });
-        }
-
-        if ($interest && $interest !== 'all') {
-            $interestMap = [
-                'nature' => ['nature', 'alam', 'hutan', 'gunung', 'danau', 'terasering', 'air terjun'],
-                'culture' => ['culture', 'budaya', 'heritage', 'pura', 'candi', 'desa', 'tarian', 'sejarah'],
-                'beach' => ['beach', 'pantai', 'coast', 'laut', 'pasir', 'selancar', 'snorkeling'],
-                'culinary' => ['culinary', 'kuliner', 'food', 'makan', 'restoran', 'kopi'],
-            ];
-
-            $keywords = $interestMap[$interest] ?? [$interest];
-
-            $wisataQuery->where(function ($query) use ($keywords) {
-                $query->whereHas('kategori', function ($inner) use ($keywords) {
-                    $inner->where(function ($q) use ($keywords) {
-                        foreach ($keywords as $keyword) {
-                            $q->orWhereRaw('LOWER(nama_kategori) LIKE ?', ['%' . strtolower($keyword) . '%']);
-                        }
-                    });
-                })->orWhere(function ($inner) use ($keywords) {
-                    foreach ($keywords as $keyword) {
-                        $inner->orWhereRaw('LOWER(nama) LIKE ?', ['%' . strtolower($keyword) . '%']);
-                    }
-                })->orWhere(function ($inner) use ($keywords) {
-                    foreach ($keywords as $keyword) {
-                        $inner->orWhereRaw('LOWER(deskripsi) LIKE ?', ['%' . strtolower($keyword) . '%']);
-                    }
-                });
-            });
-        }
+        $wisataQuery = Wisata::query()->with(['lokasi', 'kategori', 'fasilitas']);
 
         $wisata = $wisataQuery->get();
 
@@ -287,6 +224,23 @@ class RekomendasiController extends Controller
                     'bobot' => (float) $item->bobot,
                 ];
             })->values()->all(),
+            'wisata' => $wisata->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'nama' => $item->nama,
+                    'kategori' => $item->kategori?->nama_kategori,
+                    'lokasi' => $item->lokasi?->nama_kabupaten,
+                    'harga_wni_min' => $item->harga_wni_min,
+                    'harga_wna_min' => $item->harga_wna_min,
+                    'rating' => $item->rating,
+                    'deskripsi' => $item->deskripsi,
+                    'keterangan' => $item->keterangan,
+                    'fasilitas' => $item->fasilitas
+                        ->pluck('nama_fasilitas')
+                        ->values()
+                        ->all(),
+                ];
+            })->values()->all(),
             'filters' => [
                 'regency' => $regency,
                 'interest' => $interest,
@@ -296,7 +250,7 @@ class RekomendasiController extends Controller
         ];
 
         try {
-            $response = Http::timeout(10)->post('http://127.0.0.1:5000/hitung-saw', $payload);
+            $response = Http::timeout(10)->post('http://127.0.0.1:5000/hitung-fw-bw-saw', $payload);
             
             if (!$response->successful()) {
                 return view('pages.user.recommendations.results', [
@@ -318,6 +272,10 @@ class RekomendasiController extends Controller
                     }
 
                     $item->skor_akhir = (float) ($row['skor'] ?? 0);
+                    $item->alasan_rekomendasi = collect($row['alasan'] ?? [])
+                        ->filter()
+                        ->values()
+                        ->all();
 
                     return $item;
                 })

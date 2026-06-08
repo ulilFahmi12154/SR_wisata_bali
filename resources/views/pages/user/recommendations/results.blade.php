@@ -115,7 +115,6 @@
 
             <div class="flex flex-col gap-3 lg:items-end">
                 <div class="flex flex-wrap gap-2 lg:justify-end">
-                    <span class="rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">Metode SAW</span>
                     <span class="rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">{{ number_format($totalDestinations, 0, ',', '.') }} hasil ditemukan</span>
                     <span class="rounded-full border border-amber-100 bg-amber-50/80 px-4 py-2 text-xs font-semibold text-amber-700 shadow-sm">Data sesuai preferensi</span>
                 </div>
@@ -195,6 +194,21 @@
                             <p class="mt-5 text-base leading-7 text-slate-600">
                                 {{ \Illuminate\Support\Str::limit($topDescription, 190) }}
                             </p>
+                            @php
+                                $visibleReasons = collect($topDestination->alasan_rekomendasi ?? [])
+                                    ->reject(fn ($reason) => str_contains(strtolower($reason), 'saw') || str_contains(strtolower($reason), 'penilaian'))
+                                    ->take(3)
+                                    ->values();
+                            @endphp
+                            @if($visibleReasons->isNotEmpty())
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                    @foreach($visibleReasons as $reason)
+                                        <span class="rounded-full border border-sky-100 bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-800">
+                                            {{ $reason }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
 
                         <div class="grid gap-3 sm:grid-cols-2">
@@ -256,7 +270,7 @@
                 <section class="rounded-[2rem] border border-amber-100 bg-gradient-to-br from-amber-50/90 via-white to-sky-50/80 p-5 shadow-[0_18px_54px_rgba(15,23,42,0.07)]">
                     <p class="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">Catatan Rekomendasi</p>
                     <p class="mt-3 text-sm leading-6 text-slate-600">
-                        Skor tertinggi menunjukkan destinasi yang paling mendekati preferensi Anda. Gunakan detail destinasi untuk melihat harga, fasilitas, dan lokasi sebelum berkunjung.
+                        Skor tertinggi menunjukkan destinasi yang paling mendekati preferensi perjalanan Anda. Gunakan detail destinasi untuk melihat harga, fasilitas, dan lokasi sebelum berkunjung.
                     </p>
                 </section>
             </aside>
