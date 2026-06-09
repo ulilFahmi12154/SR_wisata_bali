@@ -23,8 +23,30 @@
     };
     $selectedAmenities = [];
     $selectedBudget = $preference?->budget_max ?? 500000;
-    $personalizedDestinations = $personalizedDestinations ?? collect();
+    $preferenceDestinations = $preferenceDestinations ?? ($personalizedDestinations ?? collect());
+    $activityDestinations = $activityDestinations ?? collect();
     $wantedWisataIds = collect($wantedWisataIds ?? []);
+    $preferenceCategoryLabels = $user?->preferenceCategories?->pluck('category.nama_kategori')->filter()->values() ?? collect();
+    $preferredRegionLabel = $preference?->preferred_region ?: 'Semua wilayah';
+    $priceCategoryLabels = [
+        'murah' => 'Murah',
+        'sedang' => 'Sedang',
+        'mahal' => 'Premium',
+    ];
+    $priceSummary = $preference?->price_category
+        ? ($priceCategoryLabels[$preference->price_category] ?? ucfirst($preference->price_category))
+        : 'Tidak dibatasi';
+
+    if ($preference?->budget_min || $preference?->budget_max) {
+        $budgetParts = [];
+        if ($preference->budget_min) {
+            $budgetParts[] = 'min Rp ' . number_format((int) $preference->budget_min, 0, ',', '.');
+        }
+        if ($preference->budget_max) {
+            $budgetParts[] = 'maks Rp ' . number_format((int) $preference->budget_max, 0, ',', '.');
+        }
+        $priceSummary .= ' (' . implode(', ', $budgetParts) . ')';
+    }
 
     $formatPrice = function ($amount) {
         $value = is_numeric($amount) ? (int) $amount : null;
@@ -647,6 +669,39 @@
         </div>
     @endif
 
+    @if($user && $user->onboarding_completed)
+        <section class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+            <div>
+                <p class="pref-kicker">PREFERENSI KAMU</p>
+                <h1 class="pref-title">
+                    Rekomendasi dibuat dari <span>pilihan wisata</span> kamu.
+                </h1>
+                <p class="pref-description">
+                    Personalisasi ini bisa kamu ubah kapan saja dari halaman profil.
+                </p>
+            </div>
+            <a href="{{ route('user.profile') }}#personalisasi-wisata" class="inline-flex min-h-12 items-center justify-center rounded-full bg-sky-700 px-6 text-sm font-bold text-white shadow-[0_14px_34px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800">
+                Edit Preferensi
+            </a>
+        </section>
+
+        <section class="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="rounded-3xl border border-sky-100 bg-white/85 p-5 shadow-sm">
+                <span class="block text-[0.68rem] font-bold uppercase tracking-[0.16em] text-slate-400">Kategori</span>
+                <strong class="mt-2 block text-sm font-bold leading-6 text-slate-900">
+                    {{ $preferenceCategoryLabels->isNotEmpty() ? $preferenceCategoryLabels->implode(', ') : 'Semua kategori' }}
+                </strong>
+            </div>
+            <div class="rounded-3xl border border-sky-100 bg-white/85 p-5 shadow-sm">
+                <span class="block text-[0.68rem] font-bold uppercase tracking-[0.16em] text-slate-400">Wilayah</span>
+                <strong class="mt-2 block text-sm font-bold leading-6 text-slate-900">{{ $preferredRegionLabel }}</strong>
+            </div>
+            <div class="rounded-3xl border border-sky-100 bg-white/85 p-5 shadow-sm">
+                <span class="block text-[0.68rem] font-bold uppercase tracking-[0.16em] text-slate-400">Harga/Budget</span>
+                <strong class="mt-2 block text-sm font-bold leading-6 text-slate-900">{{ $priceSummary }}</strong>
+            </div>
+        </section>
+    @else
     <div class="pref-grid">
         <section class="pref-intro animate-fade-up" aria-label="Intro halaman preferensi">
             <p class="pref-kicker">PERSONALISASI PERJALANAN</p>
@@ -789,16 +844,17 @@
             </form>
         </section>
     </div>
+    @endif
 </div>
 
-@if($personalizedDestinations->isNotEmpty())
+@if($preferenceDestinations->isNotEmpty())
     <section class="mx-auto mt-8 max-w-[1180px] animate-fade-up">
         <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <p class="text-xs font-bold uppercase tracking-[0.22em] text-sky-700">
-                    {{ $user?->onboarding_completed ? 'Rekomendasi Wisata Untuk Kamu' : 'Rekomendasi Umum' }}
+                    {{ $user?->onboarding_completed ? 'Rekomendasi Berdasarkan Preferensi Kamu' : 'Rekomendasi Umum' }}
                 </p>
-                <h2 class="mt-2 font-display text-3xl font-semibold text-slate-950">Mungkin kamu suka</h2>
+                <h2 class="mt-2 font-display text-3xl font-semibold text-slate-950">Pilihan yang sesuai preferensi</h2>
             </div>
             <a href="{{ route('user.recommendations.results', ['submitted' => 1, 'regency' => $selectedRegency, 'interest' => $selectedInterest, 'budget' => $selectedBudget]) }}" class="inline-flex items-center justify-center rounded-full border border-sky-100 bg-sky-50 px-5 py-3 text-sm font-bold text-sky-800 transition hover:bg-sky-100">
                 Lihat Hasil Lengkap
@@ -806,7 +862,7 @@
         </div>
 
         <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            @foreach($personalizedDestinations as $destination)
+            @foreach($preferenceDestinations as $destination)
                 @php
                     $imageUrl = $destinationImage($destination);
                     $location = optional($destination->lokasi)->nama_kabupaten ?? 'Bali';
@@ -829,6 +885,73 @@
                                 <p class="mt-2 text-sm font-semibold text-slate-500">{{ $location }}, Bali</p>
                             </div>
                             <span class="shrink-0 rounded-full bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-700">Skor {{ number_format((float) ($destination->skor_akhir ?? 0), 3) }}</span>
+                        </div>
+
+                        <div class="mt-5 grid grid-cols-2 gap-3">
+                            <div class="rounded-2xl bg-slate-50 p-3">
+                                <span class="block text-[0.68rem] font-bold uppercase tracking-[0.16em] text-slate-400">Harga</span>
+                                <strong class="mt-1 block text-sm font-bold text-slate-900">{{ $formatPrice($price) }}</strong>
+                            </div>
+                            <div class="rounded-2xl bg-slate-50 p-3">
+                                <span class="block text-[0.68rem] font-bold uppercase tracking-[0.16em] text-slate-400">Rating</span>
+                                <strong class="mt-1 block text-sm font-bold text-slate-900">{{ $destination->rating ? number_format($destination->rating, 1) : 'Belum ada' }}</strong>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 grid gap-2">
+                            <a href="{{ $detailLink }}" class="inline-flex w-full items-center justify-center rounded-full border border-sky-100 bg-sky-50 px-5 py-3 text-sm font-bold text-sky-800 transition hover:bg-sky-100">
+                                Lihat Detail
+                            </a>
+                            <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}">
+                                @csrf
+                                <button type="submit" class="inline-flex w-full items-center justify-center rounded-full {{ $isWanted ? 'border border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-sky-50 hover:text-sky-800' }} px-5 py-3 text-sm font-bold transition">
+                                    {{ $isWanted ? 'Sudah Disimpan' : 'Ingin Dikunjungi' }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+            @endforeach
+        </div>
+    </section>
+@endif
+
+@if($activityDestinations->isNotEmpty())
+    <section class="mx-auto mt-8 max-w-[1180px] animate-fade-up">
+        <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">Berdasarkan Aktivitas Kamu</p>
+                <h2 class="mt-2 font-display text-3xl font-semibold text-slate-950">Mungkin kamu suka</h2>
+            </div>
+            <a href="{{ route('want-to-go.index') }}" class="inline-flex items-center justify-center rounded-full border border-amber-100 bg-amber-50 px-5 py-3 text-sm font-bold text-amber-700 transition hover:bg-amber-100">
+                Lihat Want to Go
+            </a>
+        </div>
+
+        <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            @foreach($activityDestinations as $destination)
+                @php
+                    $imageUrl = $destinationImage($destination, 'default bali.jpg');
+                    $location = optional($destination->lokasi)->nama_kabupaten ?? 'Bali';
+                    $category = optional($destination->kategori)->nama_kategori ?? 'Destinasi';
+                    $price = $destination->harga_wni_min ?? $destination->harga_wna_min;
+                    $detailLink = route('user.destinations.detail', ['id' => $destination->id, 'from' => 'destinasi']);
+                    $isWanted = $wantedWisataIds->contains((int) $destination->id);
+                @endphp
+                <article class="group overflow-hidden rounded-[1.75rem] border border-amber-100/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.12)]">
+                    <a href="{{ $detailLink }}" class="relative block h-52 overflow-hidden bg-slate-200" aria-label="Lihat detail {{ $destination->nama }}">
+                        <img src="{{ $imageUrl }}" alt="{{ $destination->nama }}" class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/42 via-transparent to-transparent"></div>
+                        <span class="absolute left-4 top-4 rounded-full border border-white/30 bg-white/85 px-3 py-1.5 text-xs font-bold text-sky-800 shadow-sm backdrop-blur">{{ $category }}</span>
+                    </a>
+
+                    <div class="p-5">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <h3 class="line-clamp-2 text-xl font-bold leading-snug text-slate-950 group-hover:text-sky-800">{{ $destination->nama }}</h3>
+                                <p class="mt-2 text-sm font-semibold text-slate-500">{{ $location }}, Bali</p>
+                            </div>
+                            <span class="shrink-0 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">Skor {{ number_format((float) ($destination->skor_akhir ?? 0), 3) }}</span>
                         </div>
 
                         <div class="mt-5 grid grid-cols-2 gap-3">

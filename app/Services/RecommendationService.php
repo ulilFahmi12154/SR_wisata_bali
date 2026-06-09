@@ -11,6 +11,21 @@ class RecommendationService
 {
     public function recommendForUser(?User $user, int $limit = 12): Collection
     {
+        return $this->recommend($user, $limit, true, true);
+    }
+
+    public function recommendByPreference(?User $user, int $limit = 12): Collection
+    {
+        return $this->recommend($user, $limit, true, false);
+    }
+
+    public function recommendByActivity(?User $user, int $limit = 12): Collection
+    {
+        return $this->recommend($user, $limit, false, true);
+    }
+
+    private function recommend(?User $user, int $limit, bool $includePreferences, bool $includeActivity): Collection
+    {
         $destinations = Wisata::query()
             ->with(['kategori', 'lokasi', 'fasilitas'])
             ->withCount('wantToGos')
@@ -20,7 +35,7 @@ class RecommendationService
             return collect();
         }
 
-        $facts = $this->forwardChaining($user);
+        $facts = $this->forwardChaining($user, $includePreferences, $includeActivity);
         $candidates = $this->backwardChaining($destinations, $facts);
 
         if ($candidates->isEmpty()) {
@@ -32,9 +47,11 @@ class RecommendationService
             ->values();
     }
 
-    public function forwardChaining(?User $user): array
+    public function forwardChaining(?User $user, bool $includePreferences = true, bool $includeActivity = true): array
     {
         $facts = [
+            'user_id' => $user?->id,
+            'use_user_activity' => $includeActivity,
             'categories' => [],
             'regions' => [],
             'price_category' => [],
@@ -48,33 +65,46 @@ class RecommendationService
             return $facts;
         }
 
-        $user->loadMissing([
-            'preference',
-            'preferenceCategories.category',
-            'wantToGos.wisata.kategori',
-            'wantToGos.wisata.lokasi',
-        ]);
+        $relations = [];
+        if ($includePreferences) {
+            $relations[] = 'preference';
+            $relations[] = 'preferenceCategories.category';
+        }
+        if ($includeActivity) {
+            $relations[] = 'wantToGos.wisata.kategori';
+            $relations[] = 'wantToGos.wisata.lokasi';
+        }
 
-        $preference = $user->preference;
-        if ($preference) {
-            $facts['has_preferences'] = true;
-            $facts['budget_min'] = $preference->budget_min;
-            $facts['budget_max'] = $preference->budget_max;
+        if (!empty($relations)) {
+            $user->loadMissing($relations);
+        }
 
-            if ($preference->preferred_region) {
-                $this->addWeight($facts['regions'], $preference->preferred_region, 5);
+        if ($includePreferences) {
+            $preference = $user->preference;
+            if ($preference) {
+                $facts['has_preferences'] = true;
+                $facts['budget_min'] = $preference->budget_min;
+                $facts['budget_max'] = $preference->budget_max;
+
+                if ($preference->preferred_region) {
+                    $this->addWeight($facts['regions'], $preference->preferred_region, 5);
+                }
+
+                if ($preference->price_category) {
+                    $this->addWeight($facts['price_category'], $preference->price_category, 3);
+                }
             }
 
-            if ($preference->price_category) {
-                $this->addWeight($facts['price_category'], $preference->price_category, 3);
+            foreach ($user->preferenceCategories as $preferenceCategory) {
+                $categoryName = $preferenceCategory->category?->nama_kategori;
+                if ($categoryName) {
+                    $this->addWeight($facts['categories'], $categoryName, (int) $preferenceCategory->weight);
+                }
             }
         }
 
-        foreach ($user->preferenceCategories as $preferenceCategory) {
-            $categoryName = $preferenceCategory->category?->nama_kategori;
-            if ($categoryName) {
-                $this->addWeight($facts['categories'], $categoryName, (int) $preferenceCategory->weight);
-            }
+        if (!$includeActivity) {
+            return $facts;
         }
 
         foreach ($user->wantToGos as $wantToGo) {
@@ -143,9 +173,14 @@ class RecommendationService
     public function rankWithSaw(Collection $destinations, array $facts): Collection
     {
         $rows = $destinations->map(function (Wisata $destination) use ($facts) {
-            $activityScore = (float) $destination->activityLogs()
-                ->whereIn('action_type', ['click_detail', 'visit_detail', 'want_to_go'])
-                ->sum('weight');
+            $activityQuery = $destination->activityLogs()
+                ->whereIn('action_type', ['click_detail', 'visit_detail', 'want_to_go']);
+
+            if (!empty($facts['use_user_activity']) && !empty($facts['user_id'])) {
+                $activityQuery->where('user_id', $facts['user_id']);
+            }
+
+            $activityScore = (float) $activityQuery->sum('weight');
 
             return [
                 'destination' => $destination,

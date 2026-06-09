@@ -15,7 +15,8 @@ class HomeController extends Controller
 
         return view('pages.user.home', [
             'user' => $user,
-            'personalizedDestinations' => $recommendationService->recommendForUser($user, 6),
+            'preferenceDestinations' => $recommendationService->recommendByPreference($user, 6),
+            'activityDestinations' => $recommendationService->recommendByActivity($user, 6),
             'wantedWisataIds' => $user
                 ? $user->wantToGos()->pluck('wisata_id')->all()
                 : [],

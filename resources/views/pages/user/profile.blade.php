@@ -170,7 +170,7 @@
                 </form>
             </section>
 
-            <section class="rounded-[2rem] border border-sky-100/80 bg-white/90 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] sm:p-8 animate-fade-up animate-delay-150">
+            <section id="personalisasi-wisata" class="rounded-[2rem] border border-sky-100/80 bg-white/90 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] sm:p-8 animate-fade-up animate-delay-150">
                 <div class="mb-7">
                     <p class="inline-flex rounded-full border border-sky-100 bg-sky-50/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-sky-700">
                         Personalisasi Wisata

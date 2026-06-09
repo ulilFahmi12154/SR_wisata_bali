@@ -65,12 +65,16 @@
 
     $detailSource = request('from', 'destinasi');
     $returnQuery = collect(request()->query())->except('from')->all();
-    $backUrl = $detailSource === 'rekomendasi'
-        ? route('user.recommendations.results', $returnQuery)
-        : route('user.destinations', $returnQuery);
-    $backLabel = $detailSource === 'rekomendasi'
-        ? 'Kembali ke Hasil Rekomendasi'
-        : 'Kembali ke Destinasi';
+    $backUrl = match ($detailSource) {
+        'rekomendasi' => route('user.recommendations.results', $returnQuery),
+        'want-to-go' => route('want-to-go.index'),
+        default => route('user.destinations', $returnQuery),
+    };
+    $backLabel = match ($detailSource) {
+        'rekomendasi' => 'Kembali ke Hasil Rekomendasi',
+        'want-to-go' => 'Kembali ke Want to Go',
+        default => 'Kembali ke Destinasi',
+    };
     $relatedDetailQuery = collect(request()->query())->except('id')->all();
 @endphp
 

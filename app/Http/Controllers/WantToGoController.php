@@ -7,9 +7,23 @@ use App\Models\WantToGo;
 use App\Models\Wisata;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class WantToGoController extends Controller
 {
+    public function index(Request $request): View
+    {
+        $wantToGos = WantToGo::query()
+            ->with(['wisata.kategori', 'wisata.lokasi'])
+            ->where('user_id', $request->user()->id)
+            ->latest()
+            ->paginate(12);
+
+        return view('pages.user.want-to-go.index', [
+            'wantToGos' => $wantToGos,
+        ]);
+    }
+
     public function toggle(Request $request, Wisata $destination): RedirectResponse
     {
         $user = $request->user();

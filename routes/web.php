@@ -141,6 +141,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/preferences', [PreferenceController::class, 'store'])->name('preferences.store');
     Route::get('/profile/preferences/edit', [PreferenceController::class, 'edit'])->name('preferences.edit');
     Route::patch('/profile/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
+    Route::get('/want-to-go', [WantToGoController::class, 'index'])->name('want-to-go.index');
     Route::post('/destinations/{destination}/want-to-go', [WantToGoController::class, 'toggle'])->name('destinations.want-to-go.toggle');
 });
 
