@@ -186,6 +186,28 @@ class RekomendasiController extends Controller
             $query['amenities'] = $amenities;
         }
 
+        if ($request->user()) {
+            ActivityLog::create([
+                'session_id' => $request->session()->getId(),
+                'user_id' => $request->user()->id,
+                'user_name' => $request->user()->name,
+                'action_type' => 'search',
+                'action' => 'Mencari rekomendasi wisata lain',
+                'icon' => 'search',
+                'weight' => 1,
+                'metadata' => [
+                    'source' => 'explore_recommendation',
+                    'regency' => $query['regency'],
+                    'interest' => $query['interest'],
+                    'budget' => $query['budget'],
+                    'amenities' => $amenities,
+                ],
+                'search_keyword' => implode(' ', array_filter([$query['regency'], $query['interest']])),
+                'url' => $request->fullUrl(),
+                'ip_address' => $request->ip(),
+            ]);
+        }
+
         return redirect()->route('user.recommendations.results', $query);
     }
 

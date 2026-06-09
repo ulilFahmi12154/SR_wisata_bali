@@ -90,7 +90,7 @@
 
             <div class="flex flex-wrap gap-2 lg:justify-end">
                 <a href="{{ route('user.home') }}" class="rounded-full border border-amber-100 bg-amber-50/80 px-4 py-2 text-xs font-bold text-amber-700 shadow-sm transition hover:bg-amber-100">
-                    Cari Rekomendasi Personal
+                    Lihat Rekomendasi Personal
                 </a>
             </div>
         </div>
@@ -285,11 +285,11 @@
                             <a href="{{ $detailLink }}" class="inline-flex w-full items-center justify-center rounded-full border border-sky-100 bg-sky-50 px-5 py-3 text-sm font-bold text-sky-800 transition hover:bg-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-100">
                                 Lihat Detail
                             </a>
-                            <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}">
+                            <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}" data-want-to-go-form data-wisata-id="{{ $destination->id }}">
                                 @csrf
                                 @php $isWanted = $wantedWisataIds->contains((int) $destination->id); @endphp
-                                <button type="submit" class="inline-flex w-full items-center justify-center rounded-full {{ $isWanted ? 'border border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-sky-50 hover:text-sky-800' }} px-5 py-3 text-sm font-bold transition">
-                                    {{ $isWanted ? 'Sudah Disimpan' : 'Ingin Dikunjungi' }}
+                                <button type="submit" data-want-to-go-button data-is-wanted="{{ $isWanted ? 'true' : 'false' }}" class="want-to-go-button {{ $isWanted ? 'is-wanted' : '' }} inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-sm font-bold transition">
+                                    {{ $isWanted ? 'Tersimpan' : 'Ingin Dikunjungi' }}
                                 </button>
                             </form>
                         </div>

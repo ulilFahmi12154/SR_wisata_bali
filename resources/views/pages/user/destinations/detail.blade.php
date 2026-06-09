@@ -64,15 +64,20 @@
     $priceWna = $formatRange($destination->harga_wna_min ?? null, $destination->harga_wna_max ?? null);
 
     $detailSource = request('from', 'destinasi');
-    $returnQuery = collect(request()->query())->except('from')->all();
+    $returnQuery = collect(request()->query())->except(['from', 'section'])->all();
+    $homeSection = request('section');
+    $homeSection = in_array($homeSection, ['rekomendasi-preferensi', 'rekomendasi-aktivitas'], true) ? $homeSection : null;
+    $homeBackUrl = route('user.home') . ($homeSection ? '#' . $homeSection : '');
     $backUrl = match ($detailSource) {
+        'home' => $homeBackUrl,
         'rekomendasi' => route('user.recommendations.results', $returnQuery),
         'want-to-go' => route('want-to-go.index'),
         default => route('user.destinations', $returnQuery),
     };
     $backLabel = match ($detailSource) {
+        'home' => 'Kembali ke Beranda',
         'rekomendasi' => 'Kembali ke Hasil Rekomendasi',
-        'want-to-go' => 'Kembali ke Want to Go',
+        'want-to-go' => 'Kembali ke Daftar Ingin Dikunjungi',
         default => 'Kembali ke Destinasi',
     };
     $relatedDetailQuery = collect(request()->query())->except('id')->all();
@@ -93,8 +98,8 @@
                 </svg>
                 {{ $backLabel }}
             </a>
-            <a href="{{ route('user.home') }}" class="inline-flex items-center rounded-full border border-sky-100 bg-sky-50/85 px-4 py-2 text-sm font-bold text-sky-800 shadow-sm transition hover:bg-sky-100">
-                Ubah Preferensi
+            <a href="{{ route('user.recommendations.explore') }}" class="inline-flex items-center rounded-full border border-sky-100 bg-sky-50/85 px-4 py-2 text-sm font-bold text-sky-800 shadow-sm transition hover:bg-sky-100">
+                Cari Lainnya
             </a>
             @if($detailSource === 'rekomendasi')
                 <a href="{{ route('user.destinations') }}" class="inline-flex items-center rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-sm font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900">
@@ -156,24 +161,24 @@
                 </div>
             </div>
 
-            <div class="flex flex-col gap-3 sm:flex-row">
+            <div class="grid gap-3 {{ $hasMapsLink ? 'sm:grid-cols-3' : 'sm:grid-cols-2' }}">
                 @if($hasMapsLink)
-                    <a href="{{ $mapsLink }}" target="_blank" rel="noopener noreferrer" class="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-sky-700 px-6 py-3.5 text-sm font-bold text-white shadow-[0_16px_38px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-100">
+                    <a href="{{ $mapsLink }}" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-sky-700 px-5 py-3 text-sm font-bold text-white shadow-[0_16px_38px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-100">
                         <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M12 21s7-6.08 7-12A7 7 0 1 0 5 9c0 5.92 7 12 7 12Z" stroke="currentColor" stroke-width="1.8"/>
                             <path d="M12 11.5A2.5 2.5 0 1 0 12 6a2.5 2.5 0 0 0 0 5.5Z" stroke="currentColor" stroke-width="1.8"/>
                         </svg>
-                        Buka di Google Maps
+                        <span class="whitespace-nowrap">Buka Maps</span>
                     </a>
                 @endif
-                <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}" class="flex-1">
+                <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}" data-want-to-go-form data-wisata-id="{{ $destination->id }}">
                     @csrf
-                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-full {{ $isWanted ?? false ? 'border border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border border-sky-100 bg-sky-50 text-sky-800 hover:bg-sky-100' }} px-6 py-3.5 text-sm font-bold transition">
-                        {{ $isWanted ?? false ? 'Sudah Disimpan' : 'Ingin Dikunjungi' }}
+                    <button type="submit" data-want-to-go-button data-is-wanted="{{ $isWanted ?? false ? 'true' : 'false' }}" class="want-to-go-button {{ $isWanted ?? false ? 'is-wanted' : '' }} inline-flex min-h-14 w-full items-center justify-center rounded-full border px-5 py-3 text-sm font-bold transition">
+                        {{ $isWanted ?? false ? 'Tersimpan' : 'Ingin Dikunjungi' }}
                     </button>
                 </form>
-                <a href="{{ route('user.home') }}" class="inline-flex flex-1 items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-sky-50 hover:text-sky-800">
-                    Ubah Preferensi
+                <a href="{{ route('user.recommendations.explore') }}" class="inline-flex min-h-14 w-full items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-sky-50 hover:text-sky-800">
+                    Cari Lainnya
                 </a>
             </div>
         </div>

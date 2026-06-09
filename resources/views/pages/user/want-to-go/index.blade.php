@@ -50,7 +50,7 @@
 
     <section class="mt-4 overflow-hidden rounded-[2.25rem] border border-sky-100/80 bg-gradient-to-br from-white via-sky-50 to-amber-50/60 p-6 shadow-[0_26px_80px_rgba(15,23,42,0.08)] sm:p-8 lg:p-10 animate-fade-up">
         <p class="inline-flex rounded-full border border-sky-100 bg-sky-50/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-sky-700">
-            Want to Go
+            Daftar Ingin Dikunjungi
         </p>
         <h1 class="mt-5 max-w-3xl font-display text-4xl font-semibold leading-[1.04] text-slate-950 sm:text-5xl lg:text-6xl">
             Destinasi Ingin Dikunjungi
@@ -67,7 +67,7 @@
                     <path d="M12 21s-7-4.9-7-11a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 6.1-7 11-7 11Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
-            <h2 class="mt-5 font-display text-3xl font-semibold text-slate-950">Kamu belum menambahkan destinasi ke Want to Go.</h2>
+            <h2 class="mt-5 font-display text-3xl font-semibold text-slate-950">Kamu belum menambahkan destinasi ke daftar ingin dikunjungi.</h2>
             <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600">
                 Tandai destinasi yang kamu minati agar rekomendasi berikutnya semakin sesuai.
             </p>
@@ -88,7 +88,7 @@
                     $detailLink = route('user.destinations.detail', ['id' => $destination->id, 'from' => 'want-to-go']);
                 @endphp
 
-                <article class="group overflow-hidden rounded-[1.75rem] border border-sky-100/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.12)] animate-fade-up">
+                <article data-want-to-go-card class="group overflow-hidden rounded-[1.75rem] border border-sky-100/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.12)] animate-fade-up">
                     <a href="{{ $detailLink }}" class="relative block aspect-[4/3] overflow-hidden bg-slate-200" aria-label="Lihat detail {{ $destination->nama }}">
                         <img src="{{ $imageUrl }}" alt="{{ $destination->nama }}" class="h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.04]">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950/42 via-transparent to-transparent"></div>
@@ -123,10 +123,10 @@
                             <a href="{{ $detailLink }}" class="inline-flex w-full items-center justify-center rounded-full border border-sky-100 bg-sky-50 px-5 py-3 text-sm font-bold text-sky-800 transition hover:bg-sky-100">
                                 Lihat Detail
                             </a>
-                            <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}">
+                            <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}" data-want-to-go-form data-wisata-id="{{ $destination->id }}" data-remove-on-unwanted="true">
                                 @csrf
-                                <button type="submit" class="inline-flex w-full items-center justify-center rounded-full border border-amber-100 bg-amber-50 px-5 py-3 text-sm font-bold text-amber-700 transition hover:bg-amber-100">
-                                    Hapus dari Daftar
+                                <button type="submit" data-want-to-go-button data-is-wanted="true" data-wanted-text="Tersimpan" data-unwanted-text="Ingin Dikunjungi" class="want-to-go-button is-wanted inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-sm font-bold transition">
+                                    Tersimpan
                                 </button>
                             </form>
                         </div>

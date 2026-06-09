@@ -19,7 +19,7 @@
             </a>
 
             <a href="#fitur-utama" class="landing-btn-secondary">
-                Pelajari Metode SAW
+                Lihat Fitur Utama
             </a>
         </div>
     </div>
@@ -37,7 +37,7 @@
         </div>
 
         <p class="landing-features-desc">
-            Menggabungkan kriteria preferensi Anda dengan perhitungan algoritma SAW
+            Menggabungkan kriteria preferensi Anda dengan perhitungan rekomendasi
             untuk memberikan hasil rekomendasi yang objektif dan personal.
         </p>
 

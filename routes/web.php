@@ -153,6 +153,7 @@ Route::middleware('auth')->name('user.')->group(function () {
     Route::get('/destinasi/{id}', [RekomendasiController::class, 'show'])->name('destinations.detail');
     Route::get('/destinations/{id}', fn ($id) => redirect()->route('user.destinations.detail', ['id' => $id]))->name('destinations.detail.legacy');
 
+    Route::get('/rekomendasi/eksplorasi', [HomeController::class, 'explore'])->name('recommendations.explore');
     Route::post('/rekomendasi', [RekomendasiController::class, 'process'])->name('recommendations.process');
     Route::get('/rekomendasi/hasil', [RekomendasiController::class, 'results'])->name('recommendations.results');
     Route::redirect('/recommendation', '/rekomendasi/hasil')->name('recommendation');

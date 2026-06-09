@@ -7,9 +7,20 @@
     $preference = $preference ?? null;
     $selectedCategoryIds = collect(old('category_ids', $selectedCategoryIds ?? []))->map(fn ($id) => (int) $id)->all();
     $selectedRegion = old('preferred_region', $preference?->preferred_region);
-    $selectedPriceCategory = old('price_category', $preference?->price_category);
-    $budgetMin = old('budget_min', $preference?->budget_min);
-    $budgetMax = old('budget_max', $preference?->budget_max);
+    $selectedPriceCategory = old('price_category', $preference?->price_category ?: 'sedang');
+    $priceBudgetRanges = [
+        '' => ['min' => '', 'max' => ''],
+        'murah' => ['min' => 0, 'max' => 50000],
+        'sedang' => ['min' => 50000, 'max' => 500000],
+        'mahal' => ['min' => 500000, 'max' => 10000000],
+    ];
+    $priceCategoryOptions = [
+        '' => ['label' => 'Tidak dibatasi', 'description' => 'Cocok untuk semua pilihan harga.'],
+        'murah' => ['label' => 'Murah', 'description' => 'Prioritaskan destinasi hemat.'],
+        'sedang' => ['label' => 'Sedang', 'description' => 'Pilihan seimbang untuk mayoritas destinasi.'],
+        'mahal' => ['label' => 'Premium', 'description' => 'Untuk pengalaman wisata lebih lengkap.'],
+    ];
+    $selectedBudgetRange = $priceBudgetRanges[$selectedPriceCategory] ?? $priceBudgetRanges['sedang'];
     $action = $isEdit ? route('preferences.update') : route('preferences.store');
 @endphp
 
@@ -69,35 +80,46 @@
                 @enderror
             </div>
 
-            <div class="grid gap-5 md:grid-cols-3">
-                <div>
-                    <label for="price_category" class="mb-2 block text-sm font-bold text-slate-700">Kategori Harga</label>
-                    <select id="price_category" name="price_category" class="min-h-14 w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-5 text-sm font-semibold text-slate-900 shadow-sm transition focus:border-sky-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-sky-100">
-                        <option value="">Tidak dibatasi</option>
-                        <option value="murah" @selected($selectedPriceCategory === 'murah')>Murah</option>
-                        <option value="sedang" @selected($selectedPriceCategory === 'sedang')>Sedang</option>
-                        <option value="mahal" @selected($selectedPriceCategory === 'mahal')>Premium</option>
-                    </select>
-                    @error('price_category', 'preferences')
-                        <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
-                    @enderror
+            <div
+                x-data="{
+                    priceCategory: @json($selectedPriceCategory),
+                    ranges: @json($priceBudgetRanges)
+                }"
+            >
+                <div class="mb-3 flex flex-col gap-1">
+                    <p class="text-sm font-bold text-slate-700">Kategori Harga</p>
+                    <p class="text-sm leading-6 text-slate-500">Pilih kategori harga. Rentang budget teknis akan diatur otomatis.</p>
                 </div>
+                <input type="hidden" name="budget_min" value="{{ $selectedBudgetRange['min'] }}" x-bind:value="ranges[priceCategory]?.min ?? ''">
+                <input type="hidden" name="budget_max" value="{{ $selectedBudgetRange['max'] }}" x-bind:value="ranges[priceCategory]?.max ?? ''">
 
-                <div>
-                    <label for="budget_min" class="mb-2 block text-sm font-bold text-slate-700">Budget Minimum</label>
-                    <input id="budget_min" name="budget_min" type="number" min="0" max="10000000" step="10000" value="{{ $budgetMin }}" class="min-h-14 w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-5 text-sm font-semibold text-slate-900 shadow-sm transition focus:border-sky-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-sky-100" placeholder="0">
-                    @error('budget_min', 'preferences')
-                        <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
-                    @enderror
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" role="radiogroup" aria-label="Kategori harga">
+                    @foreach($priceCategoryOptions as $value => $option)
+                        <label class="relative">
+                            <input
+                                type="radio"
+                                name="price_category"
+                                value="{{ $value }}"
+                                class="peer sr-only"
+                                x-model="priceCategory"
+                                @checked($selectedPriceCategory === $value)
+                            >
+                            <span class="flex min-h-24 cursor-pointer flex-col justify-center rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:border-sky-100 hover:bg-sky-50 peer-checked:border-sky-700 peer-checked:bg-sky-50 peer-checked:text-sky-800 peer-checked:shadow-[inset_0_0_0_1px_rgba(3,105,161,0.18)]">
+                                <span>{{ $option['label'] }}</span>
+                                <span class="mt-1 text-xs font-semibold leading-5 text-slate-500 peer-checked:text-sky-700">{{ $option['description'] }}</span>
+                            </span>
+                        </label>
+                    @endforeach
                 </div>
-
-                <div>
-                    <label for="budget_max" class="mb-2 block text-sm font-bold text-slate-700">Budget Maksimum</label>
-                    <input id="budget_max" name="budget_max" type="number" min="0" max="10000000" step="10000" value="{{ $budgetMax }}" class="min-h-14 w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-5 text-sm font-semibold text-slate-900 shadow-sm transition focus:border-sky-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-sky-100" placeholder="500000">
-                    @error('budget_max', 'preferences')
-                        <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
+                @error('price_category', 'preferences')
+                    <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
+                @enderror
+                @error('budget_min', 'preferences')
+                    <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
+                @enderror
+                @error('budget_max', 'preferences')
+                    <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="flex flex-col gap-3 pt-2 sm:flex-row">

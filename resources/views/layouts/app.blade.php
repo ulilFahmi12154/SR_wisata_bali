@@ -24,6 +24,34 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 
     @stack('styles')
+
+    <style>
+        .want-to-go-button {
+            border-color: #e2e8f0;
+            background: #ffffff;
+            color: #334155;
+        }
+
+        .want-to-go-button:hover {
+            background: #f0f9ff;
+            color: #075985;
+        }
+
+        .want-to-go-button.is-wanted {
+            border-color: #fde68a;
+            background: #fffbeb;
+            color: #b45309;
+        }
+
+        .want-to-go-button.is-wanted:hover {
+            background: #fef3c7;
+        }
+
+        .want-to-go-button.is-loading {
+            opacity: 0.72;
+            pointer-events: none;
+        }
+    </style>
 </head>
 
 <body class="h-full bg-slate-50 text-slate-800">
@@ -41,6 +69,105 @@
     @endif
 
     @stack('scripts')
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+            function showWantToGoToast(message, isError = false) {
+                let toast = document.getElementById('want-to-go-toast');
+
+                if (!toast) {
+                    toast = document.createElement('div');
+                    toast.id = 'want-to-go-toast';
+                    toast.className = 'fixed bottom-5 left-1/2 z-[120] max-w-[92vw] -translate-x-1/2 rounded-full px-5 py-3 text-sm font-bold shadow-[0_18px_48px_rgba(15,23,42,0.22)] transition';
+                    document.body.appendChild(toast);
+                }
+
+                toast.textContent = message;
+                toast.classList.toggle('bg-red-600', isError);
+                toast.classList.toggle('text-white', true);
+                toast.classList.toggle('bg-sky-700', !isError);
+                toast.classList.remove('opacity-0', 'translate-y-3');
+
+                window.clearTimeout(toast.dataset.timeoutId);
+                toast.dataset.timeoutId = window.setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-3');
+                }, 2600);
+            }
+
+            function setWantToGoButtonState(button, isWanted) {
+                button.dataset.isWanted = isWanted ? 'true' : 'false';
+                button.classList.toggle('is-wanted', isWanted);
+                button.textContent = isWanted
+                    ? (button.dataset.wantedText || 'Tersimpan')
+                    : (button.dataset.unwantedText || 'Ingin Dikunjungi');
+            }
+
+            function syncWantToGoButtons(wisataId, isWanted) {
+                document
+                    .querySelectorAll(`[data-want-to-go-form][data-wisata-id="${wisataId}"] [data-want-to-go-button]`)
+                    .forEach((button) => setWantToGoButtonState(button, isWanted));
+            }
+
+            document.addEventListener('submit', async function (event) {
+                const form = event.target.closest('[data-want-to-go-form]');
+
+                if (!form) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const button = form.querySelector('[data-want-to-go-button]');
+                const wisataId = form.dataset.wisataId;
+                const previousState = button?.dataset.isWanted === 'true';
+
+                if (button) {
+                    button.classList.add('is-loading');
+                    button.disabled = true;
+                    button.textContent = 'Menyimpan...';
+                }
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': token,
+                            'Accept': 'application/json',
+                        },
+                        body: new FormData(form),
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || 'Gagal memperbarui daftar ingin dikunjungi.');
+                    }
+
+                    syncWantToGoButtons(wisataId, data.is_wanted);
+
+                    if (!data.is_wanted && form.dataset.removeOnUnwanted === 'true') {
+                        const card = form.closest('[data-want-to-go-card]');
+                        card?.remove();
+                    }
+
+                    showWantToGoToast(data.message || 'Daftar ingin dikunjungi diperbarui.');
+                } catch (error) {
+                    if (button) {
+                        setWantToGoButtonState(button, previousState);
+                    }
+
+                    showWantToGoToast(error.message || 'Gagal memperbarui daftar ingin dikunjungi.', true);
+                } finally {
+                    if (button) {
+                        button.classList.remove('is-loading');
+                        button.disabled = false;
+                    }
+                }
+            });
+        });
+    </script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {

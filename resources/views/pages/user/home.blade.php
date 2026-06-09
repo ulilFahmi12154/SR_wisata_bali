@@ -37,17 +37,6 @@
         ? ($priceCategoryLabels[$preference->price_category] ?? ucfirst($preference->price_category))
         : 'Tidak dibatasi';
 
-    if ($preference?->budget_min || $preference?->budget_max) {
-        $budgetParts = [];
-        if ($preference->budget_min) {
-            $budgetParts[] = 'min Rp ' . number_format((int) $preference->budget_min, 0, ',', '.');
-        }
-        if ($preference->budget_max) {
-            $budgetParts[] = 'maks Rp ' . number_format((int) $preference->budget_max, 0, ',', '.');
-        }
-        $priceSummary .= ' (' . implode(', ', $budgetParts) . ')';
-    }
-
     $formatPrice = function ($amount) {
         $value = is_numeric($amount) ? (int) $amount : null;
 
@@ -663,9 +652,11 @@
     @endif
 
     @if($user && ! $user->onboarding_completed)
-        <div class="mb-5 rounded-3xl border border-amber-100 bg-amber-50/90 px-5 py-4 text-sm font-semibold leading-6 text-amber-800">
-            Lengkapi personalisasi agar rekomendasi wisata lebih sesuai.
-            <a href="{{ route('preferences.create') }}" class="ml-1 font-extrabold text-amber-900 underline decoration-amber-300 underline-offset-4">Isi Personalisasi</a>
+        <div class="mb-5 flex flex-col gap-3 rounded-3xl border border-amber-100 bg-amber-50/90 px-5 py-4 text-sm font-semibold leading-6 text-amber-800 sm:flex-row sm:items-center sm:justify-between">
+            <span>Lengkapi personalisasi agar rekomendasi wisata lebih sesuai.</span>
+            <a href="{{ route('preferences.create') }}" class="inline-flex min-h-10 items-center justify-center rounded-full bg-amber-600 px-4 text-sm font-bold text-white transition hover:bg-amber-700">
+                Isi Personalisasi Sekarang
+            </a>
         </div>
     @endif
 
@@ -701,15 +692,31 @@
                 <strong class="mt-2 block text-sm font-bold leading-6 text-slate-900">{{ $priceSummary }}</strong>
             </div>
         </section>
-    @else
-    <div class="pref-grid">
+
+        <section class="mt-7 flex flex-col gap-4 rounded-[1.75rem] border border-sky-100 bg-white/85 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.22em] text-sky-700">Eksplorasi Wisata</p>
+                <p class="mt-2 text-sm font-semibold leading-6 text-slate-600">
+                    Cari rekomendasi lain tanpa mengubah preferensi utama kamu.
+                </p>
+            </div>
+            <a href="{{ route('user.recommendations.explore') }}" class="inline-flex min-h-12 items-center justify-center rounded-full bg-sky-700 px-6 text-sm font-bold text-white shadow-[0_14px_34px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800">
+                Cari Rekomendasi
+            </a>
+        </section>
+    @endif
+
+    @if(! ($user?->onboarding_completed))
+    <div id="filter-rekomendasi" class="pref-grid">
         <section class="pref-intro animate-fade-up" aria-label="Intro halaman preferensi">
             <p class="pref-kicker">PERSONALISASI PERJALANAN</p>
             <h1 class="pref-title">
                 Temukan <span>Liburan Bali</span> Terbaik.
             </h1>
             <p class="pref-description">
-                Pilih preferensi perjalanan Anda untuk mendapatkan rekomendasi destinasi yang sesuai. Form ini selalu dimulai dari pilihan netral agar hasil dihitung dari input terbaru.
+                {{ $user?->onboarding_completed
+                    ? 'Gunakan filter ini untuk mencari rekomendasi lain tanpa mengubah preferensi utama yang sudah tersimpan.'
+                    : 'Pilih preferensi perjalanan Anda untuk mendapatkan rekomendasi destinasi yang sesuai. Form ini selalu dimulai dari pilihan netral agar hasil dihitung dari input terbaru.' }}
             </p>
 
             <article class="pref-highlight animate-fade-up animate-delay-100" aria-label="Highlight destinasi">
@@ -726,11 +733,6 @@
 
         <section class="pref-form-card animate-fade-up animate-delay-200" aria-label="Form input preferensi">
             <h2 class="pref-form-title">Filter Utama</h2>
-            @if (session('status'))
-                <div class="mb-5 rounded-3xl border border-sky-100 bg-sky-50/80 px-4 py-3 text-sm font-semibold leading-6 text-sky-800">
-                    {{ session('status') }}
-                </div>
-            @endif
             <form method="POST" action="{{ route('user.recommendations.process') }}" x-data="{ budget: {{ $selectedBudget }} }">
                 @csrf
                 <div class="pref-group">
@@ -848,7 +850,7 @@
 </div>
 
 @if($preferenceDestinations->isNotEmpty())
-    <section class="mx-auto mt-8 max-w-[1180px] animate-fade-up">
+    <section id="rekomendasi-preferensi" class="mx-auto mt-8 scroll-mt-24 max-w-[1180px] animate-fade-up">
         <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <p class="text-xs font-bold uppercase tracking-[0.22em] text-sky-700">
@@ -868,7 +870,7 @@
                     $location = optional($destination->lokasi)->nama_kabupaten ?? 'Bali';
                     $category = optional($destination->kategori)->nama_kategori ?? 'Destinasi';
                     $price = $destination->harga_wni_min ?? $destination->harga_wna_min;
-                    $detailLink = route('user.destinations.detail', ['id' => $destination->id, 'from' => 'destinasi']);
+                    $detailLink = route('user.destinations.detail', ['id' => $destination->id, 'from' => 'home', 'section' => 'rekomendasi-preferensi']);
                     $isWanted = $wantedWisataIds->contains((int) $destination->id);
                 @endphp
                 <article class="group overflow-hidden rounded-[1.75rem] border border-sky-100/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.12)]">
@@ -902,10 +904,10 @@
                             <a href="{{ $detailLink }}" class="inline-flex w-full items-center justify-center rounded-full border border-sky-100 bg-sky-50 px-5 py-3 text-sm font-bold text-sky-800 transition hover:bg-sky-100">
                                 Lihat Detail
                             </a>
-                            <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}">
+                            <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}" data-want-to-go-form data-wisata-id="{{ $destination->id }}">
                                 @csrf
-                                <button type="submit" class="inline-flex w-full items-center justify-center rounded-full {{ $isWanted ? 'border border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-sky-50 hover:text-sky-800' }} px-5 py-3 text-sm font-bold transition">
-                                    {{ $isWanted ? 'Sudah Disimpan' : 'Ingin Dikunjungi' }}
+                                <button type="submit" data-want-to-go-button data-is-wanted="{{ $isWanted ? 'true' : 'false' }}" class="want-to-go-button {{ $isWanted ? 'is-wanted' : '' }} inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-sm font-bold transition">
+                                    {{ $isWanted ? 'Tersimpan' : 'Ingin Dikunjungi' }}
                                 </button>
                             </form>
                         </div>
@@ -917,14 +919,14 @@
 @endif
 
 @if($activityDestinations->isNotEmpty())
-    <section class="mx-auto mt-8 max-w-[1180px] animate-fade-up">
+    <section id="rekomendasi-aktivitas" class="mx-auto mt-8 scroll-mt-24 max-w-[1180px] animate-fade-up">
         <div class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <p class="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">Berdasarkan Aktivitas Kamu</p>
                 <h2 class="mt-2 font-display text-3xl font-semibold text-slate-950">Mungkin kamu suka</h2>
             </div>
             <a href="{{ route('want-to-go.index') }}" class="inline-flex items-center justify-center rounded-full border border-amber-100 bg-amber-50 px-5 py-3 text-sm font-bold text-amber-700 transition hover:bg-amber-100">
-                Lihat Want to Go
+                Lihat Daftar Ingin Dikunjungi
             </a>
         </div>
 
@@ -935,7 +937,7 @@
                     $location = optional($destination->lokasi)->nama_kabupaten ?? 'Bali';
                     $category = optional($destination->kategori)->nama_kategori ?? 'Destinasi';
                     $price = $destination->harga_wni_min ?? $destination->harga_wna_min;
-                    $detailLink = route('user.destinations.detail', ['id' => $destination->id, 'from' => 'destinasi']);
+                    $detailLink = route('user.destinations.detail', ['id' => $destination->id, 'from' => 'home', 'section' => 'rekomendasi-aktivitas']);
                     $isWanted = $wantedWisataIds->contains((int) $destination->id);
                 @endphp
                 <article class="group overflow-hidden rounded-[1.75rem] border border-amber-100/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.12)]">
@@ -969,10 +971,10 @@
                             <a href="{{ $detailLink }}" class="inline-flex w-full items-center justify-center rounded-full border border-sky-100 bg-sky-50 px-5 py-3 text-sm font-bold text-sky-800 transition hover:bg-sky-100">
                                 Lihat Detail
                             </a>
-                            <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}">
+                            <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}" data-want-to-go-form data-wisata-id="{{ $destination->id }}">
                                 @csrf
-                                <button type="submit" class="inline-flex w-full items-center justify-center rounded-full {{ $isWanted ? 'border border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-sky-50 hover:text-sky-800' }} px-5 py-3 text-sm font-bold transition">
-                                    {{ $isWanted ? 'Sudah Disimpan' : 'Ingin Dikunjungi' }}
+                                <button type="submit" data-want-to-go-button data-is-wanted="{{ $isWanted ? 'true' : 'false' }}" class="want-to-go-button {{ $isWanted ? 'is-wanted' : '' }} inline-flex w-full items-center justify-center rounded-full border px-5 py-3 text-sm font-bold transition">
+                                    {{ $isWanted ? 'Tersimpan' : 'Ingin Dikunjungi' }}
                                 </button>
                             </form>
                         </div>
@@ -982,4 +984,5 @@
         </div>
     </section>
 @endif
+
 @endsection

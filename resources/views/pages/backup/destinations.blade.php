@@ -759,9 +759,9 @@
     </section>
 
     <div class="dest-meta-row">
-        <span class="dest-meta-chip">SAW Methodology Applied</span>
-        <span class="dest-meta-chip">TOPSIS Vector Normalization</span>
-        <span class="dest-meta-chip">Live Data: Nov 2024</span>
+        <span class="dest-meta-chip">Rekomendasi Sesuai Preferensi</span>
+        <span class="dest-meta-chip">Pemeringkatan Destinasi</span>
+        <span class="dest-meta-chip">Data Wisata Terkurasi</span>
     </div>
 
     <section class="dest-primary-grid">
@@ -865,7 +865,7 @@
             <section class="dest-insight-card">
                 <p class="dest-insight-kicker">Top Value Find</p>
                 <p>
-                    Based on TOPSIS, Ubud offers the ideal compromise between cost and experiential quality for your profile.
+                    Ubud offers a strong balance between cost and experiential quality for your profile.
                 </p>
             </section>
         </aside>
@@ -881,7 +881,7 @@
             <div class="dest-mini-content">
                 <div class="dest-mini-head">
                     <h4>Ubud Sacred Forest</h4>
-                    <span class="dest-mini-tag">High TOPSIS</span>
+                    <span class="dest-mini-tag">High Match</span>
                 </div>
                 <p class="dest-mini-location">Ubud, Gianyar</p>
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\WantToGo;
 use App\Models\Wisata;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -24,7 +25,7 @@ class WantToGoController extends Controller
         ]);
     }
 
-    public function toggle(Request $request, Wisata $destination): RedirectResponse
+    public function toggle(Request $request, Wisata $destination): RedirectResponse|JsonResponse
     {
         $user = $request->user();
 
@@ -35,6 +36,14 @@ class WantToGoController extends Controller
 
         if ($existing) {
             $existing->delete();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'is_wanted' => false,
+                    'message' => 'Destinasi dihapus dari daftar ingin dikunjungi.',
+                ]);
+            }
 
             return back()->with('status', 'Destinasi dihapus dari daftar ingin dikunjungi.');
         }
@@ -57,6 +66,14 @@ class WantToGoController extends Controller
             'url' => $request->fullUrl(),
             'ip_address' => $request->ip(),
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'is_wanted' => true,
+                'message' => 'Destinasi ditambahkan ke daftar ingin dikunjungi.',
+            ]);
+        }
 
         return back()->with('status', 'Destinasi ditambahkan ke daftar ingin dikunjungi.');
     }

@@ -22,4 +22,14 @@ class HomeController extends Controller
                 : [],
         ]);
     }
+
+    public function explore(Request $request): View
+    {
+        $user = $request->user();
+        $user?->loadMissing(['preference', 'preferenceCategories.category']);
+
+        return view('pages.user.recommendations.explore', [
+            'user' => $user,
+        ]);
+    }
 }
