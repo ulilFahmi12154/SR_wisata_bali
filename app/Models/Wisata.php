@@ -36,4 +36,19 @@ class Wisata extends Model
     {
         return $this->hasMany(Penilaian::class);
     }
+
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
+
+    public function wantToGos(): HasMany
+    {
+        return $this->hasMany(WantToGo::class);
+    }
+
+    public function wantedByUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'want_to_gos')->withTimestamps();
+    }
 }

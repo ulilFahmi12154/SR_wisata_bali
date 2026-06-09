@@ -7,6 +7,8 @@ use App\Models\Kriteria;
 use App\Models\Lokasi;
 use App\Models\Penilaian;
 use App\Models\Wisata;
+use App\Models\ActivityLog;
+use App\Models\WantToGo;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +17,7 @@ use App\Helpers\ActivityHelper; // Tambahkan helper untuk logging
 
 class RekomendasiController extends Controller
 {
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $destination = DB::table('wisata')
             ->leftJoin('lokasi', 'wisata.lokasi_id', '=', 'lokasi.id')
@@ -44,8 +46,37 @@ class RekomendasiController extends Controller
             ->limit(3)
             ->get();
 
-        ActivityHelper::log('visit_detail', 'Melihat detail: ' . $destination->nama, 'eye', null, $id);
-        return view('pages.user.destinations.detail', compact('destination', 'facilities', 'recommendations'));
+        $user = $request->user();
+        if ($user) {
+            $recentDetailLogExists = ActivityLog::query()
+                ->where('user_id', $user->id)
+                ->where('wisata_id', $id)
+                ->where('action_type', 'click_detail')
+                ->where('created_at', '>=', now()->subMinutes(5))
+                ->exists();
+
+            if (!$recentDetailLogExists) {
+                ActivityLog::create([
+                    'session_id' => $request->session()->getId(),
+                    'user_id' => $user->id,
+                    'wisata_id' => $id,
+                    'user_name' => $user->name,
+                    'action_type' => 'click_detail',
+                    'action' => 'Melihat detail: ' . $destination->nama,
+                    'icon' => 'eye',
+                    'weight' => 2,
+                    'metadata' => ['source' => 'destination_detail'],
+                    'url' => $request->fullUrl(),
+                    'ip_address' => $request->ip(),
+                ]);
+            }
+        }
+
+        $isWanted = $user
+            ? WantToGo::where('user_id', $user->id)->where('wisata_id', $id)->exists()
+            : false;
+
+        return view('pages.user.destinations.detail', compact('destination', 'facilities', 'recommendations', 'isWanted'));
     }
 
     public function index(Request $request)
@@ -122,6 +153,10 @@ class RekomendasiController extends Controller
                 'lokasi_id' => $lokasiId,
                 'sort' => $sort,
             ],
+            'wantedWisataIds' => WantToGo::query()
+                ->where('user_id', $request->user()->id)
+                ->pluck('wisata_id')
+                ->all(),
             'sortOptions' => $sortOptions,
             'hasCatalogFilters' => $hasCatalogFilters,
             'perPage' => $perPage,
@@ -291,6 +326,10 @@ class RekomendasiController extends Controller
                 'totalDestinations' => $destinations->count(),
                 'perPage' => 12,
                 'filterSummary' => $filterSummary,
+                'wantedWisataIds' => WantToGo::query()
+                    ->where('user_id', $request->user()->id)
+                    ->pluck('wisata_id')
+                    ->all(),
             ]);
         } catch (\Throwable $e) {
             report($e);

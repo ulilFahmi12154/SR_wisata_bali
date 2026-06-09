@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\RekomendasiController;
 use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\WantToGoController;
 use App\Models\User;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
@@ -106,16 +109,19 @@ Route::middleware('guest')->name('user.')->group(function () {
         ]);
 
         try {
-            User::create([
+            $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
                 'role' => 'user',
             ]);
 
+            Auth::login($user);
+            request()->session()->regenerate();
+
             return redirect()
-                ->route('user.login')
-                ->with('success', 'Registrasi berhasil. Silakan login.');
+                ->route('preferences.create')
+                ->with('status', 'Registrasi berhasil. Silakan isi personalisasi awal.');
         } catch (\Throwable $e) {
             report($e);
             return back()
@@ -130,8 +136,16 @@ Route::middleware('guest')->name('user.')->group(function () {
 | USER AREA (AUTHENTICATED)
 |--------------------------------------------------------------------------
 */
+Route::middleware('auth')->group(function () {
+    Route::get('/preferences', [PreferenceController::class, 'create'])->name('preferences.create');
+    Route::post('/preferences', [PreferenceController::class, 'store'])->name('preferences.store');
+    Route::get('/profile/preferences/edit', [PreferenceController::class, 'edit'])->name('preferences.edit');
+    Route::patch('/profile/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
+    Route::post('/destinations/{destination}/want-to-go', [WantToGoController::class, 'toggle'])->name('destinations.want-to-go.toggle');
+});
+
 Route::middleware('auth')->name('user.')->group(function () {
-    Route::get('/home', fn () => view('pages.user.home'))->name('home');
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
 
     Route::get('/destinasi', [RekomendasiController::class, 'index'])->name('destinations');
     Route::get('/destinations', fn () => redirect()->route('user.destinations'))->name('destinations.legacy');

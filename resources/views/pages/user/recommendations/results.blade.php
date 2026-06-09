@@ -5,6 +5,7 @@
 @section('content')
 @php
     $destinations = $destinations ?? collect();
+    $wantedWisataIds = collect($wantedWisataIds ?? []);
     $destinationsPaginator = $destinationsPaginator ?? null;
     $totalDestinations = $totalDestinations ?? $destinations->count();
     $perPage = $perPage ?? 12;
@@ -159,6 +160,7 @@
                     $topDescription = $topDestination->deskripsi ?? $topDestination->keterangan ?? '';
                     $topEntryFee = $topDestination->harga_wni_min ?? $topDestination->harga_wna_min;
                     $topLink = route('user.destinations.detail', array_merge(['id' => $topDestination->id], $detailContextQuery));
+                    $isTopWanted = $wantedWisataIds->contains((int) $topDestination->id);
                 @endphp
 
                 <article class="overflow-hidden rounded-[2rem] border border-sky-100/80 bg-white/90 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur transition hover:-translate-y-1 hover:shadow-[0_30px_80px_rgba(15,23,42,0.13)] lg:grid lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] animate-fade-up animate-delay-100">
@@ -227,12 +229,20 @@
                             </div>
                         </div>
 
-                        <a href="{{ $topLink }}" class="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-full bg-sky-700 px-6 py-3.5 text-sm font-bold text-white shadow-[0_16px_38px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-100">
-                            Lihat Detail Destinasi
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </a>
+                        <div class="mt-auto grid gap-2">
+                            <a href="{{ $topLink }}" class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-sky-700 px-6 py-3.5 text-sm font-bold text-white shadow-[0_16px_38px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-100">
+                                Lihat Detail Destinasi
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </a>
+                            <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $topDestination->id]) }}">
+                                @csrf
+                                <button type="submit" class="inline-flex w-full items-center justify-center rounded-full {{ $isTopWanted ? 'border border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border border-sky-100 bg-sky-50 text-sky-800 hover:bg-sky-100' }} px-6 py-3.5 text-sm font-bold transition">
+                                    {{ $isTopWanted ? 'Sudah Disimpan' : 'Ingin Dikunjungi' }}
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </article>
             @endif
@@ -297,6 +307,7 @@
                             $category = optional($destination->kategori)->nama_kategori ?? 'Destinasi';
                             $price = $destination->harga_wni_min ?? $destination->harga_wna_min;
                             $detailLink = route('user.destinations.detail', array_merge(['id' => $destination->id], $detailContextQuery));
+                            $isWanted = $wantedWisataIds->contains((int) $destination->id);
                         @endphp
                         <article class="group overflow-hidden rounded-[1.75rem] border border-sky-100/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.12)]">
                             <a href="{{ $detailLink }}" class="relative block h-56 overflow-hidden bg-slate-200" aria-label="Lihat detail {{ $destination->nama }}">
@@ -331,9 +342,17 @@
                                     </div>
                                 </div>
 
-                                <a href="{{ $detailLink }}" class="mt-5 inline-flex w-full items-center justify-center rounded-full border border-sky-100 bg-sky-50 px-5 py-3 text-sm font-bold text-sky-800 transition hover:bg-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-100">
-                                    Lihat Detail
-                                </a>
+                                <div class="mt-5 grid gap-2">
+                                    <a href="{{ $detailLink }}" class="inline-flex w-full items-center justify-center rounded-full border border-sky-100 bg-sky-50 px-5 py-3 text-sm font-bold text-sky-800 transition hover:bg-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-100">
+                                        Lihat Detail
+                                    </a>
+                                    <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}">
+                                        @csrf
+                                        <button type="submit" class="inline-flex w-full items-center justify-center rounded-full {{ $isWanted ? 'border border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-sky-50 hover:text-sky-800' }} px-5 py-3 text-sm font-bold transition">
+                                            {{ $isWanted ? 'Sudah Disimpan' : 'Ingin Dikunjungi' }}
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </article>
                     @endforeach

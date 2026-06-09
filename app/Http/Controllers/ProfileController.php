@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Kategori;
+use App\Models\Lokasi;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,8 +17,13 @@ class ProfileController extends Controller
 {
     public function show(Request $request): View
     {
+        $user = $request->user()->loadMissing(['preference', 'preferenceCategories']);
+
         return view('pages.user.profile', [
-            'user' => $request->user(),
+            'user' => $user,
+            'categories' => Kategori::query()->orderBy('nama_kategori')->get(),
+            'locations' => Lokasi::query()->orderBy('nama_kabupaten')->get(),
+            'selectedCategoryIds' => $user->preferenceCategories->pluck('category_id')->all(),
         ]);
     }
 

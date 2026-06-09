@@ -8,6 +8,7 @@
     $destinationsPaginator = $destinationsPaginator ?? null;
     $totalDestinations = $totalDestinations ?? $destinations->count();
     $totalAvailableDestinations = $totalAvailableDestinations ?? $totalDestinations;
+    $wantedWisataIds = collect($wantedWisataIds ?? []);
     $categories = $categories ?? collect();
     $locations = $locations ?? collect();
     $sortOptions = $sortOptions ?? [
@@ -280,9 +281,18 @@
                             </div>
                         </div>
 
-                        <a href="{{ $detailLink }}" class="mt-auto inline-flex w-full items-center justify-center rounded-full border border-sky-100 bg-sky-50 px-5 py-3 text-sm font-bold text-sky-800 transition hover:bg-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-100">
-                            Lihat Detail
-                        </a>
+                        <div class="mt-auto grid gap-2">
+                            <a href="{{ $detailLink }}" class="inline-flex w-full items-center justify-center rounded-full border border-sky-100 bg-sky-50 px-5 py-3 text-sm font-bold text-sky-800 transition hover:bg-sky-100 focus:outline-none focus:ring-4 focus:ring-sky-100">
+                                Lihat Detail
+                            </a>
+                            <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}">
+                                @csrf
+                                @php $isWanted = $wantedWisataIds->contains((int) $destination->id); @endphp
+                                <button type="submit" class="inline-flex w-full items-center justify-center rounded-full {{ $isWanted ? 'border border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border border-slate-200 bg-white text-slate-700 hover:bg-sky-50 hover:text-sky-800' }} px-5 py-3 text-sm font-bold transition">
+                                    {{ $isWanted ? 'Sudah Disimpan' : 'Ingin Dikunjungi' }}
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </article>
             @endforeach

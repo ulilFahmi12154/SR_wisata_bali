@@ -75,6 +75,12 @@
 @endphp
 
 <div class="mx-auto max-w-[1180px] animate-page-in">
+    @if(session('status'))
+        <div class="mb-5 rounded-3xl border border-sky-100 bg-sky-50 px-5 py-4 text-sm font-semibold text-sky-800">
+            {{ session('status') }}
+        </div>
+    @endif
+
     <div class="mb-5 mt-2 flex flex-wrap items-center justify-between gap-3 animate-fade-up">
         <div class="flex flex-wrap gap-2">
             <a href="{{ $backUrl }}" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-sm font-bold text-slate-600 shadow-sm transition hover:border-sky-100 hover:bg-sky-50 hover:text-sky-800">
@@ -156,6 +162,12 @@
                         Buka di Google Maps
                     </a>
                 @endif
+                <form method="POST" action="{{ route('destinations.want-to-go.toggle', ['destination' => $destination->id]) }}" class="flex-1">
+                    @csrf
+                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-full {{ $isWanted ?? false ? 'border border-amber-100 bg-amber-50 text-amber-700 hover:bg-amber-100' : 'border border-sky-100 bg-sky-50 text-sky-800 hover:bg-sky-100' }} px-6 py-3.5 text-sm font-bold transition">
+                        {{ $isWanted ?? false ? 'Sudah Disimpan' : 'Ingin Dikunjungi' }}
+                    </button>
+                </form>
                 <a href="{{ route('user.home') }}" class="inline-flex flex-1 items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-sky-50 hover:text-sky-800">
                     Ubah Preferensi
                 </a>

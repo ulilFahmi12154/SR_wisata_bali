@@ -143,12 +143,13 @@ class AnalyticsController extends Controller
     public function categoryDetails()
     {
         $now = Carbon::now();
+        $detailActionTypes = ['visit_detail', 'click_detail'];
         $totalDestinations = Wisata::count();
-        $totalVisitors = ActivityLog::where('action_type', 'visit_detail')->count();
+        $totalVisitors = ActivityLog::whereIn('action_type', $detailActionTypes)->count();
         
         // Growth rate (7 hari vs 7 hari sebelumnya)
-        $last7 = ActivityLog::where('action_type', 'visit_detail')->where('created_at', '>=', $now->copy()->subDays(7))->count();
-        $prev7 = ActivityLog::where('action_type', 'visit_detail')->whereBetween('created_at', [$now->copy()->subDays(14), $now->copy()->subDays(8)])->count();
+        $last7 = ActivityLog::whereIn('action_type', $detailActionTypes)->where('created_at', '>=', $now->copy()->subDays(7))->count();
+        $prev7 = ActivityLog::whereIn('action_type', $detailActionTypes)->whereBetween('created_at', [$now->copy()->subDays(14), $now->copy()->subDays(8)])->count();
         $growthRate = $prev7 > 0 ? round(($last7 - $prev7) / $prev7 * 100) : 0;
         
         // Line chart data (7 hari)
@@ -160,7 +161,7 @@ class AnalyticsController extends Controller
             $viewsPerDay = [];
             for ($i = 6; $i >= 0; $i--) {
                 $date = $now->copy()->subDays($i);
-                $count = ActivityLog::where('action_type', 'visit_detail')
+                $count = ActivityLog::whereIn('action_type', $detailActionTypes)
                     ->whereDate('created_at', $date)
                     ->whereHas('wisata', fn($q) => $q->where('kategori_id', $cat->id))
                     ->count();
@@ -172,7 +173,7 @@ class AnalyticsController extends Controller
         }
         
         // Ranking kategori - format array of objects with proper keys
-        $categoryRanking = ActivityLog::where('action_type', 'visit_detail')
+        $categoryRanking = ActivityLog::whereIn('action_type', $detailActionTypes)
             ->join('wisata', 'activity_logs.wisata_id', '=', 'wisata.id')
             ->join('kategori', 'wisata.kategori_id', '=', 'kategori.id')
             ->select('kategori.nama_kategori', 
