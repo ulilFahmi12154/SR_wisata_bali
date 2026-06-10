@@ -322,6 +322,36 @@ def calculate_saw(df_penilaian, df_kriteria, weight_map, eligible_ids, reasons_b
     return records
 
 
+@app.route("/", methods=["GET"])
+def index():
+    return jsonify({
+        "status": "Flask backend jalan",
+        "service": "backend rekomendasi wisata",
+        "available_endpoints": [
+            {
+                "path": "/hitung-saw",
+                "method": "POST"
+            },
+            {
+                "path": "/hitung-fw-bw-saw",
+                "method": "POST"
+            },
+            {
+                "path": "/health",
+                "method": "GET"
+            }
+        ]
+    })
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({
+        "status": "ok",
+        "message": "Backend Flask aktif"
+    })
+
+
 @app.route("/hitung-saw", methods=["POST"])
 @app.route("/hitung-fw-bw-saw", methods=["POST"])
 def hitung_rekomendasi():
