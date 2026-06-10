@@ -94,7 +94,7 @@
                 Kembali ke Beranda
             </a>
             @if($user?->onboarding_completed)
-                <a href="{{ route('user.profile') }}#personalisasi-wisata" class="inline-flex items-center rounded-full border border-sky-100 bg-sky-50/85 px-4 py-2 text-sm font-bold text-sky-800 shadow-sm transition hover:bg-sky-100">
+                <a href="{{ route('user.profile', ['section' => 'preferences']) }}" class="inline-flex items-center rounded-full border border-sky-100 bg-sky-50/85 px-4 py-2 text-sm font-bold text-sky-800 shadow-sm transition hover:bg-sky-100">
                     Edit Preferensi
                 </a>
             @endif

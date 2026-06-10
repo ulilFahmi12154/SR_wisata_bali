@@ -671,7 +671,7 @@
                     Personalisasi ini bisa kamu ubah kapan saja dari halaman profil.
                 </p>
             </div>
-            <a href="{{ route('user.profile') }}#personalisasi-wisata" class="inline-flex min-h-12 items-center justify-center rounded-full bg-sky-700 px-6 text-sm font-bold text-white shadow-[0_14px_34px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800">
+            <a href="{{ route('user.profile', ['section' => 'preferences']) }}" class="inline-flex min-h-12 items-center justify-center rounded-full bg-sky-700 px-6 text-sm font-bold text-white shadow-[0_14px_34px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800">
                 Edit Preferensi
             </a>
         </section>

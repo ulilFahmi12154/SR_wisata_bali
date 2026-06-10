@@ -3,24 +3,73 @@
 @section('title', $isEdit ? 'Edit Preferensi Wisata' : 'Personalisasi Wisata')
 
 @section('content')
+@once
+    <style>
+        .price-option-badge {
+            display: none;
+        }
+
+        .price-option-input:checked ~ .price-option-badge {
+            display: inline-flex;
+        }
+
+        .price-option-card {
+            border-color: rgb(226 232 240);
+            background-color: rgb(248 250 252 / 0.8);
+            color: rgb(51 65 85);
+            box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+        }
+
+        .price-option-input:checked ~ .price-option-card {
+            border-color: rgb(3 105 161);
+            background-color: rgb(240 249 255);
+            color: rgb(7 89 133);
+            box-shadow: inset 0 0 0 1px rgb(3 105 161 / 0.18), 0 14px 34px rgb(3 105 161 / 0.10);
+        }
+    </style>
+@endonce
+
 @php
     $preference = $preference ?? null;
     $selectedCategoryIds = collect(old('category_ids', $selectedCategoryIds ?? []))->map(fn ($id) => (int) $id)->all();
-    $selectedRegion = old('preferred_region', $preference?->preferred_region);
-    $selectedPriceCategory = old('price_category', $preference?->price_category ?: 'sedang');
-    $priceBudgetRanges = [
-        '' => ['min' => '', 'max' => ''],
-        'murah' => ['min' => 0, 'max' => 50000],
-        'sedang' => ['min' => 50000, 'max' => 500000],
-        'mahal' => ['min' => 500000, 'max' => 10000000],
+    $normalizeRegion = function ($value) {
+        $value = strtolower((string) $value);
+
+        return match (true) {
+            str_contains($value, 'badung') => 'Badung',
+            str_contains($value, 'gianyar') => 'Gianyar',
+            str_contains($value, 'bangli') => 'Bangli',
+            str_contains($value, 'buleleng') => 'Buleleng',
+            default => '',
+        };
+    };
+    $regionOptions = [
+        '' => 'Pilih Kabupaten',
+        'Badung' => 'Badung',
+        'Gianyar' => 'Gianyar',
+        'Bangli' => 'Bangli',
+        'Buleleng' => 'Buleleng',
     ];
+    $selectedRegion = $normalizeRegion(old('preferred_region', $preference?->preferred_region));
+    $normalizePriceCategory = function ($value) {
+        $value = strtolower(trim((string) $value));
+
+        return match (true) {
+            $value === '', str_contains($value, 'tidak') => '',
+            str_contains($value, 'murah') => 'murah',
+            str_contains($value, 'sedang') => 'sedang',
+            str_contains($value, 'mahal'), str_contains($value, 'premium') => 'mahal',
+            default => 'sedang',
+        };
+    };
+    $rawPriceCategory = old('price_category', $preference ? $preference->price_category : 'sedang');
+    $selectedPriceCategory = $normalizePriceCategory($rawPriceCategory);
     $priceCategoryOptions = [
         '' => ['label' => 'Tidak dibatasi', 'description' => 'Cocok untuk semua pilihan harga.'],
         'murah' => ['label' => 'Murah', 'description' => 'Prioritaskan destinasi hemat.'],
         'sedang' => ['label' => 'Sedang', 'description' => 'Pilihan seimbang untuk mayoritas destinasi.'],
         'mahal' => ['label' => 'Premium', 'description' => 'Untuk pengalaman wisata lebih lengkap.'],
     ];
-    $selectedBudgetRange = $priceBudgetRanges[$selectedPriceCategory] ?? $priceBudgetRanges['sedang'];
     $action = $isEdit ? route('preferences.update') : route('preferences.store');
 @endphp
 
@@ -53,10 +102,9 @@
             <div>
                 <label for="preferred_region" class="mb-2 block text-sm font-bold text-slate-700">Wilayah Preferensi</label>
                 <select id="preferred_region" name="preferred_region" class="min-h-14 w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-5 text-sm font-semibold text-slate-900 shadow-sm transition focus:border-sky-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-sky-100">
-                    <option value="">Semua wilayah</option>
-                    @foreach($locations as $location)
-                        <option value="{{ $location->nama_kabupaten }}" @selected($selectedRegion === $location->nama_kabupaten)>
-                            {{ $location->nama_kabupaten }}
+                    @foreach($regionOptions as $value => $label)
+                        <option value="{{ $value }}" @selected($selectedRegion === $value)>
+                            {{ $label }}
                         </option>
                     @endforeach
                 </select>
@@ -80,44 +128,34 @@
                 @enderror
             </div>
 
-            <div
-                x-data="{
-                    priceCategory: @json($selectedPriceCategory),
-                    ranges: @json($priceBudgetRanges)
-                }"
-            >
+            <div>
                 <div class="mb-3 flex flex-col gap-1">
                     <p class="text-sm font-bold text-slate-700">Kategori Harga</p>
                     <p class="text-sm leading-6 text-slate-500">Pilih kategori harga. Rentang budget teknis akan diatur otomatis.</p>
                 </div>
-                <input type="hidden" name="budget_min" value="{{ $selectedBudgetRange['min'] }}" x-bind:value="ranges[priceCategory]?.min ?? ''">
-                <input type="hidden" name="budget_max" value="{{ $selectedBudgetRange['max'] }}" x-bind:value="ranges[priceCategory]?.max ?? ''">
 
                 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" role="radiogroup" aria-label="Kategori harga">
                     @foreach($priceCategoryOptions as $value => $option)
+                        @php $isSelectedPriceCategory = $selectedPriceCategory === $value; @endphp
                         <label class="relative">
                             <input
                                 type="radio"
                                 name="price_category"
                                 value="{{ $value }}"
-                                class="peer sr-only"
-                                x-model="priceCategory"
-                                @checked($selectedPriceCategory === $value)
+                                class="price-option-input sr-only"
+                                @checked($isSelectedPriceCategory)
                             >
-                            <span class="flex min-h-24 cursor-pointer flex-col justify-center rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:border-sky-100 hover:bg-sky-50 peer-checked:border-sky-700 peer-checked:bg-sky-50 peer-checked:text-sky-800 peer-checked:shadow-[inset_0_0_0_1px_rgba(3,105,161,0.18)]">
+                            <span class="price-option-badge pointer-events-none absolute right-4 top-4 z-10 rounded-full bg-sky-700 px-2.5 py-1 text-[0.68rem] font-black uppercase tracking-[0.14em] text-white">
+                                Dipilih
+                            </span>
+                            <span class="price-option-card flex min-h-24 cursor-pointer flex-col justify-center rounded-2xl border px-4 py-3 pr-24 text-sm font-bold transition hover:border-sky-100 hover:bg-sky-50">
                                 <span>{{ $option['label'] }}</span>
-                                <span class="mt-1 text-xs font-semibold leading-5 text-slate-500 peer-checked:text-sky-700">{{ $option['description'] }}</span>
+                                <span class="mt-1 text-xs font-semibold leading-5 text-slate-500">{{ $option['description'] }}</span>
                             </span>
                         </label>
                     @endforeach
                 </div>
                 @error('price_category', 'preferences')
-                    <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
-                @enderror
-                @error('budget_min', 'preferences')
-                    <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
-                @enderror
-                @error('budget_max', 'preferences')
                     <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
                 @enderror
             </div>

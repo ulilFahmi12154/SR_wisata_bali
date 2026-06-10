@@ -1,8 +1,34 @@
 @extends('layouts.app')
 
-@section('title', 'Profil Saya')
+@section('title', request('section') === 'preferences' ? 'Preferensi Wisata' : 'Profil Saya')
 
 @section('content')
+@once
+    <style>
+        .price-option-badge {
+            display: none;
+        }
+
+        .price-option-input:checked ~ .price-option-badge {
+            display: inline-flex;
+        }
+
+        .price-option-card {
+            border-color: rgb(226 232 240);
+            background-color: rgb(248 250 252 / 0.8);
+            color: rgb(51 65 85);
+            box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+        }
+
+        .price-option-input:checked ~ .price-option-card {
+            border-color: rgb(3 105 161);
+            background-color: rgb(240 249 255);
+            color: rgb(7 89 133);
+            box-shadow: inset 0 0 0 1px rgb(3 105 161 / 0.18), 0 14px 34px rgb(3 105 161 / 0.10);
+        }
+    </style>
+@endonce
+
 @php
     $user = $user ?? auth()->user();
     $userName = trim($user->name ?? '') ?: 'User';
@@ -10,36 +36,89 @@
     $joinedAt = $user->created_at ? $user->created_at->translatedFormat('d F Y') : 'Tanggal belum tersedia';
     $preference = $user->preference ?? null;
     $selectedCategoryIds = collect(old('category_ids', $selectedCategoryIds ?? []))->map(fn ($id) => (int) $id)->all();
-    $selectedPriceCategory = old('price_category', $preference?->price_category ?: 'sedang');
-    $priceBudgetRanges = [
-        '' => ['min' => '', 'max' => ''],
-        'murah' => ['min' => 0, 'max' => 50000],
-        'sedang' => ['min' => 50000, 'max' => 500000],
-        'mahal' => ['min' => 500000, 'max' => 10000000],
+    $normalizeRegion = function ($value) {
+        $value = strtolower((string) $value);
+
+        return match (true) {
+            str_contains($value, 'badung') => 'Badung',
+            str_contains($value, 'gianyar') => 'Gianyar',
+            str_contains($value, 'bangli') => 'Bangli',
+            str_contains($value, 'buleleng') => 'Buleleng',
+            default => '',
+        };
+    };
+    $regionOptions = [
+        '' => 'Pilih Kabupaten',
+        'Badung' => 'Badung',
+        'Gianyar' => 'Gianyar',
+        'Bangli' => 'Bangli',
+        'Buleleng' => 'Buleleng',
     ];
+    $selectedRegion = $normalizeRegion(old('preferred_region', $preference?->preferred_region));
+    $normalizePriceCategory = function ($value) {
+        $value = strtolower(trim((string) $value));
+
+        return match (true) {
+            $value === '', str_contains($value, 'tidak') => '',
+            str_contains($value, 'murah') => 'murah',
+            str_contains($value, 'sedang') => 'sedang',
+            str_contains($value, 'mahal'), str_contains($value, 'premium') => 'mahal',
+            default => 'sedang',
+        };
+    };
+    $rawPriceCategory = old('price_category', $preference ? $preference->price_category : 'sedang');
+    $selectedPriceCategory = $normalizePriceCategory($rawPriceCategory);
     $priceCategoryOptions = [
         '' => ['label' => 'Tidak dibatasi', 'description' => 'Cocok untuk semua pilihan harga.'],
         'murah' => ['label' => 'Murah', 'description' => 'Prioritaskan destinasi hemat.'],
         'sedang' => ['label' => 'Sedang', 'description' => 'Pilihan seimbang untuk mayoritas destinasi.'],
         'mahal' => ['label' => 'Premium', 'description' => 'Untuk pengalaman wisata lebih lengkap.'],
     ];
-    $selectedBudgetRange = $priceBudgetRanges[$selectedPriceCategory] ?? $priceBudgetRanges['sedang'];
+    $interestSummary = $interestSummary ?? ['items' => collect(), 'has_preferences' => false, 'has_activity' => false];
+    $interestItems = collect($interestSummary['items'] ?? []);
+    $activeProfileSection = request('section') === 'preferences' || $errors->preferences->any() || session('preferences_status')
+        ? 'preferences'
+        : 'profile';
 @endphp
 
 <div class="mx-auto max-w-[1180px] animate-page-in">
     <section class="mt-4">
         <p class="inline-flex rounded-full border border-sky-100 bg-sky-50/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-sky-700">
-            Pengaturan Akun
+            {{ $activeProfileSection === 'preferences' ? 'Preferensi Wisata' : 'Pengaturan Akun' }}
         </p>
         <h1 class="mt-4 font-display text-4xl font-semibold leading-tight text-slate-950 sm:text-5xl">
-            Kelola profil Anda.
+            {{ $activeProfileSection === 'preferences' ? 'Kelola preferensi wisata.' : 'Kelola profil Anda.' }}
         </h1>
         <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-            Perbarui identitas akun dan jaga keamanan akses Jelajah Bali Anda dari satu halaman yang rapi.
+            {{ $activeProfileSection === 'preferences'
+                ? 'Atur personalisasi perjalanan dan lihat ringkasan minat wisata yang dipakai untuk menyesuaikan rekomendasi.'
+                : 'Perbarui identitas akun dan jaga keamanan akses Jelajah Bali Anda dari satu halaman yang rapi.' }}
         </p>
+
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <nav class="inline-flex w-full flex-wrap gap-2 rounded-[1.5rem] border border-sky-100 bg-white/85 p-1 shadow-sm sm:w-auto" aria-label="Navigasi profil">
+                <a
+                    href="{{ route('user.profile', ['section' => 'profile']) }}"
+                    class="inline-flex min-h-11 flex-1 items-center justify-center rounded-[1.25rem] px-5 text-sm font-bold transition sm:flex-none {{ $activeProfileSection === 'profile' ? 'bg-sky-700 text-white shadow-[0_12px_28px_rgba(3,105,161,0.18)]' : 'text-slate-600 hover:bg-sky-50 hover:text-sky-800' }}"
+                >
+                    Profil Saya
+                </a>
+                <a
+                    href="{{ route('user.profile', ['section' => 'preferences']) }}"
+                    class="inline-flex min-h-11 flex-1 items-center justify-center rounded-[1.25rem] px-5 text-sm font-bold transition sm:flex-none {{ $activeProfileSection === 'preferences' ? 'bg-sky-700 text-white shadow-[0_12px_28px_rgba(3,105,161,0.18)]' : 'text-slate-600 hover:bg-sky-50 hover:text-sky-800' }}"
+                >
+                    Preferensi Wisata
+                </a>
+            </nav>
+
+            <a href="{{ route('user.home') }}" class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-200 bg-white/85 px-5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-sky-50 hover:text-sky-800">
+                Kembali ke Beranda
+            </a>
+        </div>
     </section>
 
-    <section class="mt-7 grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">
+    <section class="mt-7 {{ $activeProfileSection === 'profile' ? 'grid gap-6 lg:grid-cols-[340px_minmax(0,1fr)]' : '' }}">
+        @if($activeProfileSection === 'profile')
         <aside class="animate-fade-up">
             <div class="overflow-hidden rounded-[2rem] border border-sky-100/80 bg-gradient-to-br from-white via-sky-50 to-amber-50/60 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
                 <p class="text-xs font-bold uppercase tracking-[0.22em] text-sky-700">Ringkasan Akun</p>
@@ -69,8 +148,10 @@
                 </dl>
             </div>
         </aside>
+        @endif
 
-        <main class="space-y-6">
+        <main class="{{ $activeProfileSection === 'preferences' ? 'mx-auto max-w-[940px] space-y-6' : 'space-y-6' }}">
+            @if($activeProfileSection === 'profile')
             <section class="rounded-[2rem] border border-sky-100/80 bg-white/90 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] sm:p-8 animate-fade-up animate-delay-100">
                 <div class="mb-7">
                     <p class="inline-flex rounded-full border border-sky-100 bg-sky-50/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-sky-700">
@@ -183,8 +264,11 @@
                     </div>
                 </form>
             </section>
+            @endif
 
-            <section id="personalisasi-wisata" class="rounded-[2rem] border border-sky-100/80 bg-white/90 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] sm:p-8 animate-fade-up animate-delay-150">
+            @if($activeProfileSection === 'preferences')
+            <span id="personalisasi-wisata" class="block scroll-mt-24"></span>
+            <section id="preferensi-wisata" class="scroll-mt-24 rounded-[2rem] border border-sky-100/80 bg-white/90 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] sm:p-8 animate-fade-up animate-delay-150">
                 <div class="mb-7">
                     <p class="inline-flex rounded-full border border-sky-100 bg-sky-50/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-sky-700">
                         Personalisasi Wisata
@@ -210,10 +294,9 @@
                     <div>
                         <label for="preferred_region" class="mb-2 block text-sm font-bold text-slate-700">Wilayah Preferensi</label>
                         <select id="preferred_region" name="preferred_region" class="min-h-14 w-full rounded-2xl border border-slate-200 bg-slate-50/80 px-5 text-sm font-semibold text-slate-900 shadow-sm transition focus:border-sky-300 focus:bg-white focus:outline-none focus:ring-4 focus:ring-sky-100">
-                            <option value="">Semua wilayah</option>
-                            @foreach($locations ?? collect() as $location)
-                                <option value="{{ $location->nama_kabupaten }}" @selected(old('preferred_region', $preference?->preferred_region) === $location->nama_kabupaten)>
-                                    {{ $location->nama_kabupaten }}
+                            @foreach($regionOptions as $value => $label)
+                                <option value="{{ $value }}" @selected($selectedRegion === $value)>
+                                    {{ $label }}
                                 </option>
                             @endforeach
                         </select>
@@ -237,31 +320,27 @@
                         @enderror
                     </div>
 
-                    <div
-                        x-data="{
-                            priceCategory: @json($selectedPriceCategory),
-                            ranges: @json($priceBudgetRanges)
-                        }"
-                    >
+                    <div>
                         <div class="mb-3 flex flex-col gap-1">
                             <p class="text-sm font-bold text-slate-700">Kategori Harga</p>
                             <p class="text-sm leading-6 text-slate-500">Pilih kategori harga. Rentang budget teknis akan diatur otomatis.</p>
                         </div>
-                        <input type="hidden" name="budget_min" value="{{ $selectedBudgetRange['min'] }}" x-bind:value="ranges[priceCategory]?.min ?? ''">
-                        <input type="hidden" name="budget_max" value="{{ $selectedBudgetRange['max'] }}" x-bind:value="ranges[priceCategory]?.max ?? ''">
 
                         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" role="radiogroup" aria-label="Kategori harga">
                             @foreach($priceCategoryOptions as $value => $option)
+                                @php $isSelectedPriceCategory = $selectedPriceCategory === $value; @endphp
                                 <label class="relative">
                                     <input
                                         type="radio"
                                         name="price_category"
                                         value="{{ $value }}"
-                                        class="peer sr-only"
-                                        x-model="priceCategory"
-                                        @checked($selectedPriceCategory === $value)
+                                        class="price-option-input sr-only"
+                                        @checked($isSelectedPriceCategory)
                                     >
-                                    <span class="flex min-h-24 cursor-pointer flex-col justify-center rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:border-sky-100 hover:bg-sky-50 peer-checked:border-sky-700 peer-checked:bg-sky-50 peer-checked:text-sky-800 peer-checked:shadow-[inset_0_0_0_1px_rgba(3,105,161,0.18)]">
+                                    <span class="price-option-badge pointer-events-none absolute right-4 top-4 z-10 rounded-full bg-sky-700 px-2.5 py-1 text-[0.68rem] font-black uppercase tracking-[0.14em] text-white">
+                                        Dipilih
+                                    </span>
+                                    <span class="price-option-card flex min-h-24 cursor-pointer flex-col justify-center rounded-2xl border px-4 py-3 pr-24 text-sm font-bold transition hover:border-sky-100 hover:bg-sky-50">
                                         <span>{{ $option['label'] }}</span>
                                         <span class="mt-1 text-xs font-semibold leading-5 text-slate-500">{{ $option['description'] }}</span>
                                     </span>
@@ -271,12 +350,6 @@
                         @error('price_category', 'preferences')
                             <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
                         @enderror
-                        @error('budget_min', 'preferences')
-                            <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
-                        @enderror
-                        @error('budget_max', 'preferences')
-                            <p class="mt-2 text-sm font-semibold text-red-600">{{ $message }}</p>
-                        @enderror
                     </div>
 
                     <button type="submit" class="inline-flex min-h-12 w-full items-center justify-center rounded-full bg-sky-700 px-6 text-sm font-bold text-white shadow-[0_14px_34px_rgba(3,105,161,0.22)] transition hover:-translate-y-0.5 hover:bg-sky-800 focus:outline-none focus:ring-4 focus:ring-sky-100 sm:w-auto">
@@ -284,7 +357,9 @@
                     </button>
                 </form>
             </section>
+            @endif
 
+            @if($activeProfileSection === 'profile')
             <section class="rounded-[2rem] border border-sky-100/80 bg-white/90 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] sm:p-8 animate-fade-up animate-delay-200">
                 <div class="mb-7">
                     <p class="inline-flex rounded-full border border-amber-100 bg-amber-50/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-amber-700">
@@ -424,6 +499,59 @@
                     </button>
                 </form>
             </section>
+            @endif
+
+            @if($activeProfileSection === 'preferences')
+            <section class="rounded-[2rem] border border-sky-100/80 bg-white/90 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] sm:p-8 animate-fade-up animate-delay-200">
+                <div class="mb-7">
+                    <p class="inline-flex rounded-full border border-sky-100 bg-sky-50/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-sky-700">
+                        Minat Wisata Kamu
+                    </p>
+                    <h2 class="mt-4 font-display text-3xl font-semibold leading-tight text-slate-950">
+                        Ringkasan minat perjalanan.
+                    </h2>
+                    <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+                        Semakin sering kamu melihat atau menyimpan destinasi, rekomendasi akan semakin sesuai.
+                    </p>
+                </div>
+
+                @if($interestItems->isNotEmpty())
+                    <div class="space-y-4">
+                        @foreach($interestItems as $interest)
+                            @php
+                                $levelColor = match ($interest['level'] ?? 'Rendah') {
+                                    'Tinggi' => 'bg-sky-700',
+                                    'Sedang' => 'bg-cyan-600',
+                                    default => 'bg-slate-400',
+                                };
+                            @endphp
+                            <div class="rounded-3xl border border-slate-100 bg-slate-50/80 p-4">
+                                <div class="flex flex-wrap items-center justify-between gap-3">
+                                    <div>
+                                        <h3 class="text-base font-bold text-slate-950">{{ $interest['name'] }}</h3>
+                                        <p class="mt-1 text-sm font-semibold text-slate-500">Cocok untuk kamu</p>
+                                    </div>
+                                    <span class="rounded-full border border-sky-100 bg-white px-3 py-1.5 text-xs font-bold text-sky-700 shadow-sm">
+                                        {{ $interest['level'] }}
+                                    </span>
+                                </div>
+                                <div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
+                                    <span class="{{ $levelColor }} block h-full rounded-full" style="width: {{ (int) ($interest['bar'] ?? 38) }}%;"></span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @elseif(! $interestSummary['has_preferences'])
+                    <div class="rounded-3xl border border-amber-100 bg-amber-50/80 px-5 py-4 text-sm font-semibold leading-6 text-amber-800">
+                        Lengkapi personalisasi agar sistem dapat mengenali minat wisata kamu.
+                    </div>
+                @else
+                    <div class="rounded-3xl border border-sky-100 bg-sky-50/80 px-5 py-4 text-sm font-semibold leading-6 text-sky-800">
+                        Minat wisata akan semakin akurat setelah kamu melihat destinasi atau menambahkan destinasi ke Wishlist.
+                    </div>
+                @endif
+            </section>
+            @endif
         </main>
     </section>
 </div>

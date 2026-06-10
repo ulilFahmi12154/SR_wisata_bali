@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kategori;
 use App\Models\Lokasi;
 use App\Models\User;
+use App\Services\RecommendationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +16,7 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    public function show(Request $request): View
+    public function show(Request $request, RecommendationService $recommendationService): View
     {
         $user = $request->user()->loadMissing(['preference', 'preferenceCategories']);
 
@@ -24,6 +25,7 @@ class ProfileController extends Controller
             'categories' => Kategori::query()->orderBy('nama_kategori')->get(),
             'locations' => Lokasi::query()->orderBy('nama_kabupaten')->get(),
             'selectedCategoryIds' => $user->preferenceCategories->pluck('category_id')->all(),
+            'interestSummary' => $recommendationService->getUserInterestSummary($user),
         ]);
     }
 

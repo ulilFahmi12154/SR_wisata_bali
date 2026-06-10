@@ -24,6 +24,34 @@ class RecommendationService
         return $this->recommend($user, $limit, false, true);
     }
 
+    public function getUserInterestSummary(?User $user, int $limit = 5): array
+    {
+        $facts = $this->forwardChaining($user, true, true);
+        $items = collect($facts['categories'])
+            ->sortDesc()
+            ->take($limit)
+            ->map(function (int|float $value, string $key) {
+                $level = $this->interestLevel((int) $value);
+
+                return [
+                    'name' => $this->displayName($key),
+                    'level' => $level,
+                    'bar' => match ($level) {
+                        'Tinggi' => 100,
+                        'Sedang' => 66,
+                        default => 38,
+                    },
+                ];
+            })
+            ->values();
+
+        return [
+            'items' => $items,
+            'has_preferences' => (bool) $facts['has_preferences'],
+            'has_activity' => (bool) $facts['has_activity'],
+        ];
+    }
+
     private function recommend(?User $user, int $limit, bool $includePreferences, bool $includeActivity): Collection
     {
         $destinations = Wisata::query()
@@ -122,6 +150,7 @@ class RecommendationService
             ->with('wisata.kategori', 'wisata.lokasi')
             ->where('user_id', $user->id)
             ->whereNotNull('wisata_id')
+            ->whereNotIn('action_type', ['want_to_go'])
             ->latest()
             ->limit(80)
             ->get();
@@ -133,7 +162,7 @@ class RecommendationService
             }
 
             $facts['has_activity'] = true;
-            $weight = (int) ($activityLog->weight ?: $this->activityWeight($activityLog->action_type));
+            $weight = $this->activityLogWeight($activityLog);
             $this->addWeight($facts['categories'], $wisata->kategori?->nama_kategori, $weight);
             $this->addWeight($facts['regions'], $wisata->lokasi?->nama_kabupaten, max(1, (int) floor($weight / 2)));
         }
@@ -174,7 +203,7 @@ class RecommendationService
     {
         $rows = $destinations->map(function (Wisata $destination) use ($facts) {
             $activityQuery = $destination->activityLogs()
-                ->whereIn('action_type', ['click_detail', 'visit_detail', 'want_to_go']);
+                ->whereIn('action_type', ['click_detail', 'visit_detail']);
 
             if (!empty($facts['use_user_activity']) && !empty($facts['user_id'])) {
                 $activityQuery->where('user_id', $facts['user_id']);
@@ -213,7 +242,8 @@ class RecommendationService
             /** @var Wisata $destination */
             $destination = $row['destination'];
             $destination->skor_akhir = round($score, 6);
-            $destination->alasan_rekomendasi = $this->recommendationReasons($destination, $facts);
+            $destination->alasan_rekomendasi = $this->recommendationReasons($destination, $facts, (float) ($row['activity'] ?? 0));
+            $destination->recommendation_reason = $destination->alasan_rekomendasi[0] ?? null;
 
             return $destination;
         })->sortByDesc('skor_akhir')->values();
@@ -304,27 +334,33 @@ class RecommendationService
         return $score;
     }
 
-    private function recommendationReasons(Wisata $destination, array $facts): array
+    private function recommendationReasons(Wisata $destination, array $facts, float $activityScore = 0): array
     {
         $reasons = [];
+        $category = $destination->kategori?->nama_kategori;
+        $region = $destination->lokasi?->nama_kabupaten;
 
-        if ($this->categoryScore($destination, $facts) > 0 && !empty($facts['categories'])) {
-            $reasons[] = 'Kategori sesuai minat Anda.';
+        if ($activityScore > 0 && !empty($facts['use_user_activity'])) {
+            $reasons[] = 'Cocok untuk kamu karena kamu pernah menyimpan atau melihat destinasi serupa.';
         }
 
-        if ($this->regionScore($destination, $facts) > 0 && !empty($facts['regions'])) {
-            $reasons[] = 'Lokasi sesuai wilayah pilihan.';
+        if ($this->categoryScore($destination, $facts) > 0 && !empty($facts['categories']) && $category) {
+            $reasons[] = "Cocok untuk kamu karena sesuai dengan minat {$category}.";
+        }
+
+        if ($this->regionScore($destination, $facts) > 0 && !empty($facts['regions']) && $region) {
+            $reasons[] = "Direkomendasikan karena berada di wilayah {$region} yang kamu pilih.";
         }
 
         if ($this->priceScore($destination, $facts) > 0 && ($facts['budget_max'] || !empty($facts['price_category']))) {
-            $reasons[] = 'Harga sesuai preferensi budget.';
+            $reasons[] = 'Sesuai dengan preferensi harga kamu.';
         }
 
         if ((float) ($destination->rating ?? 0) >= 4.0) {
-            $reasons[] = 'Rating destinasi tergolong baik.';
+            $reasons[] = 'Memiliki ulasan yang baik dari data destinasi.';
         }
 
-        return $reasons ?: ['Destinasi populer dari dataset wisata Bali.'];
+        return $reasons ?: ['Destinasi ini direkomendasikan karena memiliki kecocokan dengan preferensi wisata kamu.'];
     }
 
     private function destinationPrice(Wisata $destination): ?int
@@ -357,6 +393,17 @@ class RecommendationService
         };
     }
 
+    private function activityLogWeight(ActivityLog $activityLog): int
+    {
+        $storedWeight = (int) ($activityLog->weight ?: 0);
+        $fallbackWeight = $this->activityWeight($activityLog->action_type);
+
+        return match ($activityLog->action_type) {
+            'click_detail', 'visit_detail' => max($storedWeight, 3),
+            default => max(1, $storedWeight ?: $fallbackWeight),
+        };
+    }
+
     private function addWeight(array &$target, ?string $name, int $weight): void
     {
         $key = $this->key($name);
@@ -370,5 +417,26 @@ class RecommendationService
     private function key(?string $value): string
     {
         return strtolower(trim((string) $value));
+    }
+
+    private function displayName(string $key): string
+    {
+        return collect(explode(' ', str_replace(['_', '-'], ' ', $key)))
+            ->filter()
+            ->map(fn (string $part) => mb_convert_case($part, MB_CASE_TITLE, 'UTF-8'))
+            ->implode(' ');
+    }
+
+    private function interestLevel(int $value): string
+    {
+        if ($value >= 7) {
+            return 'Tinggi';
+        }
+
+        if ($value >= 3) {
+            return 'Sedang';
+        }
+
+        return 'Rendah';
     }
 }

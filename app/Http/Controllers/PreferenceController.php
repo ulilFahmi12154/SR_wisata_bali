@@ -52,25 +52,23 @@ class PreferenceController extends Controller
             'category_ids' => ['required', 'array', 'min:1'],
             'category_ids.*' => ['integer', Rule::exists('kategori', 'id')],
             'price_category' => ['nullable', Rule::in(['murah', 'sedang', 'mahal'])],
-            'budget_min' => ['nullable', 'integer', 'min:0', 'max:10000000'],
-            'budget_max' => ['nullable', 'integer', 'min:0', 'max:10000000', 'gte:budget_min'],
         ], [
             'category_ids.required' => 'Pilih minimal satu kategori wisata.',
             'category_ids.min' => 'Pilih minimal satu kategori wisata.',
             'category_ids.*.exists' => 'Kategori wisata tidak valid.',
             'price_category.in' => 'Kategori harga tidak valid.',
-            'budget_max.gte' => 'Budget maksimum harus lebih besar atau sama dengan budget minimum.',
         ]);
 
         $user = $request->user();
+        $budgetRange = $this->budgetRangeForPriceCategory($validated['price_category'] ?? null);
 
         UserPreference::updateOrCreate(
             ['user_id' => $user->id],
             [
                 'preferred_region' => $validated['preferred_region'] ?? null,
                 'price_category' => $validated['price_category'] ?? null,
-                'budget_min' => $validated['budget_min'] ?? null,
-                'budget_max' => $validated['budget_max'] ?? null,
+                'budget_min' => $budgetRange['min'],
+                'budget_max' => $budgetRange['max'],
             ]
         );
 
@@ -101,5 +99,15 @@ class PreferenceController extends Controller
             'locations' => Lokasi::query()->orderBy('nama_kabupaten')->get(),
             'isEdit' => $isEdit,
         ];
+    }
+
+    private function budgetRangeForPriceCategory(?string $priceCategory): array
+    {
+        return match ($priceCategory) {
+            'murah' => ['min' => 0, 'max' => 50000],
+            'sedang' => ['min' => 50000, 'max' => 500000],
+            'mahal' => ['min' => 500000, 'max' => 10000000],
+            default => ['min' => null, 'max' => null],
+        };
     }
 }

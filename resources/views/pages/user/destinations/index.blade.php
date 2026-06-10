@@ -236,10 +236,15 @@
                     $category = optional($destination->kategori)->nama_kategori ?? 'Destinasi';
                     $description = $destination->deskripsi ?? $destination->keterangan ?? 'Deskripsi destinasi belum tersedia.';
                     $price = $destination->harga_wni_min ?? $destination->harga_wna_min;
-                    $detailLink = route('user.destinations.detail', array_merge(['id' => $destination->id], $detailContextQuery));
+                    $cardAnchor = 'destinasi-' . $destination->id;
+                    $detailLink = route('user.destinations.detail', array_merge(
+                        ['id' => $destination->id],
+                        $detailContextQuery,
+                        ['return_to' => request()->fullUrl() . '#' . $cardAnchor]
+                    ));
                 @endphp
 
-                <article class="group overflow-hidden rounded-[1.75rem] border border-sky-100/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.12)] animate-fade-up" style="animation-delay: {{ min($loop->index * 45, 270) }}ms">
+                <article id="{{ $cardAnchor }}" class="group scroll-mt-24 overflow-hidden rounded-[1.75rem] border border-sky-100/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.12)] animate-fade-up" style="animation-delay: {{ min($loop->index * 45, 270) }}ms">
                     <a href="{{ $detailLink }}" class="relative block aspect-[4/3] overflow-hidden bg-slate-200" aria-label="Lihat detail {{ $destination->nama }}">
                         <img src="{{ $imageUrl }}" alt="{{ $destination->nama }}" class="h-full w-full object-cover object-center transition duration-700 group-hover:scale-[1.04]">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950/42 via-transparent to-transparent"></div>

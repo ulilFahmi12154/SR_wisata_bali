@@ -64,7 +64,12 @@
     $priceWna = $formatRange($destination->harga_wna_min ?? null, $destination->harga_wna_max ?? null);
 
     $detailSource = request('from', 'destinasi');
-    $returnQuery = collect(request()->query())->except(['from', 'section'])->all();
+    $returnTo = request('return_to');
+    $returnToHost = is_string($returnTo) ? parse_url($returnTo, PHP_URL_HOST) : null;
+    $safeReturnTo = is_string($returnTo) && filled($returnTo) && (!$returnToHost || $returnToHost === request()->getHost())
+        ? $returnTo
+        : null;
+    $returnQuery = collect(request()->query())->except(['from', 'section', 'return_to'])->all();
     $homeSection = request('section');
     $homeSection = in_array($homeSection, ['rekomendasi-preferensi', 'rekomendasi-aktivitas'], true) ? $homeSection : null;
     $homeBackUrl = route('user.home') . ($homeSection ? '#' . $homeSection : '');
@@ -72,7 +77,7 @@
         'home' => $homeBackUrl,
         'rekomendasi' => route('user.recommendations.results', $returnQuery),
         'want-to-go' => route('want-to-go.index'),
-        default => route('user.destinations', $returnQuery),
+        default => $safeReturnTo ?: route('user.destinations', $returnQuery),
     };
     $backLabel = match ($detailSource) {
         'home' => 'Kembali ke Beranda',
