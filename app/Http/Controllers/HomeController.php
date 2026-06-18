@@ -11,14 +11,26 @@ class HomeController extends Controller
     public function index(Request $request, RecommendationService $recommendationService): View
     {
         $user = $request->user();
-        $user?->loadMissing(['preference', 'preferenceCategories.category']);
+        $user?->loadMissing([
+            'preference:id,user_id,preferred_region,price_category,budget_min,budget_max',
+            'preferenceCategories:id,user_id,category_id,weight',
+            'preferenceCategories.category:id,nama_kategori',
+        ]);
+
+        $preferenceDestinations = $recommendationService->recommendHomeByPreference($user, 6);
+        $activityDestinations = $recommendationService->recommendHomeByActivity($user, 6);
+        $homeWisataIds = $preferenceDestinations
+            ->pluck('id')
+            ->merge($activityDestinations->pluck('id'))
+            ->unique()
+            ->values();
 
         return view('pages.user.home', [
             'user' => $user,
-            'preferenceDestinations' => $recommendationService->recommendByPreference($user, 6),
-            'activityDestinations' => $recommendationService->recommendByActivity($user, 6),
-            'wantedWisataIds' => $user
-                ? $user->wantToGos()->pluck('wisata_id')->all()
+            'preferenceDestinations' => $preferenceDestinations,
+            'activityDestinations' => $activityDestinations,
+            'wantedWisataIds' => $user && $homeWisataIds->isNotEmpty()
+                ? $user->wantToGos()->whereIn('wisata_id', $homeWisataIds)->pluck('wisata_id')->all()
                 : [],
         ]);
     }

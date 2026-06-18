@@ -5,10 +5,14 @@ namespace App\Services;
 use App\Models\ActivityLog;
 use App\Models\User;
 use App\Models\Wisata;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class RecommendationService
 {
+    private const HOME_MAX_DESTINATIONS = 8;
+    private const HOME_CANDIDATE_LIMIT = 48;
+
     public function recommendForUser(?User $user, int $limit = 12): Collection
     {
         return $this->recommend($user, $limit, true, true);
@@ -22,6 +26,32 @@ class RecommendationService
     public function recommendByActivity(?User $user, int $limit = 12): Collection
     {
         return $this->recommend($user, $limit, false, true);
+    }
+
+    public function recommendHomeByPreference(?User $user, int $limit = 6): Collection
+    {
+        return $this->recommend(
+            $user,
+            $this->homeLimit($limit),
+            true,
+            false,
+            self::HOME_CANDIDATE_LIMIT,
+            false,
+            true
+        );
+    }
+
+    public function recommendHomeByActivity(?User $user, int $limit = 6): Collection
+    {
+        return $this->recommend(
+            $user,
+            $this->homeLimit($limit),
+            false,
+            true,
+            self::HOME_CANDIDATE_LIMIT,
+            false,
+            true
+        );
     }
 
     public function getUserInterestSummary(?User $user, int $limit = 5): array
@@ -52,18 +82,42 @@ class RecommendationService
         ];
     }
 
-    private function recommend(?User $user, int $limit, bool $includePreferences, bool $includeActivity): Collection
+    private function recommend(
+        ?User $user,
+        int $limit,
+        bool $includePreferences,
+        bool $includeActivity,
+        ?int $candidateLimit = null,
+        bool $includeFacilities = true,
+        bool $homeColumns = false
+    ): Collection
     {
-        $destinations = Wisata::query()
-            ->with(['kategori', 'lokasi', 'fasilitas'])
-            ->withCount('wantToGos')
-            ->get();
+        $limit = max(1, $limit);
+        $facts = $this->forwardChaining($user, $includePreferences, $includeActivity);
+
+        $destinationsQuery = $this->destinationQuery($facts, $includeFacilities, $homeColumns);
+
+        if ($candidateLimit) {
+            $this->applyHomeCandidateScope($destinationsQuery, $facts);
+            $this->orderHomeCandidates($destinationsQuery);
+            $destinationsQuery->limit(max($limit, $candidateLimit));
+        }
+
+        $destinations = $destinationsQuery->get();
+
+        if ($destinations->isEmpty() && $candidateLimit) {
+            $fallbackQuery = $this->destinationQuery($facts, $includeFacilities, $homeColumns);
+            $this->orderHomeCandidates($fallbackQuery);
+
+            $destinations = $fallbackQuery
+                ->limit(max($limit, $candidateLimit))
+                ->get();
+        }
 
         if ($destinations->isEmpty()) {
             return collect();
         }
 
-        $facts = $this->forwardChaining($user, $includePreferences, $includeActivity);
         $candidates = $this->backwardChaining($destinations, $facts);
 
         if ($candidates->isEmpty()) {
@@ -73,6 +127,131 @@ class RecommendationService
         return $this->rankWithSaw($candidates, $facts)
             ->take($limit)
             ->values();
+    }
+
+    private function destinationQuery(array $facts, bool $includeFacilities, bool $homeColumns): Builder
+    {
+        $query = Wisata::query();
+
+        if ($homeColumns) {
+            $query->select([
+                'id',
+                'nama',
+                'kategori_id',
+                'lokasi_id',
+                'harga_wni_min',
+                'harga_wna_min',
+                'rating',
+                'image',
+            ]);
+        }
+
+        $relations = $homeColumns
+            ? ['kategori:id,nama_kategori', 'lokasi:id,nama_kabupaten']
+            : ['kategori', 'lokasi'];
+
+        if ($includeFacilities) {
+            $relations[] = $homeColumns ? 'fasilitas:id,nama_fasilitas' : 'fasilitas';
+        }
+
+        return $query
+            ->with($relations)
+            ->withCount('wantToGos')
+            ->withActivityScore($this->activityScoreUserId($facts));
+    }
+
+    private function applyHomeCandidateScope(Builder $query, array $facts): void
+    {
+        if (empty($facts['has_preferences']) && empty($facts['has_activity'])) {
+            return;
+        }
+
+        $categoryKeys = array_keys($facts['categories']);
+        $regionKeys = array_keys($facts['regions']);
+        $hasPriceSignals = $facts['budget_min'] || $facts['budget_max'] || !empty($facts['price_category']);
+
+        $query->where(function (Builder $query) use ($categoryKeys, $regionKeys, $facts, $hasPriceSignals) {
+            if (!empty($categoryKeys)) {
+                $query->orWhereHas('kategori', function (Builder $query) use ($categoryKeys) {
+                    $this->whereNormalizedIn($query, 'nama_kategori', $categoryKeys);
+                });
+            }
+
+            if (!empty($regionKeys)) {
+                $query->orWhereHas('lokasi', function (Builder $query) use ($regionKeys) {
+                    $this->whereNormalizedIn($query, 'nama_kabupaten', $regionKeys);
+                });
+            }
+
+            if ($hasPriceSignals) {
+                $query->orWhere(function (Builder $query) use ($facts) {
+                    $this->applyPriceCandidateScope($query, $facts);
+                });
+            }
+
+            $query->orWhere('rating', '>=', 4.0);
+        });
+    }
+
+    private function applyPriceCandidateScope(Builder $query, array $facts): void
+    {
+        $priceColumn = 'COALESCE(harga_wni_min, harga_wna_min)';
+
+        if ($facts['budget_max']) {
+            $query->orWhereRaw("{$priceColumn} <= ?", [(int) $facts['budget_max']]);
+        }
+
+        if ($facts['budget_min']) {
+            $query->orWhereRaw("{$priceColumn} >= ?", [(int) $facts['budget_min']]);
+        }
+
+        foreach (array_keys($facts['price_category']) as $priceCategory) {
+            match ($priceCategory) {
+                'murah' => $query->orWhereRaw("{$priceColumn} <= ?", [50000]),
+                'sedang' => $query->orWhereRaw("{$priceColumn} BETWEEN ? AND ?", [50001, 150000]),
+                'mahal' => $query->orWhereRaw("{$priceColumn} > ?", [150000]),
+                default => null,
+            };
+        }
+
+        $query->orWhere(function (Builder $query) {
+            $query->whereNull('harga_wni_min')
+                ->whereNull('harga_wna_min');
+        });
+    }
+
+    private function orderHomeCandidates(Builder $query): void
+    {
+        $query
+            ->orderByDesc('activity_score')
+            ->orderByDesc('want_to_gos_count')
+            ->orderByDesc('rating')
+            ->orderBy('nama');
+    }
+
+    private function whereNormalizedIn(Builder $query, string $column, array $values): void
+    {
+        $query->where(function (Builder $query) use ($column, $values) {
+            foreach (array_values($values) as $index => $value) {
+                $method = $index === 0 ? 'whereRaw' : 'orWhereRaw';
+
+                $query->{$method}("LOWER(TRIM({$column})) = ?", [$value]);
+            }
+        });
+    }
+
+    private function activityScoreUserId(array $facts): ?int
+    {
+        if (empty($facts['use_user_activity']) || empty($facts['user_id'])) {
+            return null;
+        }
+
+        return (int) $facts['user_id'];
+    }
+
+    private function homeLimit(int $limit): int
+    {
+        return min(self::HOME_MAX_DESTINATIONS, max(1, $limit));
     }
 
     public function forwardChaining(?User $user, bool $includePreferences = true, bool $includeActivity = true): array
@@ -95,12 +274,15 @@ class RecommendationService
 
         $relations = [];
         if ($includePreferences) {
-            $relations[] = 'preference';
-            $relations[] = 'preferenceCategories.category';
+            $relations[] = 'preference:id,user_id,preferred_region,price_category,budget_min,budget_max';
+            $relations[] = 'preferenceCategories:id,user_id,category_id,weight';
+            $relations[] = 'preferenceCategories.category:id,nama_kategori';
         }
         if ($includeActivity) {
-            $relations[] = 'wantToGos.wisata.kategori';
-            $relations[] = 'wantToGos.wisata.lokasi';
+            $relations[] = 'wantToGos:id,user_id,wisata_id';
+            $relations[] = 'wantToGos.wisata:id,kategori_id,lokasi_id';
+            $relations[] = 'wantToGos.wisata.kategori:id,nama_kategori';
+            $relations[] = 'wantToGos.wisata.lokasi:id,nama_kabupaten';
         }
 
         if (!empty($relations)) {
@@ -147,13 +329,17 @@ class RecommendationService
         }
 
         $activityLogs = ActivityLog::query()
-            ->with('wisata.kategori', 'wisata.lokasi')
+            ->with([
+                'wisata:id,kategori_id,lokasi_id',
+                'wisata.kategori:id,nama_kategori',
+                'wisata.lokasi:id,nama_kabupaten',
+            ])
             ->where('user_id', $user->id)
             ->whereNotNull('wisata_id')
             ->whereNotIn('action_type', ['want_to_go'])
             ->latest()
             ->limit(80)
-            ->get();
+            ->get(['id', 'user_id', 'wisata_id', 'action_type', 'weight', 'created_at']);
 
         foreach ($activityLogs as $activityLog) {
             $wisata = $activityLog->wisata;
@@ -202,14 +388,7 @@ class RecommendationService
     public function rankWithSaw(Collection $destinations, array $facts): Collection
     {
         $rows = $destinations->map(function (Wisata $destination) use ($facts) {
-            $activityQuery = $destination->activityLogs()
-                ->whereIn('action_type', ['click_detail', 'visit_detail']);
-
-            if (!empty($facts['use_user_activity']) && !empty($facts['user_id'])) {
-                $activityQuery->where('user_id', $facts['user_id']);
-            }
-
-            $activityScore = (float) $activityQuery->sum('weight');
+            $activityScore = (float) ($destination->activity_score ?? 0);
 
             return [
                 'destination' => $destination,

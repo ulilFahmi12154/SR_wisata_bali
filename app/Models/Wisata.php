@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -50,5 +51,18 @@ class Wisata extends Model
     public function wantedByUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'want_to_gos')->withTimestamps();
+    }
+
+    public function scopeWithActivityScore(Builder $query, ?int $userId = null): Builder
+    {
+        return $query->withSum([
+            'activityLogs as activity_score' => function (Builder $query) use ($userId) {
+                $query->whereIn('action_type', ActivityLog::DETAIL_ACTION_TYPES);
+
+                if ($userId) {
+                    $query->where('user_id', $userId);
+                }
+            },
+        ], 'weight');
     }
 }

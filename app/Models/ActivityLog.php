@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ActivityLog extends Model
 {
+    public const DETAIL_ACTION_TYPES = ['click_detail', 'visit_detail'];
+
     protected $table = 'activity_logs';
     protected $fillable = [
         'session_id', 'user_id', 'wisata_id', 'user_name', 'action_type',
