@@ -6,6 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', 'Jelajah Bali')</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon_SR_WisataBali_32.png') }}?v=20260618b">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('favicon_SR_WisataBali_transparent.png') }}?v=20260618b">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon_SR_WisataBali.png') }}?v=20260618b">
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
