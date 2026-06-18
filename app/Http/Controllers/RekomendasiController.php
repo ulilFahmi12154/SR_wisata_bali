@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Helpers\ActivityHelper; // Tambahkan helper untuk logging
 
 class RekomendasiController extends Controller
@@ -307,9 +308,19 @@ class RekomendasiController extends Controller
         ];
 
         try {
-            $response = Http::timeout(10)->post('http://127.0.0.1:5000/hitung-fw-bw-saw', $payload);
+            $flaskUrl = rtrim(config('services.flask.url'), '/');
+
+            $response = Http::connectTimeout(10)
+                ->timeout(60)
+                ->post($flaskUrl . '/hitung-fw-bw-saw', $payload);
             
             if (!$response->successful()) {
+                Log::error('Request rekomendasi Flask gagal.', [
+                    'url' => $flaskUrl . '/hitung-fw-bw-saw',
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
                 return view('pages.user.recommendations.results', [
                     'destinations' => collect(),
                     'filterSummary' => $filterSummary,
@@ -354,6 +365,12 @@ class RekomendasiController extends Controller
                     ->all(),
             ]);
         } catch (\Throwable $e) {
+            Log::error('Tidak dapat menghubungi backend Flask rekomendasi.', [
+                'url' => isset($flaskUrl) ? $flaskUrl . '/hitung-fw-bw-saw' : null,
+                'message' => $e->getMessage(),
+                'exception' => $e::class,
+            ]);
+
             report($e);
 
             return view('pages.user.recommendations.results', [
